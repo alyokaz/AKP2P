@@ -26,6 +26,8 @@ public class AKTorrent {
 
     private int totalPieces = 0;
 
+    private Map<String, File> completedFiles = new HashMap<>();
+
     public AKTorrent(int port) {
         this.PORT = port;
     }
@@ -113,6 +115,7 @@ public class AKTorrent {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        completedFiles.put(outputFile.getName(), outputFile);
     }
 
     public void seedFile(File file) {
@@ -133,8 +136,11 @@ public class AKTorrent {
             byte[] buffer = new byte[1024];
             IntStream.range(0, numberOfPieces).forEach(i -> {
                 try {
-                    in.read(buffer);
-                    pieces.add(new Piece(i, buffer.clone(), numberOfPieces));
+                    int bytesRead = in.read(buffer);
+                    pieces.add(new Piece(i,
+                            // make last Piece correct length
+                            bytesRead < 1024? Arrays.copyOf(buffer, bytesRead) : buffer.clone(),
+                            numberOfPieces));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -150,7 +156,7 @@ public class AKTorrent {
 
     private int getNoOfPieces(File file) {
         int numberOfPieces = (int) file.length() / 1024;
-        if((file.length() % 1024) == 0) {
+        if((file.length() % 1024) != 0) {
             numberOfPieces++;
         }
         return numberOfPieces;
@@ -158,6 +164,10 @@ public class AKTorrent {
 
     public void addPeer(InetSocketAddress address) {
         peers.add(address);
+    }
+
+    public File getFile(String filename) {
+        return completedFiles.get(filename);
     }
 
 

@@ -2,13 +2,13 @@ package aktorrent.message;
 
 import java.util.List;
 
-public class RequestPieces extends Message implements RequestPieceIDs {
+public class RequestPiecesMessage extends Message implements RequestPieceIDs {
 
     private List<Integer> pieceIDs;
 
     private String filename;
 
-    public RequestPieces(String filename, List<Integer> pieceIDs) {
+    public RequestPiecesMessage(String filename, List<Integer> pieceIDs) {
         super(MessageType.REQUEST_PIECES);
         this.filename = filename;
         this.pieceIDs = pieceIDs;

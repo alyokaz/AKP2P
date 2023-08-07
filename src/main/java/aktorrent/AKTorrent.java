@@ -2,8 +2,9 @@ package aktorrent;
 
 import aktorrent.message.Message;
 import aktorrent.message.MessageType;
-import aktorrent.message.RequestPieces;
+import aktorrent.message.RequestPieceMessage;
 
+import javax.swing.text.html.Option;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -12,7 +13,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class AKTorrent {
@@ -27,6 +27,8 @@ public class AKTorrent {
     private int totalPieces = 0;
 
     private Map<String, File> completedFiles = new HashMap<>();
+
+    private static final int BUFFER_SIZE = 1000000;
 
     public AKTorrent(int port) {
         this.PORT = port;
@@ -69,21 +71,24 @@ public class AKTorrent {
     private void downloadPieces(String filename, ObjectOutputStream out, ObjectInputStream in) {
         // TODO Change to Download each piece separately then check which pieces are still needed again
         PieceContainer container  = files.get(filename);
+
+        if(container.complete())
+            return;
+
         try {
-            // request pieces for file
-            out.writeObject(new RequestPieces(
-                    filename,
-                    container.getPieces().stream().map(Piece::getId).collect(Collectors.toList()))
-            );
-            // read in each requested piece
-            Object readObject;
-            while (!((readObject = in.readObject()) instanceof Message)) {
+            while(!container.complete()) {
+                // request piece for file
+                out.writeObject(new RequestPieceMessage(filename, container.getPieces().size()));
+
+                // read in each requested piece
+                Object readObject = in.readObject();
                 if (readObject instanceof Piece) {
                     container.getPieces().add((Piece) readObject);
                 }
+                System.out.println(String.format("%.2f %%", (container.getPieces().size() / (double) container.getTotalPieces() ) * 100));
+                if (container.getPieces().size() == container.getTotalPieces())
+                    buildFile(container);
             }
-            if(container.getPieces().size() == container.getTotalPieces())
-                buildFile(container);
         } catch (EOFException e) {
             if(container.getPieces().size() == container.getTotalPieces())
                 buildFile(container);
@@ -133,13 +138,13 @@ public class AKTorrent {
         Set<Piece> pieces = new HashSet<>();
         int numberOfPieces = getNoOfPieces(file);
         try(BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[BUFFER_SIZE];
             IntStream.range(0, numberOfPieces).forEach(i -> {
                 try {
                     int bytesRead = in.read(buffer);
                     pieces.add(new Piece(i,
                             // make last Piece correct length
-                            bytesRead < 1024? Arrays.copyOf(buffer, bytesRead) : buffer.clone(),
+                            bytesRead < BUFFER_SIZE? Arrays.copyOf(buffer, bytesRead) : buffer.clone(),
                             numberOfPieces));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -155,8 +160,8 @@ public class AKTorrent {
     }
 
     private int getNoOfPieces(File file) {
-        int numberOfPieces = (int) file.length() / 1024;
-        if((file.length() % 1024) != 0) {
+        int numberOfPieces = (int) file.length() / BUFFER_SIZE;
+        if((file.length() % BUFFER_SIZE) != 0) {
             numberOfPieces++;
         }
         return numberOfPieces;
@@ -166,8 +171,11 @@ public class AKTorrent {
         peers.add(address);
     }
 
-    public File getFile(String filename) {
-        return completedFiles.get(filename);
+    public Optional<File> getFile(String filename) {
+        File file = completedFiles.get(filename);
+        if(file == null)
+            return Optional.empty();
+        return Optional.of(file);
     }
 
 

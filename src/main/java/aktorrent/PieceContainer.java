@@ -25,4 +25,8 @@ public class PieceContainer {
     public Set<Piece> getPieces() {
         return pieces;
     }
+
+    public boolean complete() {
+        return totalPieces == pieces.size();
+    }
 }

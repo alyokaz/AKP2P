@@ -1,7 +1,5 @@
 import aktorrent.AKTorrent;
-import aktorrent.Piece;
 import aktorrent.PieceContainer;
-import org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -10,7 +8,6 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -25,6 +22,8 @@ public class IntegrationTest {
 
     private static final int BUFFER_SIZE = 1000000;
 
+    private static final String FILENAME = "matrix.mp4";
+
     @Test
     public void canSeedAndReceiveFile() throws InterruptedException, ExecutionException, IOException {
         final String filename = "matrix.mp4";
@@ -35,7 +34,7 @@ public class IntegrationTest {
         AKTorrent client = new AKTorrent(NODE_B_PORT);
         client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
         Future future = client.downloadFile(
-                new PieceContainer(file.getName(), getNoOfPieces(file), new HashSet<>())
+                new PieceContainer(file.getName(), getNoOfPieces(file))
         );
         future.get();
         Optional<File> completedFile;
@@ -46,19 +45,23 @@ public class IntegrationTest {
         assertEquals(-1, Files.mismatch(file.toPath(), completedFile.get().toPath()));
     }
 
-
-
     @Test
-    public void canDownloadFromTwoPeers() throws ExecutionException, InterruptedException {
-        File file = new File(getClass().getResource("matrix.mp4").getFile());
-        AKTorrent ak1 = new AKTorrent(4444);
-        AKTorrent ak2 = new AKTorrent(4441);
-        AKTorrent ak3 = new AKTorrent(4442);
+    public void canDownloadFromTwoPeers() throws ExecutionException, InterruptedException, IOException {
+        File file = new File(getClass().getResource(FILENAME).getFile());
+
+        AKTorrent ak1 = new AKTorrent(NODE_A_PORT);
+        AKTorrent ak2 = new AKTorrent(NODE_B_PORT);
+        AKTorrent ak3 = new AKTorrent(NODE_C_PORT);
+
         ak1.seedFile(file);
         ak2.seedFile(file);
-        ak3.addPeer(new InetSocketAddress(LOCAL_HOST, 4444));
-        ak3.addPeer(new InetSocketAddress(LOCAL_HOST, 4441));
-        ak3.downloadFile(new PieceContainer(file.getName(), getNoOfPieces(file), new HashSet<>())).get();
+
+        ak3.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
+        ak3.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_B_PORT));
+
+        ak3.downloadFile(new PieceContainer(file.getName(), getNoOfPieces(file))).get();
+
+        assertEquals(-1, Files.mismatch(file.toPath(), ak3.getFile(FILENAME).get().toPath()));
     }
 
     static private int getNoOfPieces(File file) {

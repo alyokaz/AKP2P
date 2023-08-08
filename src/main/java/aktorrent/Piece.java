@@ -1,21 +1,16 @@
 package aktorrent;
 
 import java.io.Serializable;
-import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.Objects;
 
-public class Piece implements Serializable {
+public class Piece implements Serializable, Comparable<Piece> {
     private int id;
     private byte[] data;
 
-    private int totalPieces;
-
-    private Status status;
-
-    public Piece(int id, byte[] data, int totalPieces) {
+    public Piece(int id, byte[] data) {
         this.id = id;
         this.data = data;
-        this.totalPieces = totalPieces;
-        this.status = Status.EMPTY;
     }
 
     public int getId() {
@@ -26,19 +21,23 @@ public class Piece implements Serializable {
         return data;
     }
 
-    public int getTotalPieces() {
-        return totalPieces;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Piece piece = (Piece) o;
+        return id == piece.id && Arrays.equals(data, piece.data);
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(id);
+        result = 31 * result + Arrays.hashCode(data);
+        return result;
     }
 
-    public enum Status {
-        DOWNLOADING, EMPTY, COMPLETE
-    }
-
-    public Status getStatus() {
-        return this.status;
+    @Override
+    public int compareTo(Piece other) {
+        return this.id - other.getId();
     }
 }

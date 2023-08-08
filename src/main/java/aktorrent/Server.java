@@ -32,6 +32,7 @@ public class Server {
     public void start() {
         executor.execute(() -> {
             try(ServerSocket serverSocket = new ServerSocket(PORT)) {
+                System.out.println(Thread.currentThread().getName() + " Server Started");
                 while(!Thread.currentThread().isInterrupted()) {
                     PeerHandler peerHandler = new PeerHandler(serverSocket.accept(), files);
                     executor.execute(peerHandler);

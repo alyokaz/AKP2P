@@ -1,13 +1,7 @@
 package aktorrent;
 
-import aktorrent.message.Message;
-import aktorrent.message.MessageType;
-import aktorrent.message.RequestPieceMessage;
-
-import javax.swing.text.html.Option;
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -22,7 +16,7 @@ public class AKTorrent {
 
     private ExecutorService executor = Executors.newCachedThreadPool();
 
-    private Map<String, PieceContainer> files = new HashMap<>();
+    private Map<String, PieceContainer> files = Collections.synchronizedMap(new HashMap<>());
 
     private int totalPieces = 0;
 
@@ -39,21 +33,7 @@ public class AKTorrent {
         return executor.submit(() -> {
             List<Future> futures = new ArrayList<>();
             peers.forEach(address -> {
-                    Future future = executor.submit(() -> {
-                        try (Socket socket = new Socket(address.getAddress(), address.getPort());
-                             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())
-                        ) {
-                            out.writeObject(new Message(MessageType.REQUEST_FILENAMES));
-                            Set<String> filenames = (Set<String>) in.readObject();
-                            filenames.stream().filter(files::containsKey)
-                                    .forEach(filename -> downloadPieces(filename, out, in));
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        } catch (ClassNotFoundException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
+                    Future future = executor.submit(new DownloadHandler(address, files, completedFiles));
                     futures.add(future);
                 });
             futures.forEach(f -> {
@@ -68,60 +48,9 @@ public class AKTorrent {
         });
     }
 
-    private void downloadPieces(String filename, ObjectOutputStream out, ObjectInputStream in) {
-        // TODO Change to Download each piece separately then check which pieces are still needed again
-        PieceContainer container  = files.get(filename);
-
-        if(container.complete())
-            return;
-
-        try {
-            while(!container.complete()) {
-                // request piece for file
-                out.writeObject(new RequestPieceMessage(filename, container.getPieces().size()));
-
-                // read in each requested piece
-                Object readObject = in.readObject();
-                if (readObject instanceof Piece) {
-                    container.getPieces().add((Piece) readObject);
-                }
-                System.out.println(String.format("%.2f %%", (container.getPieces().size() / (double) container.getTotalPieces() ) * 100));
-                if (container.getPieces().size() == container.getTotalPieces())
-                    buildFile(container);
-            }
-        } catch (EOFException e) {
-            if(container.getPieces().size() == container.getTotalPieces())
-                buildFile(container);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 
-    private void buildFile(PieceContainer container) {
-        File outputFile = new File(container.getFilename());
-        try {
-            outputFile.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try(BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFile))) {
-            container.getPieces().stream().sorted(Comparator.comparing(Piece::getId)).forEach((piece) -> {
-                try {
-                    out.write(piece.getData());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        completedFiles.put(outputFile.getName(), outputFile);
-    }
+
 
     public void seedFile(File file) {
         this.files.put(file.getName(), buildPieceContainer(file));
@@ -135,7 +64,7 @@ public class AKTorrent {
     }
 
     private PieceContainer buildPieceContainer(File file) {
-        Set<Piece> pieces = new HashSet<>();
+        SortedSet<Piece> pieces = new TreeSet<>();
         int numberOfPieces = getNoOfPieces(file);
         try(BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
             byte[] buffer = new byte[BUFFER_SIZE];
@@ -144,8 +73,8 @@ public class AKTorrent {
                     int bytesRead = in.read(buffer);
                     pieces.add(new Piece(i,
                             // make last Piece correct length
-                            bytesRead < BUFFER_SIZE? Arrays.copyOf(buffer, bytesRead) : buffer.clone(),
-                            numberOfPieces));
+                            bytesRead < BUFFER_SIZE? Arrays.copyOf(buffer, bytesRead) : buffer.clone()
+                    ));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

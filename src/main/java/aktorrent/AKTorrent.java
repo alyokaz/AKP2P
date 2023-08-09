@@ -20,7 +20,7 @@ public class AKTorrent {
 
     private int totalPieces = 0;
 
-    private Map<String, File> completedFiles = new HashMap<>();
+    private final Map<String, File> completedFiles = new HashMap<>();
 
     private static final int BUFFER_SIZE = 1000000;
 
@@ -29,28 +29,13 @@ public class AKTorrent {
     }
 
 
-    public Future startClient() {
-        return executor.submit(() -> {
-            List<Future> futures = new ArrayList<>();
+    public void startClient() {
+        executor.submit(() -> {
             peers.forEach(address -> {
-                    Future future = executor.submit(new DownloadHandler(address, files, completedFiles));
-                    futures.add(future);
-                });
-            futures.forEach(f -> {
-                try {
-                    f.get();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
+                executor.submit(new DownloadHandler(address, files, completedFiles));
             });
         });
     }
-
-
-
-
 
     public void seedFile(File file) {
         this.files.put(file.getName(), buildPieceContainer(file));
@@ -58,31 +43,29 @@ public class AKTorrent {
         server.start();
     }
 
-    public Future downloadFile(PieceContainer container) {
+    public void downloadFile(PieceContainer container) {
         files.put(container.getFilename(), container);
-        return startClient();
+        startClient();
     }
 
     private PieceContainer buildPieceContainer(File file) {
         SortedSet<Piece> pieces = new TreeSet<>();
         int numberOfPieces = getNoOfPieces(file);
-        try(BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
+
+        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
             byte[] buffer = new byte[BUFFER_SIZE];
             IntStream.range(0, numberOfPieces).forEach(i -> {
                 try {
                     int bytesRead = in.read(buffer);
                     pieces.add(new Piece(i,
                             // make last Piece correct length
-                            bytesRead < BUFFER_SIZE? Arrays.copyOf(buffer, bytesRead) : buffer.clone()
+                            bytesRead < BUFFER_SIZE ? Arrays.copyOf(buffer, bytesRead) : buffer.clone()
                     ));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-
             });
             return new PieceContainer(file.getName(), numberOfPieces, pieces);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -90,7 +73,7 @@ public class AKTorrent {
 
     private int getNoOfPieces(File file) {
         int numberOfPieces = (int) file.length() / BUFFER_SIZE;
-        if((file.length() % BUFFER_SIZE) != 0) {
+        if ((file.length() % BUFFER_SIZE) != 0) {
             numberOfPieces++;
         }
         return numberOfPieces;
@@ -102,7 +85,7 @@ public class AKTorrent {
 
     public Optional<File> getFile(String filename) {
         File file = completedFiles.get(filename);
-        if(file == null)
+        if (file == null)
             return Optional.empty();
         return Optional.of(file);
     }

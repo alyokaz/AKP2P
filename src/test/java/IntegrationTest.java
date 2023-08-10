@@ -23,12 +23,11 @@ public class IntegrationTest {
 
     private static final int BUFFER_SIZE = 1000000;
 
-    private static final String FILENAME = "matrix.mp4";
+    private static final String FILENAME = "test_file.mp4";
 
     @Test
     public void canSeedAndReceiveFile() throws IOException {
-        final String filename = "matrix.mp4";
-        File file = new File(getClass().getResource(filename).getFile());
+        File file = new File(getClass().getResource(FILENAME).getFile());
         AKTorrent server = new AKTorrent(NODE_A_PORT);
         server.seedFile(file);
 
@@ -37,7 +36,7 @@ public class IntegrationTest {
         client.downloadFile(new PieceContainer(file.getName(), getNoOfPieces(file)));
         Optional<File> completedFile;
         do {
-            completedFile = client.getFile(filename);
+            completedFile = client.getFile(FILENAME);
         } while(completedFile.isEmpty());
 
         assertEquals(-1, Files.mismatch(file.toPath(), completedFile.get().toPath()));

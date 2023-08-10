@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Piece implements Serializable, Comparable<Piece> {
-    private int id;
-    private byte[] data;
+    private final int id;
+    private final byte[] data;
 
     public Piece(int id, byte[] data) {
         this.id = id;

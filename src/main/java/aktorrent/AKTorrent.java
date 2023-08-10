@@ -3,22 +3,18 @@ package aktorrent;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
 public class AKTorrent {
 
     private final int PORT;
-    private List<InetSocketAddress> peers = new ArrayList<>();
+    private final List<InetSocketAddress> peers = new ArrayList<>();
 
-    private ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    private Map<String, PieceContainer> files = Collections.synchronizedMap(new HashMap<>());
-
-    private int totalPieces = 0;
+    private final Map<String, PieceContainer> files = Collections.synchronizedMap(new HashMap<>());
 
     private final Map<String, File> completedFiles = new HashMap<>();
 

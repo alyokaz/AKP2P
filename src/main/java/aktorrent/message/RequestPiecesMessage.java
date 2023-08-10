@@ -4,9 +4,9 @@ import java.util.List;
 
 public class RequestPiecesMessage extends Message implements RequestPieceIDs {
 
-    private List<Integer> pieceIDs;
+    private final List<Integer> pieceIDs;
 
-    private String filename;
+    private final String filename;
 
     public RequestPiecesMessage(String filename, List<Integer> pieceIDs) {
         super(MessageType.REQUEST_PIECES);

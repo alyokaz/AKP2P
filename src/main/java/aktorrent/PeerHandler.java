@@ -15,8 +15,8 @@ import java.util.Set;
 
 public class PeerHandler implements Runnable {
 
-    private Socket peerSocket;
-    private Map<String, PieceContainer> files;
+    private final Socket peerSocket;
+    private final Map<String, PieceContainer> files;
 
     public PeerHandler(Socket peerSocket, Map<String, PieceContainer> files) {
         this.peerSocket = peerSocket;
@@ -57,17 +57,11 @@ public class PeerHandler implements Runnable {
             else
                 out.writeObject(piece.get());
             //TODO Replace with download speed settings option
-            Thread.sleep(0); //simulate download speed limit / connection speed
+            Thread.sleep(1); //simulate download speed limit / connection speed
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-        /*try {
-            out.writeObject(new Message(MessageType.END));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }*/
     }
 }

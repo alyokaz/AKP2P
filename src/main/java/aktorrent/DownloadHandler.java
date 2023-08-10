@@ -7,8 +7,6 @@ import aktorrent.message.RequestPieceMessage;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,30 +61,13 @@ public class DownloadHandler implements Runnable {
                 if (readObject instanceof Piece) {
                     container.addPiece((Piece) readObject);
                 }
-                System.out.println(String.format(Thread.currentThread().getName() + " - %.2f %%", (container.getPieces().size() / (double) container.getTotalPieces()) * 100));
+                System.out.printf(Thread.currentThread().getName() + " - %.2f %%%n", (container.getPieces().size() / (double) container.getTotalPieces()) * 100);
             }
-            buildFile(container);
+            FileUtils.buildFile(container, completedFiles);
         } catch (EOFException e) {
             throw new RuntimeException();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private void buildFile(PieceContainer container) throws IOException {
-        File outputFile = new File(container.getFilename());
-
-        outputFile.createNewFile();
-
-        try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFile))) {
-            container.getPieces().stream().sorted(Comparator.comparing(Piece::getId)).forEach(p -> {
-                try {
-                    out.write(p.getData());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            completedFiles.put(outputFile.getName(), outputFile);
         }
     }
 

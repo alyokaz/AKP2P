@@ -2,9 +2,9 @@ package aktorrent.message;
 
 public class RequestPieceMessage extends Message {
 
-    private String filename;
+    private final String filename;
 
-    private int pieceId;
+    private final int pieceId;
 
     public RequestPieceMessage(String filename, int pieceId) {
         super(MessageType.REQUEST_PIECE);

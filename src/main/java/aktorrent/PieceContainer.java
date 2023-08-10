@@ -19,7 +19,7 @@ public class PieceContainer {
         this.downloadingPieces = new HashSet<>();
     }
 
-    public PieceContainer(String filename, int totalPieces, SortedSet pieces) {
+    public PieceContainer(String filename, int totalPieces, SortedSet<Piece> pieces) {
         this.filename = filename;
         this.totalPieces = totalPieces;
         this.pieces = pieces;
@@ -41,9 +41,9 @@ public class PieceContainer {
         return totalPieces == pieces.size();
     }
 
-    public synchronized boolean addPiece(Piece piece) {
+    public synchronized void addPiece(Piece piece) {
         this.downloadingPieces.remove(piece.getId());
-        return this.pieces.add(piece);
+        this.pieces.add(piece);
     }
 
     public synchronized int requestPiece() {

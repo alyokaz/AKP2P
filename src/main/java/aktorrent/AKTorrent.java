@@ -1,10 +1,17 @@
 package aktorrent;
 
+import aktorrent.message.Message;
+import aktorrent.message.MessageType;
+
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 public class AKTorrent {
@@ -23,7 +30,6 @@ public class AKTorrent {
     public AKTorrent(int port) {
         this.PORT = port;
     }
-
 
     public void startClient() {
         executor.submit(() -> {
@@ -86,5 +92,34 @@ public class AKTorrent {
         return Optional.of(file);
     }
 
+    public Future<Set<FileInfo>> getAvailableFiles() {
+        return executor.submit(() -> {
+            Set<FileInfo> availableFiles = new HashSet<>();
+            Set<Future<Set<FileInfo>>> futures = new HashSet<>();
+            peers.forEach(address -> {
+                Future<Set<FileInfo>> future = executor.submit(() -> {
+                    try (Socket socket = new Socket(address.getHostName(), address.getPort());
+                         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
 
+                        out.writeObject(new Message(MessageType.REQUEST_AVAILABLE_FILES));
+                        Object obj = in.readObject();
+                        return ((Set<FileInfo>) obj);
+
+                    } catch (IOException | ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+                futures.add(future);
+            });
+            futures.forEach(f -> {
+                try {
+                    availableFiles.addAll(f.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            return availableFiles;
+        });
+    }
 }

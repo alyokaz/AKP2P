@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class PeerHandler implements Runnable {
 
@@ -36,6 +37,7 @@ public class PeerHandler implements Runnable {
                 switch (message.getType()) {
                     case REQUEST_FILENAMES -> out.writeObject(Set.copyOf(files.keySet()));
                     case REQUEST_PIECE -> processPieceRequest((RequestPieceMessage) message, out);
+                    case REQUEST_AVAILABLE_FILES -> processAvailableFilesRequest(out);
                 }
             }
         } catch (EOFException e){
@@ -45,6 +47,13 @@ public class PeerHandler implements Runnable {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void processAvailableFilesRequest(ObjectOutputStream out) throws IOException {
+        Set<FileInfo> availableFiles = files.values().stream().map(p -> new FileInfo(p.getFilename(), p.getTotalPieces(),
+                ((p.getTotalPieces() - 1) * 1000000) + p.getPieces().last().getData().length)).collect(Collectors.toSet());
+
+        out.writeObject(availableFiles);
     }
 
     private void processPieceRequest(RequestPieceMessage request, ObjectOutputStream out) {

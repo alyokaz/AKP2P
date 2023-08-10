@@ -5,6 +5,7 @@ build/
 !**/src/test/**/build/
 
 test_file.mp4
+test_file_2.mp4
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

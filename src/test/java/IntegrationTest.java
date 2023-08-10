@@ -1,5 +1,6 @@
 import aktorrent.AKTorrent;
 import aktorrent.FileInfo;
+import aktorrent.FileUtils;
 import aktorrent.PieceContainer;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +38,7 @@ public class IntegrationTest {
 
         AKTorrent client = new AKTorrent(NODE_B_PORT);
         client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
-        client.downloadFile(new PieceContainer(file.getName(), getNoOfPieces(file)));
+        client.downloadFile(FileUtils.buildPieceContainer(file));
         Optional<File> completedFile;
         do {
             completedFile = client.getFile(FILENAME);
@@ -63,7 +64,7 @@ public class IntegrationTest {
         ak4.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_B_PORT));
         ak4.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_C_PORT));
 
-        ak4.downloadFile(new PieceContainer(file.getName(), getNoOfPieces(file)));
+        ak4.downloadFile(FileUtils.buildPieceContainer(file));
 
         Optional<File> downloadedFile;
         do {
@@ -88,7 +89,7 @@ public class IntegrationTest {
 
         IntStream.range(minPort, maxPort).forEach(port -> client.addPeer(new InetSocketAddress(LOCAL_HOST, port)));
 
-        client.downloadFile(new PieceContainer(file.getName(), getNoOfPieces(file)));
+        client.downloadFile(FileUtils.buildPieceContainer(file));
 
         Optional<File> downloadedFile;
         do {
@@ -100,31 +101,25 @@ public class IntegrationTest {
 
     @Test
     public void getAvailableFiles() throws ExecutionException, InterruptedException {
-        File test_file = new File(getClass().getResource(FILENAME).getFile());
-        File test_file_2 = new File(getClass().getResource(FILENAME_2).getFile());
+        File testFileA = new File(getClass().getResource(FILENAME).getFile());
+        File testFileB = new File(getClass().getResource(FILENAME_2).getFile());
 
         AKTorrent node_A = new AKTorrent(NODE_A_PORT);
         AKTorrent node_B = new AKTorrent(NODE_B_PORT);
 
-        node_A.seedFile(test_file);
-        node_B.seedFile(test_file_2);
+        node_A.seedFile(testFileA);
+        node_B.seedFile(testFileB);
 
         AKTorrent client = new AKTorrent(NODE_C_PORT);
         client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
         client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_B_PORT));
 
         Set<FileInfo> files = client.getAvailableFiles().get();
+
+        Set<FileInfo> expected = Set.of(FileUtils.getFileInfo(testFileA), FileUtils.getFileInfo(testFileB));
         assertNotNull(files);
         assertTrue(files.size() > 0);
-        assertTrue(files.stream().map(FileInfo::getFilename).collect(Collectors.toList()).containsAll(Set.of(FILENAME, FILENAME_2)));
+        assertTrue(files.containsAll(expected));
     }
 
-
-    static private int getNoOfPieces(File file) {
-        int numberOfPieces = (int) file.length() / BUFFER_SIZE;
-        if((file.length() % BUFFER_SIZE) != 0) {
-            numberOfPieces++;
-        }
-        return numberOfPieces;
-    }
 }

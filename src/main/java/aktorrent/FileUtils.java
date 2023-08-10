@@ -1,11 +1,8 @@
 package aktorrent;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
+import java.util.stream.IntStream;
 
 public class FileUtils {
 
@@ -27,5 +24,40 @@ public class FileUtils {
             });
             completedFiles.put(outputFile.getName(), outputFile);
         }
+    }
+
+    private static int getNoOfPieces(File file) {
+        int numberOfPieces = (int) file.length() / AKTorrent.BUFFER_SIZE;
+        if ((file.length() % AKTorrent.BUFFER_SIZE) != 0) {
+            numberOfPieces++;
+        }
+        return numberOfPieces;
+    }
+
+    public static PieceContainer buildPieceContainer(File file) {
+        SortedSet<Piece> pieces = new TreeSet<>();
+        int numberOfPieces = getNoOfPieces(file);
+
+        try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
+            byte[] buffer = new byte[AKTorrent.BUFFER_SIZE];
+            IntStream.range(0, numberOfPieces).forEach(i -> {
+                try {
+                    int bytesRead = in.read(buffer);
+                    pieces.add(new Piece(i,
+                            // make last Piece correct length
+                            bytesRead < AKTorrent.BUFFER_SIZE ? Arrays.copyOf(buffer, bytesRead) : buffer.clone()
+                    ));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            return new PieceContainer(file.getName(), numberOfPieces, pieces);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static FileInfo getFileInfo(File file) {
+        return new FileInfo(file.getName(), getNoOfPieces(file), (int) file.length());
     }
 }

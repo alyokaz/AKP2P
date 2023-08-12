@@ -17,12 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class IntegrationTest {
 
     private static final String LOCAL_HOST = "127.0.0.1";
-    private static final int NODE_A_PORT = 4444;
-    private static final int NODE_B_PORT = 4441;
+    private static final int NODE_A_PORT = 4441;
+    private static final int NODE_B_PORT = 4442;
 
-    private static final int NODE_C_PORT = 4442;
+    private static final int NODE_C_PORT = 4443;
 
-    private static final int NODE_D_PORT = 4443;
+    private static final int NODE_D_PORT = 4444;
 
     private static final int BUFFER_SIZE = 1000000;
 

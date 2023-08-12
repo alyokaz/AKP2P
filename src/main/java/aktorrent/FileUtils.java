@@ -51,7 +51,7 @@ public class FileUtils {
                     throw new RuntimeException(e);
                 }
             });
-            return new PieceContainer(file.getName(), numberOfPieces, pieces);
+            return new PieceContainer(FileUtils.getFileInfo(file), pieces);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -46,9 +46,9 @@ public class AKTorrent {
         Server server = new Server(this.PORT, files);
         server.start();
     }
-
-    public void downloadFile(PieceContainer container) {
-        files.put(container.getFilename(), container);
+    //TODO refactor to use FileInfo
+    public void downloadFile(FileInfo fileInfo) {
+        files.put(fileInfo.getFilename(), new PieceContainer(fileInfo));
         startClient();
     }
 

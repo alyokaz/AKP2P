@@ -6,31 +6,31 @@ import java.util.stream.IntStream;
 
 public class PieceContainer {
 
-    private final String filename;
-    private final int totalPieces;
+
     private final SortedSet<Piece> pieces;
 
     private Set<Integer> downloadingPieces;
 
-    public PieceContainer(String filename, int totalPieces) {
-        this.filename = filename;
-        this.totalPieces = totalPieces;
+    private final FileInfo fileInfo;
+
+    public PieceContainer(FileInfo fileInfo) {
+        this.fileInfo = fileInfo;
         this.pieces = new TreeSet<>(Comparator.comparingInt(Piece::getId));
         this.downloadingPieces = new HashSet<>();
     }
 
-    public PieceContainer(String filename, int totalPieces, SortedSet<Piece> pieces) {
-        this.filename = filename;
-        this.totalPieces = totalPieces;
+    public PieceContainer(FileInfo fileInfo, SortedSet<Piece> pieces) {
+        this.fileInfo = fileInfo;
         this.pieces = pieces;
+        this.downloadingPieces = new HashSet<>();
     }
 
     public String getFilename() {
-        return filename;
+        return this.fileInfo.getFilename();
     }
 
     public int getTotalPieces() {
-        return totalPieces;
+        return this.fileInfo.getTotalPieces();
     }
 
     public SortedSet<Piece> getPieces() {
@@ -38,7 +38,7 @@ public class PieceContainer {
     }
 
     public boolean complete() {
-        return totalPieces == pieces.size();
+        return this.fileInfo.getTotalPieces() == pieces.size();
     }
 
     public synchronized void addPiece(Piece piece) {
@@ -47,11 +47,11 @@ public class PieceContainer {
     }
 
     public synchronized int requestPiece() {
-        if(pieces.size() == totalPieces)
+        if(pieces.size() == this.fileInfo.getTotalPieces())
             return -1;
 
         List<Integer> ids = this.pieces.stream().map(Piece::getId).collect(Collectors.toList());
-        List<Integer> candidateIds = IntStream.range(0, totalPieces).filter(i -> !ids.contains(i)).boxed().collect(Collectors.toList());
+        List<Integer> candidateIds = IntStream.range(0, this.fileInfo.getTotalPieces()).filter(i -> !ids.contains(i)).boxed().collect(Collectors.toList());
         int chosenId = candidateIds.get(new Random().nextInt(candidateIds.size()));
         this.downloadingPieces.add(chosenId);
         return chosenId;

@@ -8,7 +8,9 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -19,9 +21,12 @@ public class PeerHandler implements Runnable {
     private final Socket peerSocket;
     private final Map<String, PieceContainer> files;
 
-    public PeerHandler(Socket peerSocket, Map<String, PieceContainer> files) {
+    private final List<InetSocketAddress> peers;
+
+    public PeerHandler(Socket peerSocket, Map<String, PieceContainer> files, List<InetSocketAddress> peers) {
         this.peerSocket = peerSocket;
         this.files = files;
+        this.peers = peers;
     }
 
     @Override
@@ -38,6 +43,7 @@ public class PeerHandler implements Runnable {
                     case REQUEST_FILENAMES -> out.writeObject(Set.copyOf(files.keySet()));
                     case REQUEST_PIECE -> processPieceRequest((RequestPieceMessage) message, out);
                     case REQUEST_AVAILABLE_FILES -> processAvailableFilesRequest(out);
+                    case REQUEST_PEERS -> processRequestPeers(out);
                 }
             }
         } catch (EOFException e){
@@ -47,6 +53,10 @@ public class PeerHandler implements Runnable {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void processRequestPeers(ObjectOutputStream out) throws IOException {
+        out.writeObject(peers);
     }
 
     private void processAvailableFilesRequest(ObjectOutputStream out) throws IOException {

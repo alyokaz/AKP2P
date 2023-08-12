@@ -122,4 +122,33 @@ public class IntegrationTest {
         assertTrue(files.containsAll(expected));
     }
 
+    @Test
+    public void testDiscoverTransientPeers() throws IOException {
+        AKTorrent nodeA = new AKTorrent(NODE_A_PORT);
+        AKTorrent nodeB = new AKTorrent(NODE_B_PORT);
+        AKTorrent nodeC = new AKTorrent(NODE_C_PORT);
+
+        File file = new File(getClass().getResource(FILENAME).getFile());
+        nodeC.seedFile(file);
+
+        nodeB.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_C_PORT));
+        nodeB.startServer();
+
+        nodeA.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_B_PORT));
+        nodeA.startServer();
+
+        AKTorrent client = new AKTorrent(NODE_D_PORT);
+
+        client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
+
+        client.downloadFile(FileUtils.getFileInfo(file));
+
+        Optional<File> downloadedFile;
+        do{
+            downloadedFile = client.getFile(file.getName());
+        } while (downloadedFile.isEmpty());
+
+        assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
+    }
+
 }

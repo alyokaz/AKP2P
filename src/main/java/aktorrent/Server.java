@@ -1,6 +1,7 @@
 package aktorrent;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -15,9 +16,12 @@ public class Server {
 
     private final Map<String, PieceContainer> files;
 
-    public Server(int port, Map<String, PieceContainer> files) {
+    private final List<InetSocketAddress> peers;
+
+    public Server(int port, Map<String, PieceContainer> files, List<InetSocketAddress> peers) {
         this.PORT = port;
         this.files = files;
+        this.peers = peers;
     }
 
     public void start() {
@@ -25,7 +29,7 @@ public class Server {
             try(ServerSocket serverSocket = new ServerSocket(PORT)) {
                 System.out.println(Thread.currentThread().getName() + " Server Started");
                 while(!Thread.currentThread().isInterrupted()) {
-                    PeerHandler peerHandler = new PeerHandler(serverSocket.accept(), files);
+                    PeerHandler peerHandler = new PeerHandler(serverSocket.accept(), files, peers);
                     executor.execute(peerHandler);
                 }
             } catch (IOException e) {

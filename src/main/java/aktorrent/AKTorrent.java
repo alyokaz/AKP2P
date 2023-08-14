@@ -6,13 +6,11 @@ import aktorrent.message.MessageType;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.IntStream;
 
 import static aktorrent.FileUtils.buildPieceContainer;
+import static aktorrent.FileUtils.getFileInfo;
 
 public class AKTorrent {
 
@@ -25,7 +23,11 @@ public class AKTorrent {
 
     private final Map<String, File> completedFiles = new HashMap<>();
 
+    private final Set<FileInfo> availableFiles = Collections.synchronizedSet(new HashSet<>());
+
     static final int BUFFER_SIZE = 1000000;
+
+    private Server server;
 
     public AKTorrent(int port) {
         this.PORT = port;
@@ -69,6 +71,7 @@ public class AKTorrent {
 
     public void seedFile(File file) {
         this.files.put(file.getName(), buildPieceContainer(file));
+        this.availableFiles.add(getFileInfo(file));
         startServer();
     }
     //TODO refactor to use FileInfo
@@ -90,7 +93,7 @@ public class AKTorrent {
 
     public Future<Set<FileInfo>> getAvailableFiles() {
         return executor.submit(() -> {
-            Set<FileInfo> availableFiles = new HashSet<>();
+            Set<FileInfo> remoteAvailableFiles = new HashSet<>();
             Set<Future<Set<FileInfo>>> futures = new HashSet<>();
             peers.forEach(address -> {
                 Future<Set<FileInfo>> future = executor.submit(() -> {
@@ -101,7 +104,7 @@ public class AKTorrent {
 
                         out.writeObject(new Message(MessageType.REQUEST_AVAILABLE_FILES));
                         Object obj = in.readObject();
-                        return ((Set<FileInfo>) obj);
+                        return (Set<FileInfo>) obj;
 
                     } catch (IOException | ClassNotFoundException e) {
                         throw new RuntimeException(e);
@@ -111,18 +114,30 @@ public class AKTorrent {
             });
             futures.forEach(f -> {
                 try {
-                    availableFiles.addAll(f.get());
+                    remoteAvailableFiles.addAll(f.get());
                 } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException(e);
                 }
             });
-            return availableFiles;
+            return remoteAvailableFiles;
         });
     }
 
+    private void updateAvailableFiles() {
+        try {
+            this.availableFiles.addAll(getAvailableFiles().get());
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public void startServer() {
-        discoverPeers();
-        Server server = new Server(this.PORT, files, peers);
-        server.start();
+        if(this.server == null) {
+            discoverPeers();
+            updateAvailableFiles();
+            this.server = new Server(this.PORT, files, peers, availableFiles);
+            server.start();
+        }
     }
 }

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class PeerHandler implements Runnable {
 
@@ -23,10 +22,14 @@ public class PeerHandler implements Runnable {
 
     private final List<InetSocketAddress> peers;
 
-    public PeerHandler(Socket peerSocket, Map<String, PieceContainer> files, List<InetSocketAddress> peers) {
+    private Set<FileInfo> availableFiles;
+
+    public PeerHandler(Socket peerSocket, Map<String, PieceContainer> files, List<InetSocketAddress> peers,
+                       Set<FileInfo> availableFiles) {
         this.peerSocket = peerSocket;
         this.files = files;
         this.peers = peers;
+        this.availableFiles = availableFiles;
     }
 
     @Override
@@ -60,9 +63,6 @@ public class PeerHandler implements Runnable {
     }
 
     private void processAvailableFilesRequest(ObjectOutputStream out) throws IOException {
-        Set<FileInfo> availableFiles = files.values().stream().map(p -> new FileInfo(p.getFilename(), p.getTotalPieces(),
-                ((p.getTotalPieces() - 1) * 1000000) + p.getPieces().last().getData().length)).collect(Collectors.toSet());
-
         out.writeObject(availableFiles);
     }
 

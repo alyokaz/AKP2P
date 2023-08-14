@@ -18,10 +18,14 @@ public class Server {
 
     private final List<InetSocketAddress> peers;
 
-    public Server(int port, Map<String, PieceContainer> files, List<InetSocketAddress> peers) {
+    private final Set<FileInfo> availableFiles;
+
+    public Server(int port, Map<String, PieceContainer> files, List<InetSocketAddress> peers,
+                  Set<FileInfo> availableFiles) {
         this.PORT = port;
         this.files = files;
         this.peers = peers;
+        this.availableFiles = availableFiles;
     }
 
     public void start() {
@@ -29,7 +33,7 @@ public class Server {
             try(ServerSocket serverSocket = new ServerSocket(PORT)) {
                 System.out.println(Thread.currentThread().getName() + " Server Started");
                 while(!Thread.currentThread().isInterrupted()) {
-                    PeerHandler peerHandler = new PeerHandler(serverSocket.accept(), files, peers);
+                    PeerHandler peerHandler = new PeerHandler(serverSocket.accept(), files, peers, availableFiles);
                     executor.execute(peerHandler);
                 }
             } catch (IOException e) {

@@ -105,13 +105,15 @@ public class IntegrationTest {
         File testFileB = new File(getClass().getResource(FILENAME_2).getFile());
 
         AKTorrent node_A = new AKTorrent(NODE_A_PORT);
-        AKTorrent node_B = new AKTorrent(NODE_B_PORT);
 
         node_A.seedFile(testFileA);
-        node_B.seedFile(testFileB);
+        node_A.seedFile(testFileB);
+
+        AKTorrent node_B = new AKTorrent(NODE_B_PORT);
+        node_B.addPeer(new InetSocketAddress(NODE_A_PORT));
+        node_B.startServer();
 
         AKTorrent client = new AKTorrent(NODE_C_PORT);
-        client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
         client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_B_PORT));
 
         Set<FileInfo> files = client.getAvailableFiles().get();

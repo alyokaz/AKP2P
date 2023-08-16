@@ -37,6 +37,7 @@ public class DownloadHandler implements Runnable {
             Set<String> filenames = (Set<String>) in.readObject();
             filenames.stream().filter(files::containsKey)
                     .forEach(filename -> downloadPieces(filename, out, in));
+            out.writeObject(new Message(MessageType.END));
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

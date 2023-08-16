@@ -40,13 +40,15 @@ public class PeerHandler implements Runnable {
         ){
             Thread.currentThread().setName(Thread.currentThread().getName() + " PeerHandler");
             System.out.println(Thread.currentThread().getName() + " Client Connected");
-            while(!Thread.currentThread().isInterrupted()) {
+            boolean end = false;
+            while(!Thread.currentThread().isInterrupted() && !end) {
                 Message message = (Message) in.readObject();
                 switch (message.getType()) {
                     case REQUEST_FILENAMES -> out.writeObject(Set.copyOf(files.keySet()));
                     case REQUEST_PIECE -> processPieceRequest((RequestPieceMessage) message, out);
                     case REQUEST_AVAILABLE_FILES -> processAvailableFilesRequest(out);
                     case REQUEST_PEERS -> processRequestPeers(out);
+                    case END -> end = true;
                 }
             }
         } catch (EOFException e){
@@ -56,6 +58,7 @@ public class PeerHandler implements Runnable {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+        System.out.println("Client Closed");
     }
 
     private void processRequestPeers(ObjectOutputStream out) throws IOException {

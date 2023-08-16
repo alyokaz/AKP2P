@@ -2,6 +2,7 @@ import aktorrent.AKTorrent;
 import aktorrent.FileInfo;
 import aktorrent.FileUtils;
 import aktorrent.PieceContainer;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -31,7 +32,7 @@ public class IntegrationTest {
     private static final String FILENAME_2 = "test_file_2.mp4";
 
     @Test
-    public void canSeedAndReceiveFile() throws IOException {
+    public void canSeedAndReceiveFile() throws IOException, InterruptedException {
         File file = new File(getClass().getResource(FILENAME).getFile());
         AKTorrent server = new AKTorrent(NODE_A_PORT);
         server.seedFile(file);
@@ -45,6 +46,7 @@ public class IntegrationTest {
         } while(completedFile.isEmpty());
 
         assertEquals(-1, Files.mismatch(file.toPath(), completedFile.get().toPath()));
+        server.shutDown();
     }
 
     @Test
@@ -72,6 +74,11 @@ public class IntegrationTest {
         } while (downloadedFile.isEmpty());
 
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
+        ak1.shutDown();
+        ak2.shutDown();
+        ak3.shutDown();
+        ak4.shutDown();
+
     }
 
     @Test
@@ -97,6 +104,7 @@ public class IntegrationTest {
         } while (downloadedFile.isEmpty());
 
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
+        nodes.forEach(AKTorrent::shutDown);
     }
 
     @Test
@@ -122,6 +130,9 @@ public class IntegrationTest {
         assertNotNull(files);
         assertTrue(files.size() > 0);
         assertTrue(files.containsAll(expected));
+
+        node_A.shutDown();
+        node_B.shutDown();
     }
 
     @Test
@@ -151,6 +162,9 @@ public class IntegrationTest {
         } while (downloadedFile.isEmpty());
 
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
+        nodeA.shutDown();
+        nodeB.shutDown();
+        nodeC.shutDown();
     }
 
 }

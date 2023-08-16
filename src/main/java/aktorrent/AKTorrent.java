@@ -5,6 +5,7 @@ import aktorrent.message.MessageType;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.*;
@@ -134,10 +135,20 @@ public class AKTorrent {
 
     public void startServer() {
         if(this.server == null) {
-            discoverPeers();
-            updateAvailableFiles();
-            this.server = new Server(this.PORT, files, peers, availableFiles);
-            server.start();
+            try {
+                this.server = new Server(new ServerSocket(PORT), files, peers, availableFiles);
+                discoverPeers();
+                updateAvailableFiles();
+                server.start();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
+
+    public void shutDown() {
+        if(server != null)
+            server.shutdown();
+    }
+
 }

@@ -10,8 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Server {
 
-    private final int PORT;
-
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
     private final Map<String, PieceContainer> files;
@@ -20,9 +18,10 @@ public class Server {
 
     private final Set<FileInfo> availableFiles;
 
-    public Server(int port, Map<String, PieceContainer> files, List<InetSocketAddress> peers,
+    private final ServerSocket serverSocket;
+    public Server(ServerSocket serverSocket, Map<String, PieceContainer> files, List<InetSocketAddress> peers,
                   Set<FileInfo> availableFiles) {
-        this.PORT = port;
+        this.serverSocket = serverSocket;
         this.files = files;
         this.peers = peers;
         this.availableFiles = availableFiles;
@@ -30,24 +29,23 @@ public class Server {
 
     public void start() {
         executor.execute(() -> {
-            try(ServerSocket serverSocket = new ServerSocket(PORT)) {
+            try(serverSocket) {
                 System.out.println(Thread.currentThread().getName() + " Server Started");
                 while(!Thread.currentThread().isInterrupted()) {
                     PeerHandler peerHandler = new PeerHandler(serverSocket.accept(), files, peers, availableFiles);
                     executor.execute(peerHandler);
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out.println("Server Closed: " + e.getMessage());
             }
         });
 
     }
 
     public void shutdown() {
-        this.executor.shutdown();
         try {
-            this.executor.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+            this.serverSocket.close();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

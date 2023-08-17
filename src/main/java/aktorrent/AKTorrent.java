@@ -151,4 +151,10 @@ public class AKTorrent {
             server.shutdown();
     }
 
+    public static void main(String[] args) throws IOException {
+        AKTorrent node = new AKTorrent(Integer.parseInt(args[0]));
+        CLI cli = new CLI(System.in, System.out, node);
+        cli.start();
+    }
+
 }

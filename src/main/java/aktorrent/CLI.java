@@ -25,6 +25,11 @@ public class CLI {
                 String filename = tokens[1];
                 File file = new File(AKTorrent.class.getResource("/" + filename).getFile());
                 node.seedFile(file);
+            } else if(tokens[0].equals("download")) {
+                String filename = tokens[1];
+                //TODO Temp for test: FileInfo will have to be supplied at command line or derived from filename
+                File file = new File(AKTorrent.class.getResource("/" + filename).getFile());
+                node.downloadFile(FileUtils.getFileInfo(file));
             }
         }
         node.shutDown();

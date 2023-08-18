@@ -80,4 +80,81 @@ public class CLIIntegrationTests {
         countDownLatch_A.countDown();
     }
 
+    @Test
+    public void canReceiveFile() throws InterruptedException {
+        CountDownLatch countDownLatch_A = new CountDownLatch(1);
+        CountDownLatch countDownLatch_B = new CountDownLatch(1);
+        CountDownLatch exit = new CountDownLatch(1);
+
+        AKTorrent server = new AKTorrent(NODE_A_PORT);
+        File file = new File(getClass().getResource(FILENAME).getFile());
+        server.seedFile(file);
+
+        Thread clientThread = new Thread(() -> {
+            AKTorrent client = new AKTorrent(NODE_B_PORT);
+            client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
+            CLI cli = new CLI(
+                    new MyInputStream(("download " + FILENAME + "\n").getBytes(), countDownLatch_A, countDownLatch_B),
+                    new ByteArrayOutputStream(),
+                    client
+            );
+            new Thread(() -> {
+                try {
+                    cli.start();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
+            Optional<File> downloadedFile;
+            do{
+                downloadedFile = client.getFile(FILENAME);
+            } while (downloadedFile.isEmpty());
+            try {
+                assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
+                countDownLatch_A.countDown();
+                exit.countDown();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        clientThread.setName("CLIENT");
+        clientThread.start();
+
+        exit.await();
+        server.shutDown();
+    }
+
+    public static class MyInputStream extends InputStream {
+
+        private int index = 0;
+
+        private byte[] command;
+
+        private CountDownLatch countDownLatch_A;
+        private CountDownLatch countDownLatch_B;
+
+        public MyInputStream(byte[] command, CountDownLatch countDownLatch_A, CountDownLatch countDownLatch_B) {
+            this.command = command;
+            this.countDownLatch_A = countDownLatch_A;
+            this.countDownLatch_B = countDownLatch_B;
+        }
+
+        @Override
+        public int read() throws IOException {
+            if (index == command.length) {
+                index++;
+                return -1;
+            } else if (index > command.length) {
+                try {
+                    countDownLatch_B.countDown();
+                    countDownLatch_A.await();
+                    return -1;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return command[index++];
+        }
+    }
+
 }

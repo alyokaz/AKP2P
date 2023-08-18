@@ -36,10 +36,9 @@ public class AKTorrent {
 
     public void startClient() {
         discoverPeers();
-        //TODO Change to execute
-        executor.submit(() -> {
+        executor.execute(() -> {
             peers.forEach(address -> {
-                executor.submit(new DownloadHandler(address, files, completedFiles));
+                executor.execute(new DownloadHandler(address, files, completedFiles));
             });
         });
     }

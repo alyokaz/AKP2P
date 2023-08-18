@@ -18,7 +18,7 @@ public class CLITests {
     @Test
     public void seedFileTest() throws IOException {
         File file = new File(getClass().getResource(FILENAME).getFile());
-        InputStream in = new ByteArrayInputStream(("seed " + FILENAME).getBytes());
+        InputStream in = new ByteArrayInputStream(("1\n " + FILENAME + "\n").getBytes());
         PrintStream out = new PrintStream(new ByteArrayOutputStream(1024));
         AKTorrent client = mock(AKTorrent.class);
         CLI sut = new CLI(in, out, client);

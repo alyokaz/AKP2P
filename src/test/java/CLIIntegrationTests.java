@@ -34,7 +34,7 @@ public class CLIIntegrationTests {
 
         new Thread(()-> {
             InputStream in = new InputStream() {
-                private byte[] command = ("seed " + FILENAME + "\n").getBytes();
+                private byte[] command = ("1\n " + FILENAME + "\n").getBytes();
                 int index = 0;
                 @Override
                 public int read() throws IOException {
@@ -94,7 +94,7 @@ public class CLIIntegrationTests {
             AKTorrent client = new AKTorrent(NODE_B_PORT);
             client.addPeer(LOCAL_HOST, NODE_A_PORT);
             CLI cli = new CLI(
-                    new MyInputStream(("download " + FILENAME + "\n").getBytes(), countDownLatch_A, countDownLatch_B),
+                    new MyInputStream(("2\n " + FILENAME + "\n").getBytes(), countDownLatch_A, countDownLatch_B),
                     new PrintStream(new ByteArrayOutputStream()),
                     client
             );

@@ -54,7 +54,7 @@ public class CLIIntegrationTests {
                 }
             };
 
-            BufferedOutputStream out = new BufferedOutputStream(new ByteArrayOutputStream(1024));
+            PrintStream out = new PrintStream(new ByteArrayOutputStream(1024));
             CLI cli = new CLI(in, out, new AKTorrent(NODE_A_PORT));
             try {
                 cli.start();
@@ -95,7 +95,7 @@ public class CLIIntegrationTests {
             client.addPeer(LOCAL_HOST, NODE_A_PORT);
             CLI cli = new CLI(
                     new MyInputStream(("download " + FILENAME + "\n").getBytes(), countDownLatch_A, countDownLatch_B),
-                    new ByteArrayOutputStream(),
+                    new PrintStream(new ByteArrayOutputStream()),
                     client
             );
             new Thread(() -> {

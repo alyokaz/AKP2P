@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -17,7 +19,7 @@ public class CLITests {
     public void seedFileTest() throws IOException {
         File file = new File(getClass().getResource(FILENAME).getFile());
         InputStream in = new ByteArrayInputStream(("seed " + FILENAME).getBytes());
-        BufferedOutputStream out = new BufferedOutputStream(new ByteArrayOutputStream(1024));
+        PrintStream out = new PrintStream(new ByteArrayOutputStream(1024));
         AKTorrent client = mock(AKTorrent.class);
         CLI sut = new CLI(in, out, client);
         sut.start();

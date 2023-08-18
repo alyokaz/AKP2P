@@ -6,11 +6,11 @@ public class CLI {
 
     private final InputStream inputStream;
 
-    private final OutputStream outputStream;
+    private final PrintStream outputStream;
 
     private final AKTorrent node;
 
-    public CLI(InputStream inputStream, OutputStream outputStream, AKTorrent node) {
+    public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
         this.node = node;

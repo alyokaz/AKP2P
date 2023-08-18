@@ -81,9 +81,8 @@ public class AKTorrent {
         startClient();
     }
 
-    //TODO Refactor to use hostname and port
-    public void addPeer(InetSocketAddress address) {
-        peers.add(address);
+    public void addPeer(String hostName, int port) {
+        peers.add(new InetSocketAddress(hostName, port));
     }
 
     public Optional<File> getFile(String filename) {

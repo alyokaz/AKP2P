@@ -66,7 +66,7 @@ public class CLIIntegrationTests {
         countDownLatch_B.await();
 
         AKTorrent client = new AKTorrent(NODE_B_PORT);
-        client.addPeer(new InetSocketAddress(NODE_A_PORT));
+        client.addPeer(LOCAL_HOST, NODE_A_PORT);
         File file = new File(getClass().getResource(FILENAME).getFile());
         client.downloadFile(FileUtils.getFileInfo(file));
 
@@ -92,7 +92,7 @@ public class CLIIntegrationTests {
 
         Thread clientThread = new Thread(() -> {
             AKTorrent client = new AKTorrent(NODE_B_PORT);
-            client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
+            client.addPeer(LOCAL_HOST, NODE_A_PORT);
             CLI cli = new CLI(
                     new MyInputStream(("download " + FILENAME + "\n").getBytes(), countDownLatch_A, countDownLatch_B),
                     new ByteArrayOutputStream(),

@@ -38,7 +38,7 @@ public class IntegrationTest {
         server.seedFile(file);
 
         AKTorrent client = new AKTorrent(NODE_B_PORT);
-        client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
+        client.addPeer(LOCAL_HOST, NODE_A_PORT);
         client.downloadFile(FileUtils.getFileInfo(file));
         Optional<File> completedFile;
         do {
@@ -62,9 +62,9 @@ public class IntegrationTest {
         ak2.seedFile(file);
         ak3.seedFile(file);
 
-        ak4.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
-        ak4.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_B_PORT));
-        ak4.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_C_PORT));
+        ak4.addPeer(LOCAL_HOST, NODE_A_PORT);
+        ak4.addPeer(LOCAL_HOST, NODE_B_PORT);
+        ak4.addPeer(LOCAL_HOST, NODE_C_PORT);
 
         ak4.downloadFile(FileUtils.getFileInfo(file));
 
@@ -94,7 +94,7 @@ public class IntegrationTest {
 
         AKTorrent client = new AKTorrent(clientPort);
 
-        IntStream.range(minPort, maxPort).forEach(port -> client.addPeer(new InetSocketAddress(LOCAL_HOST, port)));
+        IntStream.range(minPort, maxPort).forEach(port -> client.addPeer(LOCAL_HOST, port));
 
         client.downloadFile(FileUtils.getFileInfo(file));
 
@@ -118,11 +118,11 @@ public class IntegrationTest {
         node_A.seedFile(testFileB);
 
         AKTorrent node_B = new AKTorrent(NODE_B_PORT);
-        node_B.addPeer(new InetSocketAddress(NODE_A_PORT));
+        node_B.addPeer(LOCAL_HOST, NODE_A_PORT);
         node_B.startServer();
 
         AKTorrent client = new AKTorrent(NODE_C_PORT);
-        client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_B_PORT));
+        client.addPeer(LOCAL_HOST, NODE_B_PORT);
 
         Set<FileInfo> files = client.getAvailableFiles().get();
 
@@ -144,15 +144,15 @@ public class IntegrationTest {
         File file = new File(getClass().getResource(FILENAME).getFile());
         nodeC.seedFile(file);
 
-        nodeB.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_C_PORT));
+        nodeB.addPeer(LOCAL_HOST, NODE_C_PORT);
         nodeB.startServer();
 
-        nodeA.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_B_PORT));
+        nodeA.addPeer(LOCAL_HOST, NODE_B_PORT);
         nodeA.startServer();
 
         AKTorrent client = new AKTorrent(NODE_D_PORT);
 
-        client.addPeer(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT));
+        client.addPeer(LOCAL_HOST, NODE_A_PORT);
 
         client.downloadFile(FileUtils.getFileInfo(file));
 

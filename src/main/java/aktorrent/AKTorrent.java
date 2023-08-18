@@ -36,6 +36,7 @@ public class AKTorrent {
 
     public void startClient() {
         discoverPeers();
+        //TODO Change to execute
         executor.submit(() -> {
             peers.forEach(address -> {
                 executor.submit(new DownloadHandler(address, files, completedFiles));
@@ -81,6 +82,7 @@ public class AKTorrent {
         startClient();
     }
 
+    //TODO Refactor to use hostname and port
     public void addPeer(InetSocketAddress address) {
         peers.add(address);
     }

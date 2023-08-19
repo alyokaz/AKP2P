@@ -42,4 +42,25 @@ public class CLITests {
         assertEquals(scanner.next(), CLI.MAIN_MENU);
     }
 
+    @Test
+    public void canDownloadFile() throws IOException {
+        String command = "2\n " + FILENAME;
+        InputStream in = new ByteArrayInputStream(command.getBytes());
+
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(bytes);
+
+        AKTorrent node = mock(AKTorrent.class);
+
+        CLI sut = new CLI(in, out, node);
+        sut.start();
+
+        Scanner scanner = new Scanner(bytes.toString());
+        scanner.useDelimiter("\n");
+
+        File file = new File(AKTorrent.class.getResource("/" + FILENAME).getFile());
+
+        verify(node).downloadFile(FileUtils.getFileInfo(file));
+    }
+
 }

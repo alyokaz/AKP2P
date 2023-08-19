@@ -107,8 +107,9 @@ public class CLITests {
 
         scanner.nextLine();
         scanner.nextLine();
-        assertEquals(FILENAME, scanner.nextLine());
-        assertEquals(FILENAME_2, scanner.nextLine());
+        assertEquals("1: " + FILENAME, scanner.nextLine());
+        assertEquals("2: " + FILENAME_2, scanner.nextLine());
+        assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, scanner.nextLine());
         assertEquals(CLI.MAIN_MENU, scanner.nextLine());
     }
 

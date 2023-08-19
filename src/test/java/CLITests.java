@@ -5,8 +5,10 @@ import aktorrent.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,5 +27,19 @@ public class CLITests {
         sut.start();
         verify(client).seedFile(file);
     }
-    
+
+    @Test
+    public void displayMenu() throws IOException {
+        InputStream in = new ByteArrayInputStream("".getBytes());
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(bytes);
+        AKTorrent node = mock(AKTorrent.class);
+        CLI sut = new CLI(in, out, node);
+        sut.start();
+        Scanner scanner = new Scanner(bytes.toString());
+        scanner.useDelimiter("\n");
+        assertEquals(scanner.next(), CLI.WELCOME_MESSAGE);
+        assertEquals(scanner.next(), CLI.MAIN_MENU);
+    }
+
 }

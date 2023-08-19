@@ -36,6 +36,7 @@ public class CLI {
                 case 2 -> processDownloadFile(reader, outputStream);
                 case 3 -> processDisplayFiles(reader, outputStream);
             }
+            outputStream.println(MAIN_MENU);
         }
         node.shutDown();
     }

@@ -24,10 +24,19 @@ public class CLITests {
     public void seedFileTest() throws IOException {
         File file = new File(getClass().getResource(FILENAME).getFile());
         InputStream in = new ByteArrayInputStream(("1\n " + FILENAME + "\n").getBytes());
-        PrintStream out = new PrintStream(new ByteArrayOutputStream(1024));
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(bytes);
         AKTorrent client = mock(AKTorrent.class);
         CLI sut = new CLI(in, out, client);
         sut.start();
+
+        Scanner scanner = new Scanner(bytes.toString());
+
+        assertEquals(CLI.WELCOME_MESSAGE, scanner.nextLine());
+        assertEquals(CLI.MAIN_MENU, scanner.nextLine());
+        assertEquals(CLI.INPUT_PROMPT, scanner.nextLine());
+        assertEquals(CLI.MAIN_MENU, scanner.nextLine());
+        
         verify(client).seedFile(file);
     }
 
@@ -63,6 +72,11 @@ public class CLITests {
 
         File file = new File(AKTorrent.class.getResource("/" + FILENAME).getFile());
 
+        assertEquals(CLI.WELCOME_MESSAGE, scanner.nextLine());
+        assertEquals(CLI.MAIN_MENU, scanner.nextLine());
+        assertEquals(CLI.INPUT_PROMPT, scanner.nextLine());
+        assertEquals(CLI.MAIN_MENU, scanner.nextLine());
+
         verify(node).downloadFile(FileUtils.getFileInfo(file));
     }
 
@@ -95,6 +109,7 @@ public class CLITests {
         scanner.nextLine();
         assertEquals(FILENAME, scanner.nextLine());
         assertEquals(FILENAME_2, scanner.nextLine());
+        assertEquals(CLI.MAIN_MENU, scanner.nextLine());
     }
 
 }

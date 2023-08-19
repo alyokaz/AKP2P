@@ -1,6 +1,8 @@
 package aktorrent;
 
 import java.io.*;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public class CLI {
 
@@ -30,9 +32,19 @@ public class CLI {
             switch(selection) {
                 case 1 -> processSeedFile(reader, outputStream);
                 case 2 -> processDownloadFile(reader, outputStream);
+                case 3 -> processDisplayFiles(reader, outputStream);
             }
         }
         node.shutDown();
+    }
+
+    private void processDisplayFiles(BufferedReader reader, PrintStream outputStream) {
+        try {
+            Set<FileInfo> files = node.getAvailableFiles().get();
+            files.forEach(f -> outputStream.println(f.getFilename()));
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void processDownloadFile(BufferedReader reader, PrintStream out) throws IOException {

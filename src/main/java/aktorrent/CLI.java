@@ -15,6 +15,8 @@ public class CLI {
     public static final String WELCOME_MESSAGE = "Welcome to AKTorrent";
     public static final String MAIN_MENU = "1: seed, 2: download, 3: see files";
 
+    public static final String INPUT_PROMPT = "Input Path:";
+
     public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
@@ -48,7 +50,7 @@ public class CLI {
     }
 
     private void processDownloadFile(BufferedReader reader, PrintStream out) throws IOException {
-        out.println("Input path");
+        out.println(INPUT_PROMPT);
         String filename = reader.readLine().trim();
         //TODO Temp for test: FileInfo will have to be supplied at command line or derived from filename
         File file = new File(AKTorrent.class.getResource("/" + filename).getFile());
@@ -56,7 +58,7 @@ public class CLI {
     }
 
     private void processSeedFile(BufferedReader reader, PrintStream out) throws IOException {
-        out.println("Input path");
+        out.println(INPUT_PROMPT);
         String filename = reader.readLine().trim();
         File file = new File(AKTorrent.class.getResource("/" + filename).getFile());
         node.seedFile(file);

@@ -1,8 +1,11 @@
 package aktorrent;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.IntStream;
 
 public class CLI {
 
@@ -16,6 +19,9 @@ public class CLI {
     public static final String MAIN_MENU = "1: seed, 2: download, 3: see files";
 
     public static final String INPUT_PROMPT = "Input Path:";
+
+    public static final String DOWNLOAD_INPUT_PROMPT = "Input file number: ";
+
 
     public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node) {
         this.inputStream = inputStream;
@@ -41,10 +47,16 @@ public class CLI {
         node.shutDown();
     }
 
-    private void processDisplayFiles(BufferedReader reader, PrintStream outputStream) {
+    private void processDisplayFiles(BufferedReader reader, PrintStream outputStream) throws IOException {
         try {
-            Set<FileInfo> files = node.getAvailableFiles().get();
-            files.forEach(f -> outputStream.println(f.getFilename()));
+            List<FileInfo> files = new ArrayList<>(node.getAvailableFiles().get());
+            IntStream.range(0, files.size()).forEach(i -> outputStream.println((i + 1) + ": " + files.get(i).getFilename()));
+            outputStream.println(DOWNLOAD_INPUT_PROMPT);
+            String line = reader.readLine();
+            if(line == null)
+                return;
+            int fileNumber = Integer.parseInt(reader.readLine()) - 1;
+            node.downloadFile(files.get(fileNumber));
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

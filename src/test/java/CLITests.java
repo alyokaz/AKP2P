@@ -112,4 +112,31 @@ public class CLITests {
         assertEquals(CLI.MAIN_MENU, scanner.nextLine());
     }
 
+    @Test
+    public void downloadFileByDisplayNumber() throws IOException {
+        String command = "3\n1";
+        InputStream in = new ByteArrayInputStream(command.getBytes());
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(bytes);
+
+        AKTorrent node = mock(AKTorrent.class);
+
+        FileInfo fileInfo = new FileInfo(FILENAME, 100, 100);
+
+        when(node.getAvailableFiles()).thenReturn(CompletableFuture.completedFuture(Set.of(fileInfo)));
+
+        CLI sut = new CLI(in, out, node);
+        sut.start();
+
+        Scanner scanner = new Scanner(bytes.toString());
+        scanner.useDelimiter("\n");
+
+        assertEquals(CLI.WELCOME_MESSAGE, scanner.nextLine());
+        assertEquals(CLI.MAIN_MENU, scanner.nextLine());
+        assertEquals("1: " + FILENAME, scanner.nextLine());
+        assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, scanner.nextLine());
+
+        verify(node).downloadFile(fileInfo);
+    }
+
 }

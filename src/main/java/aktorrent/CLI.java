@@ -10,6 +10,9 @@ public class CLI {
 
     private final AKTorrent node;
 
+    public static final String WELCOME_MESSAGE = "Welcome to AKTorrent";
+    public static final String MAIN_MENU = "1: seed, 2: download, 3: see files";
+
     public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
@@ -17,8 +20,8 @@ public class CLI {
     }
 
     public void start() throws IOException {
-        outputStream.println("Welcome to AKTorrent");
-        outputStream.println("1: seed, 2: download, 3: see files");
+        outputStream.println(WELCOME_MESSAGE);
+        outputStream.println(MAIN_MENU);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         while((line = reader.readLine()) != null) {

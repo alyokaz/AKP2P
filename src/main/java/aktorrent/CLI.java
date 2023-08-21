@@ -55,7 +55,7 @@ public class CLI {
             String line = reader.readLine();
             if(line == null)
                 return;
-            int fileNumber = Integer.parseInt(reader.readLine()) - 1;
+            int fileNumber = Integer.parseInt(line) - 1;
             node.downloadFile(files.get(fileNumber));
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);

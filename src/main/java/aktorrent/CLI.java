@@ -22,6 +22,8 @@ public class CLI {
 
     public static final String DOWNLOAD_INPUT_PROMPT = "Input file number: ";
 
+    public static final String NOT_A_NUMBER_ERROR = "Please select a menu number.";
+
 
     public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node) {
         this.inputStream = inputStream;
@@ -36,11 +38,16 @@ public class CLI {
         String line;
         while((line = reader.readLine()) != null) {
             String[] tokens = line.split(" ");
-            Integer selection = Integer.parseInt(tokens[0]);
-            switch(selection) {
-                case 1 -> processSeedFile(reader, outputStream);
-                case 2 -> processDownloadFile(reader, outputStream);
-                case 3 -> processDisplayFiles(reader, outputStream);
+            Integer selection;
+            try {
+                selection = Integer.parseInt(tokens[0]);
+                switch(selection) {
+                    case 1 -> processSeedFile(reader, outputStream);
+                    case 2 -> processDownloadFile(reader, outputStream);
+                    case 3 -> processDisplayFiles(reader, outputStream);
+                }
+            } catch (NumberFormatException e) {
+              outputStream.println(NOT_A_NUMBER_ERROR);
             }
             outputStream.println(MAIN_MENU);
         }

@@ -111,6 +111,18 @@ public class CLITests {
         verify(node).downloadFile(fileInfo);
     }
 
+    @Test
+    public void recoverFromWrongMenuInput() throws IOException {
+        String command = "X";
+        InputStream in = buildInputStream(command);
+        buildAndStartCLI(in, out, node);
+        Scanner scanner = new Scanner(bytes.toString());
+
+        assertDisplayOutput(() -> {
+            assertEquals(CLI.NOT_A_NUMBER_ERROR, scanner.nextLine());
+        }, scanner);
+    }
+
     private static InputStream buildInputStream(String command) {
         return new ByteArrayInputStream(command.getBytes());
     }

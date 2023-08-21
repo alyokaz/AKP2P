@@ -1,6 +1,7 @@
 package aktorrent;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class CLI {
 
     public static final String NOT_A_NUMBER_ERROR = "Please select a menu number.";
     public static final String NON_EXISTENT_MENU_OPTION = " is not an available option";
-
+    public static final String FILE_NOT_FOUND = "Could not locate file: ";
 
 
     public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node) {
@@ -87,7 +88,13 @@ public class CLI {
     private void processSeedFile(BufferedReader reader, PrintStream out) throws IOException {
         out.println(INPUT_PROMPT);
         String filename = reader.readLine().trim();
-        File file = new File(AKTorrent.class.getResource("/" + filename).getFile());
-        node.seedFile(file);
+        URL url = AKTorrent.class.getResource("/" + filename);
+        if(url != null) {
+            File file = new File(url.getFile());
+            node.seedFile(file);
+        } else {
+            outputStream.println(CLI.FILE_NOT_FOUND + filename);
+        }
+
     }
 }

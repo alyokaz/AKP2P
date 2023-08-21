@@ -135,6 +135,20 @@ public class CLITests {
         }, scanner);
     }
 
+    @Test
+    public void recoverFromNoFileFoundForSeed() throws IOException {
+        String filename = "nonexistentFile.mp4";
+        String command = "1\n" + filename;
+        InputStream in = buildInputStream(command);
+        buildAndStartCLI(in, out, node);
+        Scanner scanner = new Scanner(bytes.toString());
+
+        assertDisplayOutput(() -> {
+            assertEquals(CLI.INPUT_PROMPT, scanner.nextLine());
+            assertEquals(CLI.FILE_NOT_FOUND + filename, scanner.nextLine());
+        }, scanner);
+    }
+
     private static InputStream buildInputStream(String command) {
         return new ByteArrayInputStream(command.getBytes());
     }

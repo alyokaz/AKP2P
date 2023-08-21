@@ -23,6 +23,8 @@ public class CLI {
     public static final String DOWNLOAD_INPUT_PROMPT = "Input file number: ";
 
     public static final String NOT_A_NUMBER_ERROR = "Please select a menu number.";
+    public static final String NON_EXISTENT_MENU_OPTION = " is not an available option";
+
 
 
     public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node) {
@@ -45,6 +47,7 @@ public class CLI {
                     case 1 -> processSeedFile(reader, outputStream);
                     case 2 -> processDownloadFile(reader, outputStream);
                     case 3 -> processDisplayFiles(reader, outputStream);
+                    default -> processDefault(outputStream, selection);
                 }
             } catch (NumberFormatException e) {
               outputStream.println(NOT_A_NUMBER_ERROR);
@@ -52,6 +55,10 @@ public class CLI {
             outputStream.println(MAIN_MENU);
         }
         node.shutDown();
+    }
+
+    private void processDefault(PrintStream outputStream, Integer selection) {
+        outputStream.println(selection + NON_EXISTENT_MENU_OPTION);
     }
 
     private void processDisplayFiles(BufferedReader reader, PrintStream outputStream) throws IOException {

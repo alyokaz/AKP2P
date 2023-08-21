@@ -123,6 +123,18 @@ public class CLITests {
         }, scanner);
     }
 
+    @Test
+    public void recoverFromNonExistentMenuOption() throws IOException {
+        String command = "99";
+        InputStream in = buildInputStream(command);
+        buildAndStartCLI(in, out, node);
+        Scanner scanner = new Scanner(bytes.toString());
+
+        assertDisplayOutput(() -> {
+            assertEquals(command + CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine());
+        }, scanner);
+    }
+
     private static InputStream buildInputStream(String command) {
         return new ByteArrayInputStream(command.getBytes());
     }

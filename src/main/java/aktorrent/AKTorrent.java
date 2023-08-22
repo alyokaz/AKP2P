@@ -4,9 +4,8 @@ import aktorrent.message.Message;
 import aktorrent.message.MessageType;
 
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -29,6 +28,10 @@ public class AKTorrent {
     static final int BUFFER_SIZE = 1000000;
 
     private Server server;
+
+    private PingServer udpServer;
+
+    private Set<InetSocketAddress> connectedPeers = new HashSet<>();
 
     public AKTorrent(int port) {
         this.PORT = port;
@@ -82,7 +85,29 @@ public class AKTorrent {
     }
 
     public void addPeer(String hostName, int port) {
-        peers.add(new InetSocketAddress(hostName, port));
+        InetSocketAddress address = new InetSocketAddress(hostName, port);
+        peers.add(address);
+        pingPeer(address);
+    }
+
+    private void pingPeer(InetSocketAddress address) {
+        try(DatagramSocket socket = new DatagramSocket()) {
+            byte[] buf = PingServer.PING_PAYLOAD.getBytes();
+            DatagramPacket packet =
+                    new DatagramPacket(buf, buf.length, address.getAddress(),
+                            address.getPort());
+            socket.send(packet);
+
+            buf = new byte[PingServer.BUFFER_SIZE];
+            packet = new DatagramPacket(buf, buf.length);
+            socket.receive(packet);
+
+            String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
+            if(payload.equals(PingServer.PONG_PAYLOAD))
+                this.connectedPeers.add(address);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Optional<File> getFile(String filename) {
@@ -144,11 +169,26 @@ public class AKTorrent {
                 throw new RuntimeException(e);
             }
         }
+        if(this.udpServer == null) {
+            try {
+                this.udpServer = new PingServer(new DatagramSocket(PORT), connectedPeers);
+                this.udpServer.start();
+            } catch (SocketException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public void shutDown() {
         if(server != null)
             server.shutdown();
+
+        if(udpServer != null)
+            udpServer.shutdown();
+    }
+
+    public Set<InetSocketAddress> getConnectedPeers() {
+        return this.connectedPeers;
     }
 
     public static void main(String[] args) throws IOException {

@@ -167,4 +167,29 @@ public class IntegrationTest {
         nodeC.shutDown();
     }
 
+    @Test
+    public void pingPeerWhenAdded() {
+        AKTorrent server = new AKTorrent(NODE_A_PORT);
+        server.startServer();
+        AKTorrent client = new AKTorrent(NODE_B_PORT);
+        client.addPeer(LOCAL_HOST, NODE_A_PORT);
+        assertTrue(client.getConnectedPeers().contains(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT)));
+        server.shutDown();
+    }
+
+    @Test
+    public void pingByMultipleNodes() {
+        AKTorrent server = new AKTorrent(NODE_A_PORT);
+        server.startServer();
+
+        Set<AKTorrent> nodes = new HashSet<>();
+        IntStream.range(0, 1000).forEach(i -> nodes.add(new AKTorrent(NODE_B_PORT + i)));
+        nodes.forEach(node -> node.addPeer(LOCAL_HOST, NODE_A_PORT));
+
+        InetSocketAddress expectedAddress = new InetSocketAddress(LOCAL_HOST, NODE_A_PORT);
+        nodes.forEach(node -> assertTrue(node.getConnectedPeers().contains(expectedAddress)));
+        server.shutDown();
+    }
+
+
 }

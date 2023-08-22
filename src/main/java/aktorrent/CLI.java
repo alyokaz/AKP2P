@@ -88,9 +88,8 @@ public class CLI {
     private void processSeedFile(BufferedReader reader, PrintStream out) throws IOException {
         out.println(INPUT_PROMPT);
         String filename = reader.readLine().trim();
-        URL url = AKTorrent.class.getResource("/" + filename);
-        if(url != null) {
-            File file = new File(url.getFile());
+        File file = new File(filename);
+        if(file.exists()) {
             node.seedFile(file);
         } else {
             outputStream.println(CLI.FILE_NOT_FOUND + filename);

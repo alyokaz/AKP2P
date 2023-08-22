@@ -33,7 +33,7 @@ public class CLITests {
 
     @Test
     public void seedFileTest() throws IOException {
-        String command = "1\n " + FILENAME + "\n";
+        String command = "1\n " + this.getClass().getResource(FILENAME).getPath() + "\n";
         InputStream in = buildInputStream(command);
         buildAndStartCLI(in, out, node);
         Scanner scanner = new Scanner(bytes.toString());

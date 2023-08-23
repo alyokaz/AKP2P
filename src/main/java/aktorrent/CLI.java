@@ -1,10 +1,8 @@
 package aktorrent;
 
 import java.io.*;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
 
@@ -17,7 +15,7 @@ public class CLI {
     private final AKTorrent node;
 
     public static final String WELCOME_MESSAGE = "Welcome to AKTorrent";
-    public static final String MAIN_MENU = "1: seed, 2: download, 3: see files";
+    public static final String MAIN_MENU = "1: seed, 2: download, 3: see files, 4: add peer";
 
     public static final String INPUT_PROMPT = "Input Path:";
 
@@ -26,6 +24,10 @@ public class CLI {
     public static final String NOT_A_NUMBER_ERROR = "Please select a menu number.";
     public static final String NON_EXISTENT_MENU_OPTION = " is not an available option";
     public static final String FILE_NOT_FOUND = "Could not locate file: ";
+    public static final String INPUT_PEER_ADDRESS_PROMPT = "Input peer hostname and port: ";
+    public static final String PEER_CONNECTED_MESSAGE = "Peer Connected";
+
+
 
 
     public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node) {
@@ -48,6 +50,7 @@ public class CLI {
                     case 1 -> processSeedFile(reader, outputStream);
                     case 2 -> processDownloadFile(reader, outputStream);
                     case 3 -> processDisplayFiles(reader, outputStream);
+                    case 4 -> processAddPeer(reader, outputStream);
                     default -> processDefault(outputStream, selection);
                 }
             } catch (NumberFormatException e) {
@@ -56,6 +59,13 @@ public class CLI {
             outputStream.println(MAIN_MENU);
         }
         node.shutDown();
+    }
+
+    private void processAddPeer(BufferedReader reader, PrintStream outputStream) throws IOException {
+        outputStream.println(CLI.INPUT_PEER_ADDRESS_PROMPT);
+        String[] address = reader.readLine().split(" ");
+        node.addPeer(address[0], Integer.parseInt(address[1]));
+        outputStream.println(CLI.PEER_CONNECTED_MESSAGE);
     }
 
     private void processDefault(PrintStream outputStream, Integer selection) {

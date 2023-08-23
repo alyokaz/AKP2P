@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CLIIntegrationTests {
 
@@ -121,6 +122,35 @@ public class CLIIntegrationTests {
         clientThread.start();
 
         exit.await();
+        server.shutDown();
+    }
+
+    @Test
+    public void canAddPeer() throws IOException, InterruptedException {
+        CountDownLatch countDownLatch_A = new CountDownLatch(0);
+        CountDownLatch countDownLatch_B = new CountDownLatch(0);
+        CountDownLatch exitLatch = new CountDownLatch(1);
+
+        AKTorrent server = new AKTorrent(NODE_A_PORT);
+        server.startServer();
+
+        AKTorrent client = new AKTorrent(NODE_B_PORT);
+        new Thread(() -> {
+            CLI cli = new CLI(
+                    new MyInputStream(("4\n" + LOCAL_HOST + " " + NODE_A_PORT).getBytes(),
+                            countDownLatch_A,
+                            countDownLatch_B),
+                    new PrintStream(new ByteArrayOutputStream()),
+                    client);
+            try {
+                cli.start();
+                assertTrue(client.getConnectedPeers().contains(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT)));
+                exitLatch.countDown();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+        exitLatch.await();
         server.shutDown();
     }
 

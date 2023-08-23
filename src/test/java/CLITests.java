@@ -149,6 +149,19 @@ public class CLITests {
         }, scanner);
     }
 
+    @Test
+    public void canAddPeer() throws IOException {
+        String command = "4\n" + "localhost " + "4441";
+        InputStream in = buildInputStream(command);
+        buildAndStartCLI(in, out, node);
+        Scanner scanner = new Scanner(bytes.toString());
+
+        assertDisplayOutput(() -> {
+            assertEquals(CLI.INPUT_PEER_ADDRESS_PROMPT, scanner.nextLine());
+            assertEquals(CLI.PEER_CONNECTED_MESSAGE, scanner.nextLine());
+        }, scanner);
+    }
+
     private static InputStream buildInputStream(String command) {
         return new ByteArrayInputStream(command.getBytes());
     }

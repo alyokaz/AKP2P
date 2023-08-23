@@ -56,19 +56,6 @@ public class CLITests {
     }
 
     @Test
-    public void canDownloadFile() throws IOException {
-        String command = "2\n " + FILENAME;
-        InputStream in = buildInputStream(command);
-        buildAndStartCLI(in, out, node);
-        Scanner scanner = new Scanner(bytes.toString());
-
-        assertDisplayOutput(() -> assertEquals(CLI.INPUT_PROMPT, scanner.nextLine()), scanner);
-
-        File file = buildFile(FILENAME);
-        verify(node).downloadFile(FileUtils.getFileInfo(file));
-    }
-
-    @Test
     public void displayAvailableFiles() throws IOException {
         FileInfo fileInfo_A = new FileInfo(FILENAME, 100, 100);
         FileInfo fileInfo_B = new FileInfo(FILENAME_2, 100, 100);
@@ -79,7 +66,7 @@ public class CLITests {
 
         when(node.getAvailableFiles()).thenReturn(CompletableFuture.completedFuture(files));
 
-        String command = "3\n";
+        String command = "2\n";
         InputStream in = buildInputStream(command);
         buildAndStartCLI(in, out, node);
 
@@ -97,7 +84,7 @@ public class CLITests {
         FileInfo fileInfo = new FileInfo(FILENAME, 100, 100);
         when(node.getAvailableFiles()).thenReturn(CompletableFuture.completedFuture(Set.of(fileInfo)));
 
-        String command = "3\n1";
+        String command = "2\n1";
         InputStream in = buildInputStream(command);
         buildAndStartCLI(in, out, node);
 
@@ -151,7 +138,7 @@ public class CLITests {
 
     @Test
     public void canAddPeer() throws IOException {
-        String command = "4\n" + "localhost " + "4441";
+        String command = "3\n" + "localhost " + "4441";
         InputStream in = buildInputStream(command);
         buildAndStartCLI(in, out, node);
         Scanner scanner = new Scanner(bytes.toString());

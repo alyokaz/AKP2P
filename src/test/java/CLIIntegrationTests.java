@@ -126,6 +126,50 @@ public class CLIIntegrationTests {
     }
 
     @Test
+    public void canDownloadFileByNumber() throws InterruptedException {
+        CountDownLatch countDownLatch_A = new CountDownLatch(0);
+        CountDownLatch countDownLatch_B = new CountDownLatch(0);
+        CountDownLatch exit = new CountDownLatch(1);
+
+        AKTorrent server = new AKTorrent(NODE_A_PORT);
+        File file = new File(getClass().getResource(FILENAME).getFile());
+        server.seedFile(file);
+
+        Thread clientThread = new Thread(() -> {
+            AKTorrent client = new AKTorrent(NODE_B_PORT);
+            client.addPeer(LOCAL_HOST, NODE_A_PORT);
+            CLI cli = new CLI(
+                    new MyInputStream(("3\n1").getBytes(), countDownLatch_A, countDownLatch_B),
+                    new PrintStream(new ByteArrayOutputStream()),
+                    client
+            );
+            new Thread(() -> {
+                try {
+                    cli.start();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
+            Optional<File> downloadedFile;
+            do{
+                downloadedFile = client.getFile(FILENAME);
+            } while (downloadedFile.isEmpty());
+            try {
+                assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
+                countDownLatch_A.countDown();
+                exit.countDown();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        clientThread.setName("CLIENT");
+        clientThread.start();
+
+        exit.await();
+        server.shutDown();
+    }
+
+    @Test
     public void canAddPeer() throws IOException, InterruptedException {
         CountDownLatch countDownLatch_A = new CountDownLatch(0);
         CountDownLatch countDownLatch_B = new CountDownLatch(0);

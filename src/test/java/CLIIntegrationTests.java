@@ -75,16 +75,13 @@ public class CLIIntegrationTests {
         do{
             downloadedFile = client.getFile(file.getName());
         } while (downloadedFile.isEmpty());
-
-
+        
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
         countDownLatch_A.countDown();
     }
 
     @Test
     public void canDownloadFileByNumber() throws InterruptedException {
-        CountDownLatch countDownLatch_A = new CountDownLatch(0);
-        CountDownLatch countDownLatch_B = new CountDownLatch(0);
         CountDownLatch exit = new CountDownLatch(1);
 
         AKTorrent server = new AKTorrent(NODE_A_PORT);
@@ -95,7 +92,7 @@ public class CLIIntegrationTests {
             AKTorrent client = new AKTorrent(NODE_B_PORT);
             client.addPeer(LOCAL_HOST, NODE_A_PORT);
             CLI cli = new CLI(
-                    new MyInputStream(("2\n1").getBytes(), countDownLatch_A, countDownLatch_B),
+                    new ByteArrayInputStream(("2\n1").getBytes()),
                     new PrintStream(new ByteArrayOutputStream()),
                     client
             );
@@ -112,7 +109,6 @@ public class CLIIntegrationTests {
             } while (downloadedFile.isEmpty());
             try {
                 assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
-                countDownLatch_A.countDown();
                 exit.countDown();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -126,9 +122,7 @@ public class CLIIntegrationTests {
     }
 
     @Test
-    public void canAddPeer() throws IOException, InterruptedException {
-        CountDownLatch countDownLatch_A = new CountDownLatch(0);
-        CountDownLatch countDownLatch_B = new CountDownLatch(0);
+    public void canAddPeer() throws InterruptedException {
         CountDownLatch exitLatch = new CountDownLatch(1);
 
         AKTorrent server = new AKTorrent(NODE_A_PORT);
@@ -136,10 +130,7 @@ public class CLIIntegrationTests {
 
         AKTorrent client = new AKTorrent(NODE_B_PORT);
         new Thread(() -> {
-            CLI cli = new CLI(
-                    new MyInputStream(("3\n" + LOCAL_HOST + " " + NODE_A_PORT).getBytes(),
-                            countDownLatch_A,
-                            countDownLatch_B),
+            CLI cli = new CLI(new ByteArrayInputStream(("3\n" + LOCAL_HOST + " " + NODE_A_PORT).getBytes()),
                     new PrintStream(new ByteArrayOutputStream()),
                     client);
             try {
@@ -153,38 +144,4 @@ public class CLIIntegrationTests {
         exitLatch.await();
         server.shutDown();
     }
-
-    public static class MyInputStream extends InputStream {
-
-        private int index = 0;
-
-        private byte[] command;
-
-        private CountDownLatch countDownLatch_A;
-        private CountDownLatch countDownLatch_B;
-
-        public MyInputStream(byte[] command, CountDownLatch countDownLatch_A, CountDownLatch countDownLatch_B) {
-            this.command = command;
-            this.countDownLatch_A = countDownLatch_A;
-            this.countDownLatch_B = countDownLatch_B;
-        }
-
-        @Override
-        public int read() throws IOException {
-            if (index == command.length) {
-                index++;
-                return -1;
-            } else if (index > command.length) {
-                try {
-                    countDownLatch_B.countDown();
-                    countDownLatch_A.await();
-                    return -1;
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return command[index++];
-        }
-    }
-
 }

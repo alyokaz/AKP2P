@@ -138,7 +138,7 @@ public class CLITests {
 
     @Test
     public void canAddPeer() throws IOException {
-        String command = "3\n" + "localhost " + "4441";
+        String command = "3 \n" + "localhost " + "4441";
         InputStream in = buildInputStream(command);
         buildAndStartCLI(in, out, node);
         Scanner scanner = new Scanner(bytes.toString());

@@ -35,7 +35,7 @@ public class CLI {
         String line;
         while ((line = reader.readLine()) != null) {
             String[] tokens = line.split(" ");
-            Integer selection;
+            int selection;
             try {
                 selection = Integer.parseInt(tokens[0]);
                 switch (selection) {

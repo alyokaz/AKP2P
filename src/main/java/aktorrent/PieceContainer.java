@@ -9,7 +9,7 @@ public class PieceContainer {
 
     private final SortedSet<Piece> pieces;
 
-    private Set<Integer> downloadingPieces;
+    private final Set<Integer> downloadingPieces;
 
     private final FileInfo fileInfo;
 

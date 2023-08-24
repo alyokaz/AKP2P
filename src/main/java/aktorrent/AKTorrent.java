@@ -40,11 +40,9 @@ public class AKTorrent {
 
     public void startClient() {
         discoverPeers();
-        executor.execute(() -> {
-            peers.forEach(address -> {
-                executor.execute(new DownloadHandler(address, files, completedFiles));
-            });
-        });
+        executor.execute(() -> peers.forEach(address -> {
+            executor.execute(new DownloadHandler(address, files, completedFiles));
+        }));
     }
 
     private void discoverPeers() {
@@ -167,7 +165,7 @@ public class AKTorrent {
         }
         if (this.udpServer == null) {
             try {
-                this.udpServer = new PingServer(new DatagramSocket(PORT), connectedPeers);
+                this.udpServer = new PingServer(new DatagramSocket(PORT));
                 this.udpServer.start();
             } catch (SocketException e) {
                 throw new RuntimeException(e);

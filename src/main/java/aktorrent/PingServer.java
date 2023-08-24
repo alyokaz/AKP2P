@@ -17,11 +17,9 @@ public class PingServer {
     public static final String PONG_PAYLOAD = "pong";
     private final DatagramSocket socket;
     private final ExecutorService executor = Executors.newCachedThreadPool();
-    private final Set<InetSocketAddress> connectedPeers;
 
-    public PingServer(DatagramSocket socket, Set<InetSocketAddress> connectedPeers) {
+    public PingServer(DatagramSocket socket) {
         this.socket = socket;
-        this.connectedPeers = connectedPeers;
     }
 
     public void start() {

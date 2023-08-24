@@ -22,7 +22,7 @@ public class PeerHandler implements Runnable {
 
     private final List<InetSocketAddress> peers;
 
-    private Set<FileInfo> availableFiles;
+    private final Set<FileInfo> availableFiles;
 
     public PeerHandler(Socket peerSocket, Map<String, PieceContainer> files, List<InetSocketAddress> peers,
                        Set<FileInfo> availableFiles) {

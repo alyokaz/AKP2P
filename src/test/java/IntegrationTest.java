@@ -1,16 +1,16 @@
 import aktorrent.AKTorrent;
 import aktorrent.FileInfo;
 import aktorrent.FileUtils;
-import aktorrent.PieceContainer;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +32,7 @@ public class IntegrationTest {
     private static final String FILENAME_2 = "test_file_2.mp4";
 
     @Test
-    public void canSeedAndReceiveFile() throws IOException, InterruptedException {
+    public void canSeedAndReceiveFile() throws IOException {
         File file = new File(getClass().getResource(FILENAME).getFile());
         AKTorrent server = new AKTorrent(NODE_A_PORT);
         server.seedFile(file);

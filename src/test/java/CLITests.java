@@ -1,18 +1,19 @@
 import aktorrent.AKTorrent;
 import aktorrent.CLI;
 import aktorrent.FileInfo;
-import aktorrent.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class CLITests {
@@ -60,7 +61,7 @@ public class CLITests {
         FileInfo fileInfo_A = new FileInfo(FILENAME, 100, 100);
         FileInfo fileInfo_B = new FileInfo(FILENAME_2, 100, 100);
 
-        Set<FileInfo> files = Set.of(fileInfo_A, fileInfo_B).stream()
+        Set<FileInfo> files = Stream.of(fileInfo_A, fileInfo_B)
                 .sorted(Comparator.comparing(FileInfo::getFilename))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -105,9 +106,7 @@ public class CLITests {
         buildAndStartCLI(in, out, node);
         Scanner scanner = new Scanner(bytes.toString());
 
-        assertDisplayOutput(() -> {
-            assertEquals(CLI.NOT_A_NUMBER_ERROR, scanner.nextLine());
-        }, scanner);
+        assertDisplayOutput(() -> assertEquals(CLI.NOT_A_NUMBER_ERROR, scanner.nextLine()), scanner);
     }
 
     @Test
@@ -117,9 +116,7 @@ public class CLITests {
         buildAndStartCLI(in, out, node);
         Scanner scanner = new Scanner(bytes.toString());
 
-        assertDisplayOutput(() -> {
-            assertEquals(command + CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine());
-        }, scanner);
+        assertDisplayOutput(() -> assertEquals(command + CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine()), scanner);
     }
 
     @Test
@@ -157,10 +154,9 @@ public class CLITests {
         return new File(CLITests.class.getResource(filename).getFile());
     }
 
-    private static CLI buildAndStartCLI(InputStream in, PrintStream out, AKTorrent node) throws IOException {
+    private static void buildAndStartCLI(InputStream in, PrintStream out, AKTorrent node) throws IOException {
         CLI cli = new CLI(in, out, node);
         cli.start();
-        return cli;
     }
 
     public static void assertDisplayWelcomeMessage(Scanner scanner) {

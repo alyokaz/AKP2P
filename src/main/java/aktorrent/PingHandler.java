@@ -9,8 +9,8 @@ import java.net.DatagramSocket;
 
 public class PingHandler implements Runnable {
 
-    DatagramPacket packet;
-    DatagramSocket socket;
+    final DatagramPacket packet;
+    final DatagramSocket socket;
 
     public PingHandler(DatagramPacket packet, DatagramSocket socket) {
         this.packet = packet;

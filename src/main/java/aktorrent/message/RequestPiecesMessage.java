@@ -13,13 +13,5 @@ public class RequestPiecesMessage extends Message implements RequestPieceIDs {
         this.filename = filename;
         this.pieceIDs = pieceIDs;
     }
-    @Override
-    public List<Integer> getIds() {
-        return pieceIDs;
-    }
 
-    @Override
-    public String getFilename() {
-        return filename;
-    }
 }

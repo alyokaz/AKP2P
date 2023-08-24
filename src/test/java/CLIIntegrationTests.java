@@ -35,10 +35,10 @@ public class CLIIntegrationTests {
 
         new Thread(()-> {
             InputStream in = new InputStream() {
-                private byte[] command = ("1\n " + FILENAME + "\n").getBytes();
+                private final byte[] command = ("1\n " + FILENAME + "\n").getBytes();
                 int index = 0;
                 @Override
-                public int read() throws IOException {
+                public int read() {
                     if (index == command.length) {
                         index++;
                         return -1;

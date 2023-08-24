@@ -64,17 +64,13 @@ public class CLI {
     }
 
     private void processDisplayFiles(BufferedReader reader, PrintStream outputStream) throws IOException {
-        try {
-            List<FileInfo> files = new ArrayList<>(node.getAvailableFiles().get());
-            IntStream.range(0, files.size()).forEach(i -> outputStream.println((i + 1) + ": " + files.get(i).getFilename()));
-            outputStream.println(DOWNLOAD_INPUT_PROMPT);
-            String line = reader.readLine();
-            if (line == null) return;
-            int fileNumber = Integer.parseInt(line) - 1;
-            node.downloadFile(files.get(fileNumber));
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+        List<FileInfo> files = new ArrayList<>(node.getAvailableFiles());
+        IntStream.range(0, files.size()).forEach(i -> outputStream.println((i + 1) + ": " + files.get(i).getFilename()));
+        outputStream.println(DOWNLOAD_INPUT_PROMPT);
+        String line = reader.readLine();
+        if (line == null) return;
+        int fileNumber = Integer.parseInt(line) - 1;
+        node.downloadFile(files.get(fileNumber));
     }
 
     private void processSeedFile(BufferedReader reader, PrintStream out) throws IOException {

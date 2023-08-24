@@ -65,7 +65,7 @@ public class CLITests {
                 .sorted(Comparator.comparing(FileInfo::getFilename))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        when(node.getAvailableFiles()).thenReturn(CompletableFuture.completedFuture(files));
+        when(node.getAvailableFiles()).thenReturn(files);
 
         String command = "2\n";
         InputStream in = buildInputStream(command);
@@ -83,7 +83,7 @@ public class CLITests {
     @Test
     public void downloadFileByDisplayNumber() throws IOException {
         FileInfo fileInfo = new FileInfo(FILENAME, 100, 100);
-        when(node.getAvailableFiles()).thenReturn(CompletableFuture.completedFuture(Set.of(fileInfo)));
+        when(node.getAvailableFiles()).thenReturn(Set.of(fileInfo));
 
         String command = "2\n1";
         InputStream in = buildInputStream(command);

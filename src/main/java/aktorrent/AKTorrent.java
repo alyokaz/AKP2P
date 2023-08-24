@@ -96,44 +96,38 @@ public class AKTorrent {
         return Optional.of(file);
     }
 
-    public Future<Set<FileInfo>> getAvailableFiles() {
-        return executor.submit(() -> {
-            Set<FileInfo> remoteAvailableFiles = new HashSet<>();
-            Set<Future<Set<FileInfo>>> futures = new HashSet<>();
-            peers.forEach(address -> {
-                Future<Set<FileInfo>> future = executor.submit(() -> {
+    public Set<FileInfo> getAvailableFiles() {
+        Set<FileInfo> remoteAvailableFiles = new HashSet<>();
+        Set<Future<Set<FileInfo>>> futures = new HashSet<>();
+        peers.forEach(address -> {
+            Future<Set<FileInfo>> future = executor.submit(() -> {
 
-                    try (Socket socket = new Socket(address.getHostName(), address.getPort());
-                         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+                try (Socket socket = new Socket(address.getHostName(), address.getPort());
+                     ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                     ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
 
-                        out.writeObject(new Message(MessageType.REQUEST_AVAILABLE_FILES));
-                        Object obj = in.readObject();
-                        return (Set<FileInfo>) obj;
+                    out.writeObject(new Message(MessageType.REQUEST_AVAILABLE_FILES));
+                    Object obj = in.readObject();
+                    return (Set<FileInfo>) obj;
 
-                    } catch (IOException | ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-                futures.add(future);
-            });
-            futures.forEach(f -> {
-                try {
-                    remoteAvailableFiles.addAll(f.get());
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
             });
-            return remoteAvailableFiles;
+            futures.add(future);
         });
+        futures.forEach(f -> {
+            try {
+                remoteAvailableFiles.addAll(f.get());
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return remoteAvailableFiles;
     }
 
     private void updateAvailableFiles() {
-        try {
-            this.availableFiles.addAll(getAvailableFiles().get());
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+        this.availableFiles.addAll(getAvailableFiles());
     }
 
     public void startServer() {

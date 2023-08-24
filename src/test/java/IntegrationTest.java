@@ -108,7 +108,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void getAvailableFiles() throws ExecutionException, InterruptedException {
+    public void getAvailableFiles() {
         File testFileA = new File(getClass().getResource(FILENAME).getFile());
         File testFileB = new File(getClass().getResource(FILENAME_2).getFile());
 
@@ -124,7 +124,7 @@ public class IntegrationTest {
         AKTorrent client = new AKTorrent(NODE_C_PORT);
         client.addPeer(LOCAL_HOST, NODE_B_PORT);
 
-        Set<FileInfo> files = client.getAvailableFiles().get();
+        Set<FileInfo> files = client.getAvailableFiles();
 
         Set<FileInfo> expected = Set.of(FileUtils.getFileInfo(testFileA), FileUtils.getFileInfo(testFileB));
         assertNotNull(files);

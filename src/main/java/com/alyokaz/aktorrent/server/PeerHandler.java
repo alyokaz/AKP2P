@@ -1,8 +1,11 @@
-package aktorrent;
+package com.alyokaz.aktorrent.server;
 
-import aktorrent.message.Message;
-import aktorrent.message.MessageType;
-import aktorrent.message.RequestPieceMessage;
+import com.alyokaz.aktorrent.FileInfo;
+import com.alyokaz.aktorrent.Piece;
+import com.alyokaz.aktorrent.PieceContainer;
+import com.alyokaz.aktorrent.server.message.Message;
+import com.alyokaz.aktorrent.server.message.MessageType;
+import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
 
 import java.io.EOFException;
 import java.io.IOException;

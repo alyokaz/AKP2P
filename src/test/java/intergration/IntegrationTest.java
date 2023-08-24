@@ -1,6 +1,8 @@
-import aktorrent.AKTorrent;
-import aktorrent.FileInfo;
-import aktorrent.FileUtils;
+package intergration;
+
+import com.alyokaz.aktorrent.AKTorrent;
+import com.alyokaz.aktorrent.FileInfo;
+import com.alyokaz.aktorrent.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -10,7 +12,6 @@ import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;

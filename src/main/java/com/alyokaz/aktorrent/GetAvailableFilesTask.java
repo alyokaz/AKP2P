@@ -1,7 +1,7 @@
-package aktorrent;
+package com.alyokaz.aktorrent;
 
-import aktorrent.message.Message;
-import aktorrent.message.MessageType;
+import com.alyokaz.aktorrent.server.message.Message;
+import com.alyokaz.aktorrent.server.message.MessageType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

@@ -1,9 +1,11 @@
-package aktorrent;
+package com.alyokaz.aktorrent.cli;
+
+import com.alyokaz.aktorrent.AKTorrent;
+import com.alyokaz.aktorrent.FileInfo;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
 
 public class CLI {

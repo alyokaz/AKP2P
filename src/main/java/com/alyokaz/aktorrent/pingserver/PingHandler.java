@@ -1,7 +1,6 @@
-package aktorrent;
+package com.alyokaz.aktorrent.pingserver;
 
-import aktorrent.message.Message;
-import aktorrent.message.MessageType;
+import com.alyokaz.aktorrent.pingserver.PingServer;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

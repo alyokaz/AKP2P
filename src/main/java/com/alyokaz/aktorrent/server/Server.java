@@ -1,4 +1,7 @@
-package aktorrent;
+package com.alyokaz.aktorrent.server;
+
+import com.alyokaz.aktorrent.FileInfo;
+import com.alyokaz.aktorrent.PieceContainer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

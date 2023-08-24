@@ -1,8 +1,8 @@
-package aktorrent;
+package com.alyokaz.aktorrent;
 
-import aktorrent.message.Message;
-import aktorrent.message.MessageType;
-import aktorrent.message.RequestPieceMessage;
+import com.alyokaz.aktorrent.server.message.Message;
+import com.alyokaz.aktorrent.server.message.MessageType;
+import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
 
 import java.io.*;
 import java.net.InetSocketAddress;

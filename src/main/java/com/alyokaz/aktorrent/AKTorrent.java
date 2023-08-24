@@ -1,19 +1,18 @@
-package aktorrent;
+package com.alyokaz.aktorrent;
 
-import aktorrent.message.Message;
-import aktorrent.message.MessageType;
+import com.alyokaz.aktorrent.cli.CLI;
+import com.alyokaz.aktorrent.pingserver.PingServer;
+import com.alyokaz.aktorrent.server.Server;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static aktorrent.FileUtils.buildPieceContainer;
-import static aktorrent.FileUtils.getFileInfo;
+import static com.alyokaz.aktorrent.FileUtils.buildPieceContainer;
+import static com.alyokaz.aktorrent.FileUtils.getFileInfo;
 
 public class AKTorrent {
 

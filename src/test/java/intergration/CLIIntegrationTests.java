@@ -1,6 +1,8 @@
-import aktorrent.AKTorrent;
-import aktorrent.CLI;
-import aktorrent.FileUtils;
+package intergration;
+
+import com.alyokaz.aktorrent.AKTorrent;
+import com.alyokaz.aktorrent.cli.CLI;
+import com.alyokaz.aktorrent.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;

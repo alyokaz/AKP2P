@@ -1,4 +1,4 @@
-package aktorrent.message;
+package com.alyokaz.aktorrent.server.message;
 
 import java.util.List;
 

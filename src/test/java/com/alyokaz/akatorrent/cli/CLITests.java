@@ -1,6 +1,8 @@
-import aktorrent.AKTorrent;
-import aktorrent.CLI;
-import aktorrent.FileInfo;
+package com.alyokaz.akatorrent.cli;
+
+import com.alyokaz.aktorrent.AKTorrent;
+import com.alyokaz.aktorrent.cli.CLI;
+import com.alyokaz.aktorrent.FileInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +11,6 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

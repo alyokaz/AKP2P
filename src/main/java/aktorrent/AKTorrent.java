@@ -99,23 +99,7 @@ public class AKTorrent {
     public Set<FileInfo> getAvailableFiles() {
         Set<FileInfo> remoteAvailableFiles = new HashSet<>();
         Set<Future<Set<FileInfo>>> futures = new HashSet<>();
-        peers.forEach(address -> {
-            Future<Set<FileInfo>> future = executor.submit(() -> {
-
-                try (Socket socket = new Socket(address.getHostName(), address.getPort());
-                     ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                     ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-
-                    out.writeObject(new Message(MessageType.REQUEST_AVAILABLE_FILES));
-                    Object obj = in.readObject();
-                    return (Set<FileInfo>) obj;
-
-                } catch (IOException | ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            futures.add(future);
-        });
+        peers.forEach(address -> futures.add(executor.submit(new GetAvailableFilesTask(address))));
         futures.forEach(f -> {
             try {
                 remoteAvailableFiles.addAll(f.get());

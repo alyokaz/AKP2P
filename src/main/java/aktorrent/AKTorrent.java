@@ -3,7 +3,10 @@ package aktorrent;
 import aktorrent.message.Message;
 import aktorrent.message.MessageType;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -14,27 +17,25 @@ import static aktorrent.FileUtils.getFileInfo;
 
 public class AKTorrent {
 
+    static final int BUFFER_SIZE = 1000000;
     private final int PORT;
     private final List<InetSocketAddress> peers = Collections.synchronizedList(new ArrayList<>());
-
     private final ExecutorService executor = Executors.newCachedThreadPool();
-
     private final Map<String, PieceContainer> files = Collections.synchronizedMap(new HashMap<>());
-
     private final Map<String, File> completedFiles = new HashMap<>();
-
     private final Set<FileInfo> availableFiles = Collections.synchronizedSet(new HashSet<>());
-
-    static final int BUFFER_SIZE = 1000000;
-
     private Server server;
-
     private PingServer udpServer;
-
-    private Set<InetSocketAddress> connectedPeers = new HashSet<>();
+    private final Set<InetSocketAddress> connectedPeers = new HashSet<>();
 
     public AKTorrent(int port) {
         this.PORT = port;
+    }
+
+    public static void main(String[] args) throws IOException {
+        AKTorrent node = new AKTorrent(Integer.parseInt(args[0]));
+        CLI cli = new CLI(System.in, System.out, node);
+        cli.start();
     }
 
     public void startClient() {
@@ -50,13 +51,13 @@ public class AKTorrent {
         CountDownLatch countDownLatch = new CountDownLatch(peers.size());
 
         peers.forEach(address -> executor.submit(() -> {
-            try(Socket socket = new Socket(address.getHostName(), address.getPort());
-                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+            try (Socket socket = new Socket(address.getHostName(), address.getPort());
+                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
                 out.writeObject(new Message(MessageType.REQUEST_PEERS));
                 Object obj = in.readObject();
                 List<InetSocketAddress> peerList;
-                if(obj instanceof List<?>) {
+                if (obj instanceof List<?>) {
                     peerList = (List<InetSocketAddress>) obj;
                     peers.addAll(peerList);
                 }
@@ -78,7 +79,7 @@ public class AKTorrent {
         this.availableFiles.add(getFileInfo(file));
         startServer();
     }
-    //TODO refactor to use FileInfo
+
     public void downloadFile(FileInfo fileInfo) {
         files.put(fileInfo.getFilename(), new PieceContainer(fileInfo));
         startClient();
@@ -91,11 +92,9 @@ public class AKTorrent {
     }
 
     private void pingPeer(InetSocketAddress address) {
-        try(DatagramSocket socket = new DatagramSocket()) {
+        try (DatagramSocket socket = new DatagramSocket()) {
             byte[] buf = PingServer.PING_PAYLOAD.getBytes();
-            DatagramPacket packet =
-                    new DatagramPacket(buf, buf.length, address.getAddress(),
-                            address.getPort());
+            DatagramPacket packet = new DatagramPacket(buf, buf.length, address.getAddress(), address.getPort());
             socket.send(packet);
 
             buf = new byte[PingServer.BUFFER_SIZE];
@@ -103,8 +102,7 @@ public class AKTorrent {
             socket.receive(packet);
 
             String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
-            if(payload.equals(PingServer.PONG_PAYLOAD))
-                this.connectedPeers.add(address);
+            if (payload.equals(PingServer.PONG_PAYLOAD)) this.connectedPeers.add(address);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -112,8 +110,7 @@ public class AKTorrent {
 
     public Optional<File> getFile(String filename) {
         File file = completedFiles.get(filename);
-        if (file == null)
-            return Optional.empty();
+        if (file == null) return Optional.empty();
         return Optional.of(file);
     }
 
@@ -157,9 +154,8 @@ public class AKTorrent {
         }
     }
 
-
     public void startServer() {
-        if(this.server == null) {
+        if (this.server == null) {
             try {
                 this.server = new Server(new ServerSocket(PORT), files, peers, availableFiles);
                 discoverPeers();
@@ -169,7 +165,7 @@ public class AKTorrent {
                 throw new RuntimeException(e);
             }
         }
-        if(this.udpServer == null) {
+        if (this.udpServer == null) {
             try {
                 this.udpServer = new PingServer(new DatagramSocket(PORT), connectedPeers);
                 this.udpServer.start();
@@ -180,21 +176,13 @@ public class AKTorrent {
     }
 
     public void shutDown() {
-        if(server != null)
-            server.shutdown();
+        if (server != null) server.shutdown();
 
-        if(udpServer != null)
-            udpServer.shutdown();
+        if (udpServer != null) udpServer.shutdown();
     }
 
     public Set<InetSocketAddress> getConnectedPeers() {
         return this.connectedPeers;
-    }
-
-    public static void main(String[] args) throws IOException {
-        AKTorrent node = new AKTorrent(Integer.parseInt(args[0]));
-        CLI cli = new CLI(System.in, System.out, node);
-        cli.start();
     }
 
 }

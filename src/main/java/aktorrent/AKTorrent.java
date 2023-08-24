@@ -40,36 +40,20 @@ public class AKTorrent {
 
     public void startClient() {
         discoverPeers();
-        executor.execute(() -> peers.forEach(address -> {
-            executor.execute(new DownloadHandler(address, files, completedFiles));
-        }));
+        executor.execute(() -> peers.forEach(address ->
+                executor.execute(new DownloadHandler(address, files, completedFiles))));
     }
 
     private void discoverPeers() {
-        CountDownLatch countDownLatch = new CountDownLatch(peers.size());
-
-        peers.forEach(address -> executor.submit(() -> {
-            try (Socket socket = new Socket(address.getHostName(), address.getPort());
-                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-                out.writeObject(new Message(MessageType.REQUEST_PEERS));
-                Object obj = in.readObject();
-                List<InetSocketAddress> peerList;
-                if (obj instanceof List<?>) {
-                    peerList = (List<InetSocketAddress>) obj;
-                    peers.addAll(peerList);
-                }
-                countDownLatch.countDown();
-            } catch (IOException | ClassNotFoundException e) {
+        Set<Future<?>> futures = new HashSet<>();
+        peers.forEach(address -> futures.add(executor.submit(() -> new DiscoverPeersTask(address, peers))));
+        futures.forEach(future -> {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
-        }));
-
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     public void seedFile(File file) {

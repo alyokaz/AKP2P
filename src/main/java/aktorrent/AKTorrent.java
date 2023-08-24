@@ -46,7 +46,7 @@ public class AKTorrent {
 
     private void discoverPeers() {
         Set<Future<?>> futures = new HashSet<>();
-        peers.forEach(address -> futures.add(executor.submit(() -> new DiscoverPeersTask(address, peers))));
+        peers.forEach(address -> futures.add(executor.submit(new DiscoverPeersTask(address, peers))));
         futures.forEach(future -> {
             try {
                 future.get();

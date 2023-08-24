@@ -8,26 +8,18 @@ import java.util.stream.IntStream;
 
 public class CLI {
 
-    private final InputStream inputStream;
-
-    private final PrintStream outputStream;
-
-    private final AKTorrent node;
-
     public static final String WELCOME_MESSAGE = "Welcome to AKTorrent";
     public static final String MAIN_MENU = "1: seed, 2: see files, 3: add peer";
-
     public static final String INPUT_PROMPT = "Input Path:";
-
     public static final String DOWNLOAD_INPUT_PROMPT = "Input file number: ";
-
     public static final String NOT_A_NUMBER_ERROR = "Please select a menu number.";
     public static final String NON_EXISTENT_MENU_OPTION = " is not an available option";
     public static final String FILE_NOT_FOUND = "Could not locate file: ";
     public static final String INPUT_PEER_ADDRESS_PROMPT = "Input peer hostname and port: ";
     public static final String PEER_CONNECTED_MESSAGE = "Peer Connected";
-
-
+    private final InputStream inputStream;
+    private final PrintStream outputStream;
+    private final AKTorrent node;
 
 
     public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node) {
@@ -41,19 +33,19 @@ public class CLI {
         outputStream.println(MAIN_MENU);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
-        while((line = reader.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
             String[] tokens = line.split(" ");
             Integer selection;
             try {
                 selection = Integer.parseInt(tokens[0]);
-                switch(selection) {
+                switch (selection) {
                     case 1 -> processSeedFile(reader, outputStream);
                     case 2 -> processDisplayFiles(reader, outputStream);
                     case 3 -> processAddPeer(reader, outputStream);
                     default -> processDefault(outputStream, selection);
                 }
             } catch (NumberFormatException e) {
-              outputStream.println(NOT_A_NUMBER_ERROR);
+                outputStream.println(NOT_A_NUMBER_ERROR);
             }
             outputStream.println(MAIN_MENU);
         }
@@ -77,8 +69,7 @@ public class CLI {
             IntStream.range(0, files.size()).forEach(i -> outputStream.println((i + 1) + ": " + files.get(i).getFilename()));
             outputStream.println(DOWNLOAD_INPUT_PROMPT);
             String line = reader.readLine();
-            if(line == null)
-                return;
+            if (line == null) return;
             int fileNumber = Integer.parseInt(line) - 1;
             node.downloadFile(files.get(fileNumber));
         } catch (InterruptedException | ExecutionException e) {
@@ -90,11 +81,10 @@ public class CLI {
         out.println(INPUT_PROMPT);
         String filename = reader.readLine().trim();
         File file = new File(filename);
-        if(file.exists()) {
+        if (file.exists()) {
             node.seedFile(file);
         } else {
             outputStream.println(CLI.FILE_NOT_FOUND + filename);
         }
-
     }
 }

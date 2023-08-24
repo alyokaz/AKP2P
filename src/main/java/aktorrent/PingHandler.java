@@ -10,7 +10,6 @@ import java.net.DatagramSocket;
 public class PingHandler implements Runnable {
 
     DatagramPacket packet;
-
     DatagramSocket socket;
 
     public PingHandler(DatagramPacket packet, DatagramSocket socket) {
@@ -21,8 +20,7 @@ public class PingHandler implements Runnable {
     @Override
     public void run() {
         byte[] buf = PingServer.PONG_PAYLOAD.getBytes();
-        DatagramPacket replyPacket =
-                new DatagramPacket(buf, buf.length, packet.getSocketAddress());
+        DatagramPacket replyPacket = new DatagramPacket(buf, buf.length, packet.getSocketAddress());
         try {
             socket.send(replyPacket);
         } catch (IOException e) {

@@ -13,30 +13,29 @@ import java.util.Set;
 public class DownloadHandler implements Runnable {
 
     private final InetSocketAddress address;
-
     private final Map<String, PieceContainer> files;
-
     private final Map<String, File> completedFiles;
 
-    public DownloadHandler(InetSocketAddress address, Map<String, PieceContainer> files,
+    public DownloadHandler(InetSocketAddress address,
+                           Map<String, PieceContainer> files,
                            Map<String, File> completedFiles) {
         this.address = address;
         this.files = files;
         this.completedFiles = completedFiles;
     }
 
-
     @Override
     public void run() {
         try (Socket socket = new Socket(address.getAddress(), address.getPort());
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())
-        ) {
+             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
             Thread.currentThread().setName(Thread.currentThread().getName() + " DownloadHandler");
+            // request names of available files from peer
             out.writeObject(new Message(MessageType.REQUEST_FILENAMES));
             Set<String> filenames = (Set<String>) in.readObject();
-            filenames.stream().filter(files::containsKey)
-                    .forEach(filename -> downloadPieces(filename, out, in));
+            // check if we are interested in any of the available files and begin download
+            filenames.stream().filter(files::containsKey).forEach(filename -> downloadPieces(filename, out, in));
+            // signal to peer to close connection as we are finished
             out.writeObject(new Message(MessageType.END));
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -44,26 +43,26 @@ public class DownloadHandler implements Runnable {
     }
 
     private void downloadPieces(String filename, ObjectOutputStream out, ObjectInputStream in) {
-        PieceContainer container  = files.get(filename);
-        if(container.complete())
-            return;
-
+        // the container is potentially shared between multiple connections and is responsible for managing the
+        // allocation of which pieces should be downloaded
+        PieceContainer container = files.get(filename);
+        if (container.complete()) return;
         try {
-            while(!container.complete()) {
+            while (!container.complete()) {
+                // claim a piece that is not yet downloaded, or is not currently downloading, to prevent duplicate
+                // downloads of the same piece
                 int nextId = container.requestPiece();
-
-                if(nextId == -1)
-                    break;
-                // request piece for file
+                if (nextId == -1) break;
+                // request piece from peer
                 out.writeObject(new RequestPieceMessage(filename, nextId));
-
-                // read in each requested piece
-                Object readObject = in.readObject(); // Locked
+                Object readObject = in.readObject();
                 if (readObject instanceof Piece) {
                     container.addPiece((Piece) readObject);
                 }
-                System.out.printf(Thread.currentThread().getName() + " - %.2f %%%n", (container.getPieces().size() / (double) container.getTotalPieces()) * 100);
+                System.out.printf(Thread.currentThread().getName() + " - %.2f %%%n",
+                        (container.getPieces().size() / (double) container.getTotalPieces()) * 100);
             }
+            // build the file and save it to the local file system
             FileUtils.buildFile(container, completedFiles);
         } catch (EOFException e) {
             throw new RuntimeException();
@@ -71,5 +70,4 @@ public class DownloadHandler implements Runnable {
             throw new RuntimeException(e);
         }
     }
-
 }

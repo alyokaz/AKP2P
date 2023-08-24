@@ -1,30 +1,23 @@
 package aktorrent;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.nio.channels.AsynchronousCloseException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class PingServer {
 
-    private ExecutorService executor = Executors.newCachedThreadPool();
-
-    private final DatagramSocket socket;
-
-    private Set<InetSocketAddress> connectedPeers;
-
     public static final int BUFFER_SIZE = 1400;
-
     public static final String PING_PAYLOAD = "ping";
-
     public static final String PONG_PAYLOAD = "pong";
+    private final DatagramSocket socket;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final Set<InetSocketAddress> connectedPeers;
 
     public PingServer(DatagramSocket socket, Set<InetSocketAddress> connectedPeers) {
         this.socket = socket;
@@ -33,7 +26,7 @@ public class PingServer {
 
     public void start() {
         executor.execute(() -> {
-            try(DatagramSocket inSocket = socket) {
+            try (DatagramSocket inSocket = socket) {
                 while (!Thread.currentThread().isInterrupted()) {
                     byte[] buffer = new byte[BUFFER_SIZE];
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);

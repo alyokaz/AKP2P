@@ -34,10 +34,9 @@ public class CLI {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         while ((line = reader.readLine()) != null) {
-            String[] tokens = line.split(" ");
             int selection;
             try {
-                selection = Integer.parseInt(tokens[0]);
+                selection = Integer.parseInt(line);
                 switch (selection) {
                     case 1 -> processSeedFile(reader, outputStream);
                     case 2 -> processDisplayFiles(reader, outputStream);

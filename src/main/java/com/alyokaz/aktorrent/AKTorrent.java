@@ -18,14 +18,13 @@ public class AKTorrent {
 
     static final int BUFFER_SIZE = 1000000;
     private final int PORT;
-    private final List<InetSocketAddress> peers = Collections.synchronizedList(new ArrayList<>());
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private final Map<String, PieceContainer> files = Collections.synchronizedMap(new HashMap<>());
     private final Map<String, File> completedFiles = new HashMap<>();
     private final Set<FileInfo> availableFiles = Collections.synchronizedSet(new HashSet<>());
     private Server server;
     private PingServer udpServer;
-    private final Set<InetSocketAddress> connectedPeers = new HashSet<>();
+    private final PeerService peerService = new PeerService();
 
     public AKTorrent(int port) {
         this.PORT = port;
@@ -38,21 +37,9 @@ public class AKTorrent {
     }
 
     public void startClient() {
-        discoverPeers();
-        executor.execute(() -> peers.forEach(address ->
+        peerService.discoverPeers();
+        executor.execute(() -> this.peerService.getPeers().forEach(address ->
                 executor.execute(new DownloadHandler(address, files, completedFiles))));
-    }
-
-    private void discoverPeers() {
-        Set<Future<?>> futures = new HashSet<>();
-        peers.forEach(address -> futures.add(executor.submit(new DiscoverPeersTask(address, peers))));
-        futures.forEach(future -> {
-            try {
-                future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 
     public void seedFile(File file) {
@@ -67,26 +54,7 @@ public class AKTorrent {
     }
 
     public void addPeer(String hostName, int port) {
-        InetSocketAddress address = new InetSocketAddress(hostName, port);
-        peers.add(address);
-        pingPeer(address);
-    }
-
-    private void pingPeer(InetSocketAddress address) {
-        try (DatagramSocket socket = new DatagramSocket()) {
-            byte[] buf = PingServer.PING_PAYLOAD.getBytes();
-            DatagramPacket packet = new DatagramPacket(buf, buf.length, address.getAddress(), address.getPort());
-            socket.send(packet);
-
-            buf = new byte[PingServer.BUFFER_SIZE];
-            packet = new DatagramPacket(buf, buf.length);
-            socket.receive(packet);
-
-            String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
-            if (payload.equals(PingServer.PONG_PAYLOAD)) this.connectedPeers.add(address);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        this.peerService.addPeer(hostName, port);
     }
 
     public Optional<File> getFile(String filename) {
@@ -98,7 +66,7 @@ public class AKTorrent {
     public Set<FileInfo> getAvailableFiles() {
         Set<FileInfo> remoteAvailableFiles = new HashSet<>();
         Set<Future<Set<FileInfo>>> futures = new HashSet<>();
-        peers.forEach(address -> futures.add(executor.submit(new GetAvailableFilesTask(address))));
+        this.peerService.getPeers().forEach(address -> futures.add(executor.submit(new GetAvailableFilesTask(address))));
         futures.forEach(f -> {
             try {
                 remoteAvailableFiles.addAll(f.get());
@@ -116,8 +84,8 @@ public class AKTorrent {
     public void startServer() {
         if (this.server == null) {
             try {
-                this.server = new Server(new ServerSocket(PORT), files, peers, availableFiles);
-                discoverPeers();
+                this.server = new Server(new ServerSocket(PORT), files, peerService.getPeers(), availableFiles);
+                this.peerService.discoverPeers();
                 updateAvailableFiles();
                 server.start();
             } catch (IOException e) {
@@ -141,7 +109,7 @@ public class AKTorrent {
     }
 
     public Set<InetSocketAddress> getConnectedPeers() {
-        return this.connectedPeers;
+        return this.peerService.getConnectedPeers();
     }
 
 }

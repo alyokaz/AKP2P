@@ -35,7 +35,7 @@ public class CLITests {
 
     @Test
     public void seedFileTest() throws IOException {
-        String command = "1\n " + this.getClass().getResource(FILENAME).getPath() + "\n";
+        String command = "1\n " + this.getClass().getResource("/" + FILENAME).getPath() + "\n";
         InputStream in = buildInputStream(command);
         buildAndStartCLI(in, out, node);
         Scanner scanner = new Scanner(bytes.toString());
@@ -152,7 +152,7 @@ public class CLITests {
     }
 
     private static File buildFile(String filename) {
-        return new File(CLITests.class.getResource(filename).getFile());
+        return new File(CLITests.class.getResource("/" + filename).getFile());
     }
 
     private static void buildAndStartCLI(InputStream in, PrintStream out, AKTorrent node) throws IOException {

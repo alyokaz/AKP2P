@@ -34,7 +34,7 @@ public class IntegrationTest {
 
     @Test
     public void canSeedAndReceiveFile() throws IOException {
-        File file = new File(getClass().getResource(FILENAME).getFile());
+        File file = getFile(FILENAME);
         AKTorrent server = new AKTorrent(NODE_A_PORT);
         server.seedFile(file);
 
@@ -42,6 +42,7 @@ public class IntegrationTest {
         client.addPeer(LOCAL_HOST, NODE_A_PORT);
         client.downloadFile(FileUtils.getFileInfo(file));
         Optional<File> completedFile;
+        //TODO add some form of timeout
         do {
             completedFile = client.getFile(FILENAME);
         } while(completedFile.isEmpty());
@@ -52,7 +53,7 @@ public class IntegrationTest {
 
     @Test
     public void canDownloadFromTwoPeers() throws IOException {
-        File file = new File(getClass().getResource(FILENAME).getFile());
+        File file = getFile(FILENAME);
 
         AKTorrent ak1 = new AKTorrent(NODE_A_PORT);
         AKTorrent ak2 = new AKTorrent(NODE_B_PORT);
@@ -87,7 +88,7 @@ public class IntegrationTest {
         final int minPort = 4444;
         final int maxPort = minPort + 10;
         final int clientPort = maxPort + 1;
-        File file = new File(getClass().getResource(FILENAME).getFile());
+        File file = getFile(FILENAME);
 
         Set<AKTorrent> nodes = new HashSet<>();
         IntStream.range(minPort, maxPort).forEach(port -> nodes.add(new AKTorrent(port)));
@@ -110,8 +111,8 @@ public class IntegrationTest {
 
     @Test
     public void getAvailableFiles() {
-        File testFileA = new File(getClass().getResource(FILENAME).getFile());
-        File testFileB = new File(getClass().getResource(FILENAME_2).getFile());
+        File testFileA = getFile(FILENAME);
+        File testFileB = getFile(FILENAME_2);
 
         AKTorrent node_A = new AKTorrent(NODE_A_PORT);
 
@@ -142,7 +143,7 @@ public class IntegrationTest {
         AKTorrent nodeB = new AKTorrent(NODE_B_PORT);
         AKTorrent nodeC = new AKTorrent(NODE_C_PORT);
 
-        File file = new File(getClass().getResource(FILENAME).getFile());
+        File file = getFile(FILENAME);
         nodeC.seedFile(file);
 
         nodeB.addPeer(LOCAL_HOST, NODE_C_PORT);
@@ -190,6 +191,10 @@ public class IntegrationTest {
         InetSocketAddress expectedAddress = new InetSocketAddress(LOCAL_HOST, NODE_A_PORT);
         nodes.forEach(node -> assertTrue(node.getConnectedPeers().contains(expectedAddress)));
         server.shutDown();
+    }
+
+    private File getFile(String filename) {
+        return new File(getClass().getResource("/" + filename).getFile());
     }
 
 

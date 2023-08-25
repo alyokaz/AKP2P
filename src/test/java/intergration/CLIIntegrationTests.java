@@ -70,7 +70,7 @@ public class CLIIntegrationTests {
 
         AKTorrent client = new AKTorrent(NODE_B_PORT);
         client.addPeer(LOCAL_HOST, NODE_A_PORT);
-        File file = new File(getClass().getResource(FILENAME).getFile());
+        File file = getFile(FILENAME);
         client.downloadFile(FileUtils.getFileInfo(file));
 
         Optional<File> downloadedFile;
@@ -87,7 +87,7 @@ public class CLIIntegrationTests {
         CountDownLatch exit = new CountDownLatch(1);
 
         AKTorrent server = new AKTorrent(NODE_A_PORT);
-        File file = new File(getClass().getResource(FILENAME).getFile());
+        File file = getFile(FILENAME);
         server.seedFile(file);
 
         Thread clientThread = new Thread(() -> {
@@ -145,5 +145,9 @@ public class CLIIntegrationTests {
         }).start();
         exitLatch.await();
         server.shutDown();
+    }
+
+    private File getFile(String filename) {
+        return new File(getClass().getResource("/" + FILENAME).getFile());
     }
 }

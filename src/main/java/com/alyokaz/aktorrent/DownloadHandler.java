@@ -13,15 +13,12 @@ import java.util.Set;
 public class DownloadHandler implements Runnable {
 
     private final InetSocketAddress address;
-    private final Map<String, PieceContainer> files;
-    private final Map<String, File> completedFiles;
+    private final FileService fileService;
 
     public DownloadHandler(InetSocketAddress address,
-                           Map<String, PieceContainer> files,
-                           Map<String, File> completedFiles) {
+                           FileService fileService) {
         this.address = address;
-        this.files = files;
-        this.completedFiles = completedFiles;
+        this.fileService = fileService;
     }
 
     @Override
@@ -34,7 +31,7 @@ public class DownloadHandler implements Runnable {
             out.writeObject(new Message(MessageType.REQUEST_FILENAMES));
             Set<String> filenames = (Set<String>) in.readObject();
             // check if we are interested in any of the available files and begin download
-            filenames.stream().filter(files::containsKey).forEach(filename -> downloadPieces(filename, out, in));
+            filenames.stream().filter(fileService.getFiles()::containsKey).forEach(filename -> downloadPieces(filename, out, in));
             // signal to peer to close connection as we are finished
             out.writeObject(new Message(MessageType.END));
         } catch (IOException | ClassNotFoundException e) {
@@ -45,7 +42,7 @@ public class DownloadHandler implements Runnable {
     private void downloadPieces(String filename, ObjectOutputStream out, ObjectInputStream in) {
         // the container is potentially shared between multiple connections and is responsible for managing the
         // allocation of which pieces should be downloaded
-        PieceContainer container = files.get(filename);
+        PieceContainer container = fileService.getFile(filename);
         if (container.complete()) return;
         try {
             while (!container.complete()) {
@@ -63,7 +60,7 @@ public class DownloadHandler implements Runnable {
                         (container.getPieces().size() / (double) container.getTotalPieces()) * 100);
             }
             // build the file and save it to the local file system
-            FileUtils.buildFile(container, completedFiles);
+            fileService.buildFile(container);
         } catch (EOFException e) {
             throw new RuntimeException();
         } catch (IOException | ClassNotFoundException e) {

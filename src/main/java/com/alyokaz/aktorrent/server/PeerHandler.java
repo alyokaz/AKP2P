@@ -1,8 +1,6 @@
 package com.alyokaz.aktorrent.server;
 
-import com.alyokaz.aktorrent.FileInfo;
-import com.alyokaz.aktorrent.Piece;
-import com.alyokaz.aktorrent.PieceContainer;
+import com.alyokaz.aktorrent.*;
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
 import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
@@ -21,18 +19,13 @@ import java.util.Set;
 public class PeerHandler implements Runnable {
 
     private final Socket peerSocket;
-    private final Map<String, PieceContainer> files;
+    private final PeerService peerService;
+    private final FileService fileService;
 
-    private final List<InetSocketAddress> peers;
-
-    private final Set<FileInfo> availableFiles;
-
-    public PeerHandler(Socket peerSocket, Map<String, PieceContainer> files, List<InetSocketAddress> peers,
-                       Set<FileInfo> availableFiles) {
+    public PeerHandler(Socket peerSocket, PeerService peerService, FileService fileService) {
         this.peerSocket = peerSocket;
-        this.files = files;
-        this.peers = peers;
-        this.availableFiles = availableFiles;
+        this.peerService = peerService;
+        this.fileService = fileService;
     }
 
     @Override
@@ -47,7 +40,7 @@ public class PeerHandler implements Runnable {
             while(!Thread.currentThread().isInterrupted() && !end) {
                 Message message = (Message) in.readObject();
                 switch (message.getType()) {
-                    case REQUEST_FILENAMES -> out.writeObject(Set.copyOf(files.keySet()));
+                    case REQUEST_FILENAMES -> out.writeObject(Set.copyOf(fileService.getFiles().keySet()));
                     case REQUEST_PIECE -> processPieceRequest((RequestPieceMessage) message, out);
                     case REQUEST_AVAILABLE_FILES -> processAvailableFilesRequest(out);
                     case REQUEST_PEERS -> processRequestPeers(out);
@@ -65,15 +58,15 @@ public class PeerHandler implements Runnable {
     }
 
     private void processRequestPeers(ObjectOutputStream out) throws IOException {
-        out.writeObject(peers);
+        out.writeObject(peerService.getPeers());
     }
 
     private void processAvailableFilesRequest(ObjectOutputStream out) throws IOException {
-        out.writeObject(availableFiles);
+        out.writeObject(fileService.getAvailableFiles());
     }
 
     private void processPieceRequest(RequestPieceMessage request, ObjectOutputStream out) {
-        PieceContainer container = files.get(request.getFilename());
+        PieceContainer container = fileService.getFile(request.getFilename());
         Optional<Piece> piece = container.getPieces().stream().filter(p -> p.getId() == request.getPieceId()).findFirst();
 
         try {

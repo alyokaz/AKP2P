@@ -1,6 +1,8 @@
 package com.alyokaz.aktorrent.server;
 
 import com.alyokaz.aktorrent.FileInfo;
+import com.alyokaz.aktorrent.FileService;
+import com.alyokaz.aktorrent.PeerService;
 import com.alyokaz.aktorrent.PieceContainer;
 
 import java.io.IOException;
@@ -15,17 +17,14 @@ import java.util.concurrent.Executors;
 public class Server {
 
     private final ExecutorService executor = Executors.newCachedThreadPool();
-    private final Map<String, PieceContainer> files;
-    private final List<InetSocketAddress> peers;
-    private final Set<FileInfo> availableFiles;
     private final ServerSocket serverSocket;
+    private final PeerService peerService;
+    private final FileService fileService;
 
-    public Server(ServerSocket serverSocket, Map<String, PieceContainer> files, List<InetSocketAddress> peers,
-                  Set<FileInfo> availableFiles) {
+    public Server(ServerSocket serverSocket, PeerService peerService, FileService fileService) {
         this.serverSocket = serverSocket;
-        this.files = files;
-        this.peers = peers;
-        this.availableFiles = availableFiles;
+        this.peerService = peerService;
+        this.fileService = fileService;
     }
 
     public void start() {
@@ -33,7 +32,7 @@ public class Server {
             try (serverSocket) {
                 System.out.println(Thread.currentThread().getName() + " Server Started");
                 while (!Thread.currentThread().isInterrupted()) {
-                    PeerHandler peerHandler = new PeerHandler(serverSocket.accept(), files, peers, availableFiles);
+                    PeerHandler peerHandler = new PeerHandler(serverSocket.accept(), peerService, fileService);
                     executor.execute(peerHandler);
                 }
             } catch (IOException e) {

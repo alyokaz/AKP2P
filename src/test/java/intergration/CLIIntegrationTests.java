@@ -1,8 +1,8 @@
 package intergration;
 
 import com.alyokaz.aktorrent.AKTorrent;
+import com.alyokaz.aktorrent.FileService;
 import com.alyokaz.aktorrent.cli.CLI;
-import com.alyokaz.aktorrent.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -71,7 +71,7 @@ public class CLIIntegrationTests {
         AKTorrent client = new AKTorrent(NODE_B_PORT);
         client.addPeer(LOCAL_HOST, NODE_A_PORT);
         File file = getFile(FILENAME);
-        client.downloadFile(FileUtils.getFileInfo(file));
+        client.downloadFile(FileService.getFileInfo(file));
 
         Optional<File> downloadedFile;
         do{

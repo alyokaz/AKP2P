@@ -2,7 +2,7 @@ package intergration;
 
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.FileInfo;
-import com.alyokaz.aktorrent.FileUtils;
+import com.alyokaz.aktorrent.FileService;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -40,7 +40,7 @@ public class IntegrationTest {
 
         AKTorrent client = new AKTorrent(NODE_B_PORT);
         client.addPeer(LOCAL_HOST, NODE_A_PORT);
-        client.downloadFile(FileUtils.getFileInfo(file));
+        client.downloadFile(FileService.getFileInfo(file));
         Optional<File> completedFile;
         //TODO add some form of timeout
         do {
@@ -68,7 +68,7 @@ public class IntegrationTest {
         ak4.addPeer(LOCAL_HOST, NODE_B_PORT);
         ak4.addPeer(LOCAL_HOST, NODE_C_PORT);
 
-        ak4.downloadFile(FileUtils.getFileInfo(file));
+        ak4.downloadFile(FileService.getFileInfo(file));
 
         Optional<File> downloadedFile;
         do {
@@ -98,7 +98,7 @@ public class IntegrationTest {
 
         IntStream.range(minPort, maxPort).forEach(port -> client.addPeer(LOCAL_HOST, port));
 
-        client.downloadFile(FileUtils.getFileInfo(file));
+        client.downloadFile(FileService.getFileInfo(file));
 
         Optional<File> downloadedFile;
         do {
@@ -110,7 +110,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void getAvailableFiles() {
+    public void getAvailableFiles() throws InterruptedException {
         File testFileA = getFile(FILENAME);
         File testFileB = getFile(FILENAME_2);
 
@@ -128,7 +128,7 @@ public class IntegrationTest {
 
         Set<FileInfo> files = client.getAvailableFiles();
 
-        Set<FileInfo> expected = Set.of(FileUtils.getFileInfo(testFileA), FileUtils.getFileInfo(testFileB));
+        Set<FileInfo> expected = Set.of(FileService.getFileInfo(testFileA), FileService.getFileInfo(testFileB));
         assertNotNull(files);
         assertTrue(files.size() > 0);
         assertTrue(files.containsAll(expected));
@@ -156,7 +156,7 @@ public class IntegrationTest {
 
         client.addPeer(LOCAL_HOST, NODE_A_PORT);
 
-        client.downloadFile(FileUtils.getFileInfo(file));
+        client.downloadFile(FileService.getFileInfo(file));
 
         Optional<File> downloadedFile;
         do{

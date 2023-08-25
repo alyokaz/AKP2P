@@ -11,20 +11,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static com.alyokaz.aktorrent.FileUtils.buildPieceContainer;
-import static com.alyokaz.aktorrent.FileUtils.getFileInfo;
 
 public class AKTorrent {
 
     static final int BUFFER_SIZE = 1000000;
     private final int PORT;
     private final ExecutorService executor = Executors.newCachedThreadPool();
-    private final Map<String, PieceContainer> files = Collections.synchronizedMap(new HashMap<>());
-    private final Map<String, File> completedFiles = new HashMap<>();
-    private final Set<FileInfo> availableFiles = Collections.synchronizedSet(new HashSet<>());
     private Server server;
     private PingServer udpServer;
     private final PeerService peerService = new PeerService();
+    private final FileService fileService = new FileService(peerService);
 
     public AKTorrent(int port) {
         this.PORT = port;
@@ -39,17 +35,16 @@ public class AKTorrent {
     public void startClient() {
         peerService.discoverPeers();
         executor.execute(() -> this.peerService.getPeers().forEach(address ->
-                executor.execute(new DownloadHandler(address, files, completedFiles))));
+                executor.execute(new DownloadHandler(address, fileService))));
     }
 
     public void seedFile(File file) {
-        this.files.put(file.getName(), buildPieceContainer(file));
-        this.availableFiles.add(getFileInfo(file));
+        fileService.addFile(file);
         startServer();
     }
 
     public void downloadFile(FileInfo fileInfo) {
-        files.put(fileInfo.getFilename(), new PieceContainer(fileInfo));
+        fileService.addFile(fileInfo);
         startClient();
     }
 
@@ -58,35 +53,17 @@ public class AKTorrent {
     }
 
     public Optional<File> getFile(String filename) {
-        File file = completedFiles.get(filename);
+        File file = fileService.getCompletedFile(filename);
         if (file == null) return Optional.empty();
         return Optional.of(file);
-    }
-
-    public Set<FileInfo> getAvailableFiles() {
-        Set<FileInfo> remoteAvailableFiles = new HashSet<>();
-        Set<Future<Set<FileInfo>>> futures = new HashSet<>();
-        this.peerService.getPeers().forEach(address -> futures.add(executor.submit(new GetAvailableFilesTask(address))));
-        futures.forEach(f -> {
-            try {
-                remoteAvailableFiles.addAll(f.get());
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        return remoteAvailableFiles;
-    }
-
-    private void updateAvailableFiles() {
-        this.availableFiles.addAll(getAvailableFiles());
     }
 
     public void startServer() {
         if (this.server == null) {
             try {
-                this.server = new Server(new ServerSocket(PORT), files, peerService.getPeers(), availableFiles);
+                this.server = new Server(new ServerSocket(PORT), peerService, fileService);
                 this.peerService.discoverPeers();
-                updateAvailableFiles();
+                this.fileService.updateAvailableFiles();
                 server.start();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -112,4 +89,7 @@ public class AKTorrent {
         return this.peerService.getConnectedPeers();
     }
 
+    public Set<FileInfo> getAvailableFiles() {
+        return fileService.getAvailableFiles();
+    }
 }

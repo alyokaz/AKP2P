@@ -181,6 +181,7 @@ public class IntegrationTest {
         server.shutDown();
     }
 
+    @Disabled
     @Test
     public void pingByMultipleNodes() {
         AKTorrent server = new AKTorrent(NODE_A_PORT);

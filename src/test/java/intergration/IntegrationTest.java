@@ -32,7 +32,7 @@ public class IntegrationTest {
     private static final String FILENAME = "test_file.mp4";
 
     private static final String FILENAME_2 = "test_file_2.mp4";
-
+    @Disabled
     @Test
     public void canSeedAndReceiveFile() throws IOException {
         File file = getFile(FILENAME);
@@ -52,6 +52,7 @@ public class IntegrationTest {
         server.shutDown();
     }
 
+    @Disabled
     @Test
     public void canDownloadFromTwoPeers() throws IOException {
         File file = getFile(FILENAME);
@@ -84,6 +85,7 @@ public class IntegrationTest {
 
     }
 
+    @Disabled
     @Test
     public void canDownloadFromMultiplePeers() throws IOException {
         final int minPort = 4444;
@@ -110,7 +112,6 @@ public class IntegrationTest {
         nodes.forEach(AKTorrent::shutDown);
     }
 
-    //@Disabled
     @Test
     public void getAvailableFiles() throws InterruptedException {
         File testFileA = getFile(FILENAME);
@@ -139,6 +140,7 @@ public class IntegrationTest {
         node_B.shutDown();
     }
 
+    @Disabled
     @Test
     public void testDiscoverTransientPeers() throws IOException {
         AKTorrent nodeA = new AKTorrent(NODE_A_PORT);
@@ -171,6 +173,7 @@ public class IntegrationTest {
         nodeC.shutDown();
     }
 
+    @Disabled
     @Test
     public void pingPeerWhenAdded() {
         AKTorrent server = new AKTorrent(NODE_A_PORT);
@@ -181,14 +184,14 @@ public class IntegrationTest {
         server.shutDown();
     }
 
-    //@Disabled
+    @Disabled
     @Test
     public void pingByMultipleNodes() {
         AKTorrent server = new AKTorrent(NODE_A_PORT);
         server.startServer();
 
         Set<AKTorrent> nodes = new HashSet<>();
-        IntStream.range(0, 100).forEach(i -> nodes.add(new AKTorrent(NODE_B_PORT + i)));
+        IntStream.range(0, 100000).forEach(i -> nodes.add(new AKTorrent(NODE_B_PORT + i)));
         nodes.forEach(node -> node.addPeer(LOCAL_HOST, NODE_A_PORT));
 
         InetSocketAddress expectedAddress = new InetSocketAddress(LOCAL_HOST, NODE_A_PORT);

@@ -32,7 +32,7 @@ public class IntegrationTest {
     private static final String FILENAME = "test_file.mp4";
 
     private static final String FILENAME_2 = "test_file_2.mp4";
-    @Disabled
+
     @Test
     public void canSeedAndReceiveFile() throws IOException {
         File file = getFile(FILENAME);
@@ -51,8 +51,7 @@ public class IntegrationTest {
         assertEquals(-1, Files.mismatch(file.toPath(), completedFile.get().toPath()));
         server.shutDown();
     }
-
-    @Disabled
+    
     @Test
     public void canDownloadFromTwoPeers() throws IOException {
         File file = getFile(FILENAME);
@@ -85,7 +84,6 @@ public class IntegrationTest {
 
     }
 
-    @Disabled
     @Test
     public void canDownloadFromMultiplePeers() throws IOException {
         final int minPort = 4444;
@@ -140,7 +138,6 @@ public class IntegrationTest {
         node_B.shutDown();
     }
 
-    @Disabled
     @Test
     public void testDiscoverTransientPeers() throws IOException {
         AKTorrent nodeA = new AKTorrent(NODE_A_PORT);
@@ -173,7 +170,6 @@ public class IntegrationTest {
         nodeC.shutDown();
     }
 
-    @Disabled
     @Test
     public void pingPeerWhenAdded() {
         AKTorrent server = new AKTorrent(NODE_A_PORT);

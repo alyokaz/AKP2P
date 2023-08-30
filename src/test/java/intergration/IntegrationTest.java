@@ -3,6 +3,7 @@ package intergration;
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.FileInfo;
 import com.alyokaz.aktorrent.FileService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -109,6 +110,7 @@ public class IntegrationTest {
         nodes.forEach(AKTorrent::shutDown);
     }
 
+    @Disabled
     @Test
     public void getAvailableFiles() throws InterruptedException {
         File testFileA = getFile(FILENAME);

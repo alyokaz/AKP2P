@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM gradle:jdk17-jammy
+FROM gradle:jdk17-jammy as build
 
 COPY --chown=gradle:gradle . /app
 
@@ -11,9 +11,7 @@ RUN gradle build --no-daemon
 
 FROM eclipse-temurin:17-jdk-jammy
 
-WORKDIR /app
-
-COPY build/libs/*.jar app.jar
+COPY --from=build /app/build/libs/*.jar /app/app.jar
 
 CMD ["java", "-jar", "app.jar", "4441"]
 

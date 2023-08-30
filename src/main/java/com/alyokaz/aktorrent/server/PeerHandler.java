@@ -75,10 +75,8 @@ public class PeerHandler implements Runnable {
             else
                 out.writeObject(piece.get());
             //TODO Replace with download speed settings option
-            Thread.sleep(1); //simulate download speed limit / connection speed
+            //Thread.sleep(1); //simulate download speed limit / connection speed
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

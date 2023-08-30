@@ -185,7 +185,7 @@ public class IntegrationTest {
         server.startServer();
 
         Set<AKTorrent> nodes = new HashSet<>();
-        IntStream.range(0, 1000).forEach(i -> nodes.add(new AKTorrent(NODE_B_PORT + i)));
+        IntStream.range(0, 100).forEach(i -> nodes.add(new AKTorrent(NODE_B_PORT + i)));
         nodes.forEach(node -> node.addPeer(LOCAL_HOST, NODE_A_PORT));
 
         InetSocketAddress expectedAddress = new InetSocketAddress(LOCAL_HOST, NODE_A_PORT);

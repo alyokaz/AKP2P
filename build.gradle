@@ -21,7 +21,7 @@ test {
 
 jar {
     manifest {
-        attributes "Main-Class": "aktorrent.AKTorrent"
+        attributes "Main-Class": "com.alyokaz.aktorrent.AKTorrent"
     }
 
     from {

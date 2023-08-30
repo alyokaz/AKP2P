@@ -110,7 +110,7 @@ public class IntegrationTest {
         nodes.forEach(AKTorrent::shutDown);
     }
 
-    @Disabled
+    //@Disabled
     @Test
     public void getAvailableFiles() throws InterruptedException {
         File testFileA = getFile(FILENAME);
@@ -181,7 +181,7 @@ public class IntegrationTest {
         server.shutDown();
     }
 
-    @Disabled
+    //@Disabled
     @Test
     public void pingByMultipleNodes() {
         AKTorrent server = new AKTorrent(NODE_A_PORT);

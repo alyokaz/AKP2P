@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,27 +20,18 @@ import static org.junit.jupiter.api.Assertions.*;
 public class IntegrationTest {
 
     private static final String LOCAL_HOST = "127.0.0.1";
-    private static final int NODE_A_PORT = 4441;
-    private static final int NODE_B_PORT = 4442;
-
-    private static final int NODE_C_PORT = 4443;
-
-    private static final int NODE_D_PORT = 4444;
-
     private static final int BUFFER_SIZE = 1000000;
-
     private static final String FILENAME = "test_file.mp4";
-
     private static final String FILENAME_2 = "test_file_2.mp4";
 
     @Test
     public void canSeedAndReceiveFile() throws IOException {
         File file = getFile(FILENAME);
-        AKTorrent server = new AKTorrent(NODE_A_PORT);
-        server.seedFile(file);
+        AKTorrent server = new AKTorrent();
+        final int serverPort = server.seedFile(file);
 
-        AKTorrent client = new AKTorrent(NODE_B_PORT);
-        client.addPeer(LOCAL_HOST, NODE_A_PORT);
+        AKTorrent client = new AKTorrent();
+        client.addPeer(LOCAL_HOST, serverPort);
         client.downloadFile(FileService.getFileInfo(file));
         Optional<File> completedFile;
         //TODO add some form of timeout
@@ -55,48 +47,47 @@ public class IntegrationTest {
     public void canDownloadFromTwoPeers() throws IOException {
         File file = getFile(FILENAME);
 
-        AKTorrent ak1 = new AKTorrent(NODE_A_PORT);
-        AKTorrent ak2 = new AKTorrent(NODE_B_PORT);
-        AKTorrent ak3 = new AKTorrent(NODE_C_PORT);
-        AKTorrent ak4 = new AKTorrent(NODE_D_PORT);
+        AKTorrent nodeA = new AKTorrent();
+        AKTorrent nodeB = new AKTorrent();
+        AKTorrent nodeC = new AKTorrent();
+        AKTorrent nodeD = new AKTorrent();
 
-        ak1.seedFile(file);
-        ak2.seedFile(file);
-        ak3.seedFile(file);
+        final int nodeAPort = nodeA.seedFile(file);
+        final int nodeBPort = nodeB.seedFile(file);
+        final int nodeCPort = nodeC.seedFile(file);
 
-        ak4.addPeer(LOCAL_HOST, NODE_A_PORT);
-        ak4.addPeer(LOCAL_HOST, NODE_B_PORT);
-        ak4.addPeer(LOCAL_HOST, NODE_C_PORT);
+        nodeD.addPeer(LOCAL_HOST, nodeAPort);
+        nodeD.addPeer(LOCAL_HOST, nodeBPort);
+        nodeD.addPeer(LOCAL_HOST, nodeCPort);
 
-        ak4.downloadFile(FileService.getFileInfo(file));
+        nodeD.downloadFile(FileService.getFileInfo(file));
 
         Optional<File> downloadedFile;
         do {
-            downloadedFile = ak4.getFile(FILENAME);
+            downloadedFile = nodeD.getFile(FILENAME);
         } while (downloadedFile.isEmpty());
 
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
-        ak1.shutDown();
-        ak2.shutDown();
-        ak3.shutDown();
-        ak4.shutDown();
+        nodeA.shutDown();
+        nodeB.shutDown();
+        nodeC.shutDown();
+        nodeD.shutDown();
 
     }
 
     @Test
     public void canDownloadFromMultiplePeers() throws IOException {
-        final int minPort = 4444;
-        final int maxPort = minPort + 10;
-        final int clientPort = maxPort + 1;
+        final int min = 0;
+        final int max = 10;
         File file = getFile(FILENAME);
 
         Set<AKTorrent> nodes = new HashSet<>();
-        IntStream.range(minPort, maxPort).forEach(port -> nodes.add(new AKTorrent(port)));
-        nodes.forEach(node -> node.seedFile(file));
+        IntStream.range(0, 10).forEach(port -> nodes.add(new AKTorrent()));
+        Set<Integer> ports = nodes.stream().map(node -> node.seedFile(file)).collect(Collectors.toSet());
 
-        AKTorrent client = new AKTorrent(clientPort);
+        AKTorrent client = new AKTorrent();
 
-        IntStream.range(minPort, maxPort).forEach(port -> client.addPeer(LOCAL_HOST, port));
+        ports.forEach(port -> client.addPeer(LOCAL_HOST, port));
 
         client.downloadFile(FileService.getFileInfo(file));
 
@@ -114,17 +105,17 @@ public class IntegrationTest {
         File testFileA = getFile(FILENAME);
         File testFileB = getFile(FILENAME_2);
 
-        AKTorrent node_A = new AKTorrent(NODE_A_PORT);
+        AKTorrent node_A = new AKTorrent();
 
-        node_A.seedFile(testFileA);
+        final int nodeAPort = node_A.seedFile(testFileA);
         node_A.seedFile(testFileB);
 
-        AKTorrent node_B = new AKTorrent(NODE_B_PORT);
-        node_B.addPeer(LOCAL_HOST, NODE_A_PORT);
-        node_B.startServer();
+        AKTorrent node_B = new AKTorrent();
+        node_B.addPeer(LOCAL_HOST, nodeAPort);
+         final int nodeBPort = node_B.startServer();
 
-        AKTorrent client = new AKTorrent(NODE_C_PORT);
-        client.addPeer(LOCAL_HOST, NODE_B_PORT);
+        AKTorrent client = new AKTorrent();
+        client.addPeer(LOCAL_HOST, nodeBPort);
 
         Set<FileInfo> files = client.getAvailableFiles();
 
@@ -139,22 +130,22 @@ public class IntegrationTest {
 
     @Test
     public void testDiscoverTransientPeers() throws IOException {
-        AKTorrent nodeA = new AKTorrent(NODE_A_PORT);
-        AKTorrent nodeB = new AKTorrent(NODE_B_PORT);
-        AKTorrent nodeC = new AKTorrent(NODE_C_PORT);
+        AKTorrent nodeA = new AKTorrent();
+        AKTorrent nodeB = new AKTorrent();
+        AKTorrent nodeC = new AKTorrent();
 
         File file = getFile(FILENAME);
-        nodeC.seedFile(file);
+        final int nodeCPort = nodeC.seedFile(file);
 
-        nodeB.addPeer(LOCAL_HOST, NODE_C_PORT);
-        nodeB.startServer();
+        nodeB.addPeer(LOCAL_HOST, nodeCPort);
+        final int nodeBPort = nodeB.startServer();
 
-        nodeA.addPeer(LOCAL_HOST, NODE_B_PORT);
-        nodeA.startServer();
+        nodeA.addPeer(LOCAL_HOST, nodeBPort);
+        final int nodeAPort = nodeA.startServer();
 
-        AKTorrent client = new AKTorrent(NODE_D_PORT);
+        AKTorrent client = new AKTorrent();
 
-        client.addPeer(LOCAL_HOST, NODE_A_PORT);
+        client.addPeer(LOCAL_HOST, nodeAPort);
 
         client.downloadFile(FileService.getFileInfo(file));
 
@@ -171,24 +162,24 @@ public class IntegrationTest {
 
     @Test
     public void pingPeerWhenAdded() {
-        AKTorrent server = new AKTorrent(NODE_A_PORT);
-        server.startServer();
-        AKTorrent client = new AKTorrent(NODE_B_PORT);
-        client.addPeer(LOCAL_HOST, NODE_A_PORT);
-        assertTrue(client.getConnectedPeers().contains(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT)));
+        AKTorrent server = new AKTorrent();
+        final int serverPort = server.startServer();
+        AKTorrent client = new AKTorrent();
+        client.addPeer(LOCAL_HOST, serverPort);
+        assertTrue(client.getConnectedPeers().contains(new InetSocketAddress(LOCAL_HOST, serverPort)));
         server.shutDown();
     }
 
     @Test
     public void pingByMultipleNodes() {
-        AKTorrent server = new AKTorrent(NODE_A_PORT);
-        server.startServer();
+        AKTorrent server = new AKTorrent();
+        final int serverPort = server.startServer();
 
         Set<AKTorrent> nodes = new HashSet<>();
-        IntStream.range(0, 1000).forEach(i -> nodes.add(new AKTorrent(NODE_B_PORT + i)));
-        nodes.forEach(node -> node.addPeer(LOCAL_HOST, NODE_A_PORT));
+        IntStream.range(0, 1000).forEach(i -> nodes.add(new AKTorrent()));
+        nodes.forEach(node -> node.addPeer(LOCAL_HOST, serverPort));
 
-        InetSocketAddress expectedAddress = new InetSocketAddress(LOCAL_HOST, NODE_A_PORT);
+        InetSocketAddress expectedAddress = new InetSocketAddress(LOCAL_HOST, serverPort);
         nodes.forEach(node -> assertTrue(node.getConnectedPeers().contains(expectedAddress)));
         server.shutDown();
     }
@@ -196,6 +187,5 @@ public class IntegrationTest {
     private File getFile(String filename) {
         return new File(getClass().getResource("/" + filename).getFile());
     }
-
-
+    
 }

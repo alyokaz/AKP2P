@@ -48,3 +48,17 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/aktorrent:latest
+    - name: Archive code coverage results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: |
+          build/reports/tests/test/classes/intergration.CLIIntegrationTests.html
+          build/reports/tests/test/classes/intergration.IntegrationTest.html
+          build/reports/tests/test/css/base-style.css
+          build/reports/tests/test/css/style.css
+          build/reports/tests/test/js/report.js
+          build/reports/tests/test/packages/intergration.html
+          build/reports/tests/test/index.html
+        if-no-files-found: warn

@@ -7,7 +7,6 @@ import com.alyokaz.aktorrent.server.Server;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -15,7 +14,7 @@ import java.util.concurrent.*;
 public class AKTorrent {
 
     static final int BUFFER_SIZE = 1000000;
-    private final int PORT;
+    private  int port;
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private Server server;
     private PingServer udpServer;
@@ -23,7 +22,11 @@ public class AKTorrent {
     private final FileService fileService = new FileService(peerService);
 
     public AKTorrent(int port) {
-        this.PORT = port;
+        this.port = port;
+    }
+
+    public AKTorrent() {
+        this.port = 0;
     }
 
     public static void main(String[] args) throws IOException {
@@ -38,9 +41,9 @@ public class AKTorrent {
                 executor.execute(new DownloadHandler(address, fileService))));
     }
 
-    public void seedFile(File file) {
+    public int seedFile(File file) {
         fileService.addFile(file);
-        startServer();
+        return startServer();
     }
 
     public void downloadFile(FileInfo fileInfo) {
@@ -58,25 +61,24 @@ public class AKTorrent {
         return Optional.of(file);
     }
 
-    public void startServer() {
+    public int startServer() {
         if (this.server == null) {
             try {
-                this.server = new Server(new ServerSocket(PORT), peerService, fileService);
+                ServerSocket serverSocket = new ServerSocket(port);
+                this.port = serverSocket.getLocalPort();
+                this.server = new Server(serverSocket, peerService, fileService);
                 this.peerService.discoverPeers();
                 this.fileService.updateAvailableFiles();
                 server.start();
+                if (this.udpServer == null) {
+                    this.udpServer = new PingServer(new DatagramSocket(port));
+                    this.udpServer.start();
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
-        if (this.udpServer == null) {
-            try {
-                this.udpServer = new PingServer(new DatagramSocket(PORT));
-                this.udpServer.start();
-            } catch (SocketException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        return this.port;
     }
 
     public void shutDown() {

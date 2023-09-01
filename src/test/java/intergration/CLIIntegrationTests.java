@@ -9,7 +9,9 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,23 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CLIIntegrationTests {
 
     private static final String LOCAL_HOST = "127.0.0.1";
-    private static final int NODE_A_PORT = 4441;
-    private static final int NODE_B_PORT = 4442;
-
-    private static final int NODE_C_PORT = 4443;
-
-    private static final int NODE_D_PORT = 4444;
-
     private static final int BUFFER_SIZE = 1000000;
-
     private static final String FILENAME = "test_file.mp4";
-
     private static final String FILENAME_2 = "test_file_2.mp4";
 
     @Test
     public void testCliSendReceiveFile() throws IOException, InterruptedException {
         CountDownLatch countDownLatch_A = new CountDownLatch(1);
         CountDownLatch countDownLatch_B = new CountDownLatch(1);
+        BlockingQueue<Integer> port = new LinkedBlockingQueue<>();
 
         new Thread(()-> {
             InputStream in = new InputStream() {
@@ -58,7 +52,9 @@ public class CLIIntegrationTests {
             };
 
             PrintStream out = new PrintStream(new ByteArrayOutputStream(1024));
-            CLI cli = new CLI(in, out, new AKTorrent(NODE_A_PORT));
+            AKTorrent node = new AKTorrent();
+            port.add(node.startServer());
+            CLI cli = new CLI(in, out, node);
             try {
                 cli.start();
             } catch (IOException e) {
@@ -68,8 +64,8 @@ public class CLIIntegrationTests {
 
         countDownLatch_B.await();
 
-        AKTorrent client = new AKTorrent(NODE_B_PORT);
-        client.addPeer(LOCAL_HOST, NODE_A_PORT);
+        AKTorrent client = new AKTorrent();
+        client.addPeer(LOCAL_HOST, port.take());
         File file = getFile(FILENAME);
         client.downloadFile(FileService.getFileInfo(file));
 
@@ -86,13 +82,18 @@ public class CLIIntegrationTests {
     public void canDownloadFileByNumber() throws InterruptedException {
         CountDownLatch exit = new CountDownLatch(1);
 
-        AKTorrent server = new AKTorrent(NODE_A_PORT);
+        AKTorrent server = new AKTorrent();
         File file = getFile(FILENAME);
-        server.seedFile(file);
+        BlockingQueue<Integer> port = new LinkedBlockingQueue<>();
+        port.add(server.seedFile(file));
 
         Thread clientThread = new Thread(() -> {
-            AKTorrent client = new AKTorrent(NODE_B_PORT);
-            client.addPeer(LOCAL_HOST, NODE_A_PORT);
+            AKTorrent client = new AKTorrent();
+            try {
+                client.addPeer(LOCAL_HOST, port.take());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             CLI cli = new CLI(
                     new ByteArrayInputStream(("2\n1").getBytes()),
                     new PrintStream(new ByteArrayOutputStream()),
@@ -126,23 +127,27 @@ public class CLIIntegrationTests {
     @Test
     public void canAddPeer() throws InterruptedException {
         CountDownLatch exitLatch = new CountDownLatch(1);
+        BlockingQueue<Integer> port = new LinkedBlockingQueue<>();
 
-        AKTorrent server = new AKTorrent(NODE_A_PORT);
-        server.startServer();
+        AKTorrent server = new AKTorrent();
+        port.add(server.startServer());
 
-        AKTorrent client = new AKTorrent(NODE_B_PORT);
+        AKTorrent client = new AKTorrent();
         new Thread(() -> {
-            CLI cli = new CLI(new ByteArrayInputStream(("3\n" + LOCAL_HOST + " " + NODE_A_PORT).getBytes()),
+            try {
+                final int serverPort = port.take();
+            CLI cli = new CLI(new ByteArrayInputStream(("3\n" + LOCAL_HOST + " " + serverPort).getBytes()),
                     new PrintStream(new ByteArrayOutputStream()),
                     client);
-            try {
+
                 cli.start();
-                assertTrue(client.getConnectedPeers().contains(new InetSocketAddress(LOCAL_HOST, NODE_A_PORT)));
+                assertTrue(client.getConnectedPeers().contains(new InetSocketAddress(LOCAL_HOST, serverPort)));
                 exitLatch.countDown();
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }).start();
+
         exitLatch.await();
         server.shutDown();
     }

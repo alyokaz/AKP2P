@@ -19,9 +19,7 @@ import static org.mockito.Mockito.*;
 
 public class CLITests {
     private static final String FILENAME = "test_file.mp4";
-
     private static final String FILENAME_2 = "test_file_2.mp4";
-
     private ByteArrayOutputStream bytes;
     private PrintStream out;
     private AKTorrent node;

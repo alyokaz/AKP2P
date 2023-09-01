@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class IntegrationTest {
 
     private static final String LOCAL_HOST = "127.0.0.1";
-    private static final int BUFFER_SIZE = 1000000;
     private static final String FILENAME = "test_file.mp4";
     private static final String FILENAME_2 = "test_file_2.mp4";
 
@@ -82,7 +81,7 @@ public class IntegrationTest {
         File file = getFile(FILENAME);
 
         Set<AKTorrent> nodes = new HashSet<>();
-        IntStream.range(0, 10).forEach(port -> nodes.add(new AKTorrent()));
+        IntStream.range(min, max).forEach(port -> nodes.add(new AKTorrent()));
         Set<Integer> ports = nodes.stream().map(node -> node.seedFile(file)).collect(Collectors.toSet());
 
         AKTorrent client = new AKTorrent();
@@ -101,7 +100,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void getAvailableFiles() throws InterruptedException {
+    public void getAvailableFiles() {
         File testFileA = getFile(FILENAME);
         File testFileB = getFile(FILENAME_2);
 

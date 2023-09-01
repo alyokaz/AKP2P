@@ -19,9 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CLIIntegrationTests {
 
     private static final String LOCAL_HOST = "127.0.0.1";
-    private static final int BUFFER_SIZE = 1000000;
     private static final String FILENAME = "test_file.mp4";
-    private static final String FILENAME_2 = "test_file_2.mp4";
 
     @Test
     public void testCliSendReceiveFile() throws IOException, InterruptedException {

@@ -9,31 +9,24 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
+import java.util.function.BiConsumer;
 
-public class DiscoverPeersTask implements Runnable {
-
-    InetSocketAddress address;
-    List<InetSocketAddress> peers;
+public class DiscoverPeersTask extends GetPeersTaskBase {
 
     public DiscoverPeersTask(InetSocketAddress address, List<InetSocketAddress> peers) {
-        this.address = address;
-        this.peers = peers;
+        super(address, peers, (in, out) -> {
+            try {
+                out.writeObject(new Message(MessageType.REQUEST_PEERS));
+                Object obj = in.readObject();
+                List<InetSocketAddress> peerList;
+                if (obj instanceof List<?>) {
+                    peerList = (List<InetSocketAddress>) obj;
+                    peers.addAll(peerList);
+                }
+            }catch(IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
-    @Override
-    public void run() {
-        try (Socket socket = new Socket(address.getHostName(), address.getPort());
-             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-            out.writeObject(new Message(MessageType.REQUEST_PEERS));
-            Object obj = in.readObject();
-            List<InetSocketAddress> peerList;
-            if (obj instanceof List<?>) {
-                peerList = (List<InetSocketAddress>) obj;
-                peers.addAll(peerList);
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

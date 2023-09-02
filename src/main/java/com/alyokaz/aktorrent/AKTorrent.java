@@ -18,11 +18,17 @@ public class AKTorrent {
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private Server server;
     private PingServer udpServer;
-    private final PeerService peerService = new PeerService();
+    private InetSocketAddress beaconAddress;
+    private final PeerService peerService = new PeerService(beaconAddress);
     private final FileService fileService = new FileService(peerService);
 
     public AKTorrent(int port) {
         this.port = port;
+    }
+
+    public AKTorrent(int port, InetSocketAddress beaconAddress) {
+        this.port = port;
+        this.beaconAddress = beaconAddress;
     }
 
     public AKTorrent() {
@@ -67,6 +73,8 @@ public class AKTorrent {
                 ServerSocket serverSocket = new ServerSocket(port);
                 this.port = serverSocket.getLocalPort();
                 this.server = new Server(serverSocket, peerService, fileService);
+                if(this.beaconAddress != null)
+                    this.peerService.contactBeacon(new InetSocketAddress(serverSocket.getInetAddress(), serverSocket.getLocalPort()), this.beaconAddress);
                 this.peerService.discoverPeers();
                 this.fileService.updateAvailableFiles();
                 server.start();
@@ -92,6 +100,11 @@ public class AKTorrent {
     }
 
     public Set<FileInfo> getAvailableFiles() {
+        peerService.discoverPeers();
         return fileService.getAvailableFiles();
+    }
+
+    public void setBeaconAddress(String hostname, int port) {
+        this.beaconAddress = new InetSocketAddress(hostname, port);
     }
 }

@@ -1,4 +1,4 @@
-package com.alyokaz.aktorrent;
+package com.alyokaz.aktorrent.peerservice;
 
 import com.alyokaz.aktorrent.pingserver.PingServer;
 

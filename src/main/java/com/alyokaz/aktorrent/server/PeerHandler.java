@@ -1,6 +1,8 @@
 package com.alyokaz.aktorrent.server;
 
 import com.alyokaz.aktorrent.*;
+import com.alyokaz.aktorrent.fileservice.FileService;
+import com.alyokaz.aktorrent.peerservice.PeerService;
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
 import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
@@ -9,10 +11,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 

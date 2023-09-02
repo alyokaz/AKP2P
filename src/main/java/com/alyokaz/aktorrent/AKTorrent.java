@@ -1,6 +1,8 @@
 package com.alyokaz.aktorrent;
 
 import com.alyokaz.aktorrent.cli.CLI;
+import com.alyokaz.aktorrent.fileservice.FileService;
+import com.alyokaz.aktorrent.peerservice.PeerService;
 import com.alyokaz.aktorrent.pingserver.PingServer;
 import com.alyokaz.aktorrent.server.Server;
 
@@ -13,7 +15,7 @@ import java.util.concurrent.*;
 
 public class AKTorrent {
 
-    static final int BUFFER_SIZE = 1000000;
+    public static final int BUFFER_SIZE = 1000000;
     private  int port;
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private Server server;

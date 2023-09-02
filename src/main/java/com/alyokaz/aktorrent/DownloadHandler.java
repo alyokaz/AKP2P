@@ -1,5 +1,6 @@
 package com.alyokaz.aktorrent;
 
+import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
 import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
@@ -7,7 +8,6 @@ import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Map;
 import java.util.Set;
 
 public class DownloadHandler implements Runnable {

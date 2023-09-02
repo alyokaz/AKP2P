@@ -1,7 +1,7 @@
 package intergration;
 
 import com.alyokaz.aktorrent.AKTorrent;
-import com.alyokaz.aktorrent.FileService;
+import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.cli.CLI;
 import org.junit.jupiter.api.Test;
 

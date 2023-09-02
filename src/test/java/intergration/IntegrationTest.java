@@ -3,7 +3,7 @@ package intergration;
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.Beacon;
 import com.alyokaz.aktorrent.FileInfo;
-import com.alyokaz.aktorrent.FileService;
+import com.alyokaz.aktorrent.fileservice.FileService;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

@@ -1,16 +1,10 @@
 package com.alyokaz.aktorrent.server;
 
-import com.alyokaz.aktorrent.FileInfo;
-import com.alyokaz.aktorrent.FileService;
-import com.alyokaz.aktorrent.PeerService;
-import com.alyokaz.aktorrent.PieceContainer;
+import com.alyokaz.aktorrent.fileservice.FileService;
+import com.alyokaz.aktorrent.peerservice.PeerService;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

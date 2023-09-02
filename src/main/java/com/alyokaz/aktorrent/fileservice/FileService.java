@@ -1,4 +1,10 @@
-package com.alyokaz.aktorrent;
+package com.alyokaz.aktorrent.fileservice;
+
+import com.alyokaz.aktorrent.AKTorrent;
+import com.alyokaz.aktorrent.FileInfo;
+import com.alyokaz.aktorrent.Piece;
+import com.alyokaz.aktorrent.PieceContainer;
+import com.alyokaz.aktorrent.peerservice.PeerService;
 
 import java.io.*;
 import java.util.*;

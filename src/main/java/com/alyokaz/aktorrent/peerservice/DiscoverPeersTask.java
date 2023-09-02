@@ -1,15 +1,11 @@
-package com.alyokaz.aktorrent;
+package com.alyokaz.aktorrent.peerservice;
 
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public class DiscoverPeersTask extends GetPeersTaskBase {
 

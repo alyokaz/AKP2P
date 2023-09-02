@@ -1,14 +1,11 @@
-package com.alyokaz.aktorrent;
+package com.alyokaz.aktorrent.peerservice;
 
 import com.alyokaz.aktorrent.server.message.BeaconMessage;
 import com.alyokaz.aktorrent.server.message.MessageType;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 public class ContactBeaconTask extends GetPeersTaskBase {
 

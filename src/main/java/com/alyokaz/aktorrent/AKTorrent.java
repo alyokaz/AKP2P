@@ -21,20 +21,15 @@ public class AKTorrent {
     private Server server;
     private PingServer udpServer;
     private InetSocketAddress beaconAddress;
-    private final PeerService peerService = new PeerService(beaconAddress);
+    private final PeerService peerService = new PeerService();
     private final FileService fileService = new FileService(peerService);
 
     public AKTorrent(int port) {
         this.port = port;
     }
 
-    public AKTorrent(int port, InetSocketAddress beaconAddress) {
-        this.port = port;
-        this.beaconAddress = beaconAddress;
-    }
-
     public AKTorrent() {
-        this.port = 0;
+        this(0);
     }
 
     public static void main(String[] args) throws IOException {

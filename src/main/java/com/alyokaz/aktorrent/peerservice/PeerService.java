@@ -17,9 +17,7 @@ public class PeerService {
     private final List<InetSocketAddress> peers = Collections.synchronizedList(new ArrayList<>());
     private final Set<InetSocketAddress> connectedPeers = new HashSet<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
-    private final InetSocketAddress serverAddress;
-    public PeerService(InetSocketAddress serverAddress) {
-        this.serverAddress = serverAddress;
+    public PeerService() {
     }
 
     public void discoverPeers() {

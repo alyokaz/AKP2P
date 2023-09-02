@@ -1,6 +1,7 @@
 package intergration;
 
 import com.alyokaz.aktorrent.AKTorrent;
+import com.alyokaz.aktorrent.Beacon;
 import com.alyokaz.aktorrent.FileInfo;
 import com.alyokaz.aktorrent.FileService;
 import org.junit.jupiter.api.Test;
@@ -181,6 +182,28 @@ public class IntegrationTest {
         InetSocketAddress expectedAddress = new InetSocketAddress(LOCAL_HOST, serverPort);
         nodes.forEach(node -> assertTrue(node.getConnectedPeers().contains(expectedAddress)));
         server.shutDown();
+    }
+
+    @Test
+    public void canDownloadPeersFromBeacon() throws InterruptedException {
+        Beacon beacon = new Beacon();
+        final int beaconPort = beacon.start();
+
+        Thread.sleep(1000);
+
+        AKTorrent nodeA = new AKTorrent();
+        nodeA.setBeaconAddress(LOCAL_HOST, beaconPort);
+        File file = getFile(FILENAME);
+        nodeA.seedFile(file);
+
+
+        Thread.sleep(1000);
+
+        AKTorrent nodeB = new AKTorrent();
+        nodeB.setBeaconAddress(LOCAL_HOST, beaconPort);
+        nodeB.startServer();
+        Set<FileInfo> fileInfos = nodeB.getAvailableFiles();
+        assertTrue(fileInfos.contains(FileService.getFileInfo(file)));
     }
 
     private File getFile(String filename) {

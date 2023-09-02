@@ -17,8 +17,9 @@ public class PeerService {
     private final List<InetSocketAddress> peers = Collections.synchronizedList(new ArrayList<>());
     private final Set<InetSocketAddress> connectedPeers = new HashSet<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
-
-    public PeerService() {
+    private final InetSocketAddress serverAddress;
+    public PeerService(InetSocketAddress serverAddress) {
+        this.serverAddress = serverAddress;
     }
 
     public void discoverPeers() {
@@ -52,6 +53,14 @@ public class PeerService {
             String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
             if (payload.equals(PingServer.PONG_PAYLOAD)) this.connectedPeers.add(address);
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void contactBeacon(InetSocketAddress serverAddress, InetSocketAddress beaconAddress) {
+        try {
+            executor.submit(new ContactBeaconTask(beaconAddress, peers, serverAddress)).get();
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
     }

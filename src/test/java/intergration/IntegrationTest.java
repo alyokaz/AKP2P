@@ -1,7 +1,7 @@
 package intergration;
 
 import com.alyokaz.aktorrent.AKTorrent;
-import com.alyokaz.aktorrent.Beacon;
+import com.alyokaz.aktorrent.beacon.Beacon;
 import com.alyokaz.aktorrent.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import org.junit.jupiter.api.Test;
@@ -196,7 +196,6 @@ public class IntegrationTest {
         File file = getFile(FILENAME);
         nodeA.seedFile(file);
 
-
         Thread.sleep(1000);
 
         AKTorrent nodeB = new AKTorrent();
@@ -204,6 +203,10 @@ public class IntegrationTest {
         nodeB.startServer();
         Set<FileInfo> fileInfos = nodeB.getAvailableFiles();
         assertTrue(fileInfos.contains(FileService.getFileInfo(file)));
+
+        beacon.shutDown();
+        nodeA.shutDown();
+        nodeB.shutDown();
     }
 
     private File getFile(String filename) {

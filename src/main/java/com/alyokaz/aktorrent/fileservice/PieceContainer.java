@@ -1,4 +1,4 @@
-package com.alyokaz.aktorrent;
+package com.alyokaz.aktorrent.fileservice;
 
 import java.util.*;
 import java.util.stream.Collectors;

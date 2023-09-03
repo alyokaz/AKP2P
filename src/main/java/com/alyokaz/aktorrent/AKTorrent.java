@@ -11,17 +11,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 
 public class AKTorrent {
 
-    public static final int BUFFER_SIZE = 1000000;
     private  int port;
-    private final ExecutorService executor = Executors.newCachedThreadPool();
     private Server server;
     private PingServer udpServer;
-    private InetSocketAddress beaconAddress;
     private final PeerService peerService = new PeerService();
     private final FileService fileService = new FileService(peerService);
 
@@ -33,16 +29,8 @@ public class AKTorrent {
         this(0);
     }
 
-    public static void main(String[] args) throws IOException {
-        AKTorrent node = new AKTorrent(Integer.parseInt(args[0]));
-        CLI cli = new CLI(System.in, System.out, node);
-        cli.start();
-    }
-
-    public void startClient() {
-        peerService.discoverPeers();
-        executor.execute(() -> this.peerService.getPeers().forEach(address ->
-                executor.execute(new DownloadHandler(address, fileService))));
+    public void downloadAllFiles() {
+        fileService.downloadAllFiles();
     }
 
     public int seedFile(File file) {
@@ -52,7 +40,7 @@ public class AKTorrent {
 
     public void downloadFile(FileInfo fileInfo) {
         fileService.addFile(fileInfo);
-        startClient();
+        downloadAllFiles();
     }
 
     public void addPeer(String hostName, int port) {
@@ -71,11 +59,9 @@ public class AKTorrent {
                 ServerSocket serverSocket = new ServerSocket(port);
                 this.port = serverSocket.getLocalPort();
                 this.server = new Server(serverSocket, peerService, fileService);
-                if(this.beaconAddress != null)
-                    this.peerService.contactBeacon(new InetSocketAddress(serverSocket.getInetAddress(), serverSocket.getLocalPort()), this.beaconAddress);
-                this.peerService.discoverPeers();
-                this.fileService.updateAvailableFiles();
                 server.start();
+                peerService.discoverPeers();
+
                 if (this.udpServer == null) {
                     this.udpServer = new PingServer(new DatagramSocket(port));
                     this.udpServer.start();
@@ -89,16 +75,14 @@ public class AKTorrent {
 
     public void shutDown() {
         if (server != null) server.shutdown();
-
         if (udpServer != null) udpServer.shutdown();
     }
 
-    public Set<InetSocketAddress> getConnectedPeers() {
-        return this.peerService.getConnectedPeers();
+    public Set<InetSocketAddress> getLivePeers() {
+        return this.peerService.getLivePeers();
     }
 
     public Set<FileInfo> getAvailableFiles() {
-        peerService.discoverPeers();
         return fileService.getAvailableFiles();
     }
 

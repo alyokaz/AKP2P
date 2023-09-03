@@ -4,6 +4,8 @@ import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.peerservice.PeerService;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,5 +43,9 @@ public class Server {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public InetSocketAddress getServerAddress() {
+        return new InetSocketAddress(this.serverSocket.getInetAddress(), this.serverSocket.getLocalPort());
     }
 }

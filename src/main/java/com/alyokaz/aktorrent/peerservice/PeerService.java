@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
 
 public class PeerService {
     private final List<InetSocketAddress> peers = Collections.synchronizedList(new ArrayList<>());
-    private final Set<InetSocketAddress> connectedPeers = new HashSet<>();
+    private final Set<InetSocketAddress> livePeers = new HashSet<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
     public PeerService() {
     }
@@ -49,7 +49,7 @@ public class PeerService {
             socket.receive(packet);
 
             String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
-            if (payload.equals(PingServer.PONG_PAYLOAD)) this.connectedPeers.add(address);
+            if (payload.equals(PingServer.PONG_PAYLOAD)) this.livePeers.add(address);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -63,8 +63,8 @@ public class PeerService {
         }
     }
 
-    public Set<InetSocketAddress> getConnectedPeers() {
-        return this.connectedPeers;
+    public Set<InetSocketAddress> getLivePeers() {
+        return this.livePeers;
     }
 
     public List<InetSocketAddress> getPeers() {

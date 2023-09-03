@@ -1,4 +1,4 @@
-package com.alyokaz.aktorrent;
+package com.alyokaz.aktorrent.fileservice;
 
 import java.io.Serializable;
 import java.util.Arrays;

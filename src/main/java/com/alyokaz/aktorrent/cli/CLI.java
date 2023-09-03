@@ -1,7 +1,7 @@
 package com.alyokaz.aktorrent.cli;
 
 import com.alyokaz.aktorrent.AKTorrent;
-import com.alyokaz.aktorrent.FileInfo;
+import com.alyokaz.aktorrent.fileservice.FileInfo;
 
 import java.io.*;
 import java.util.ArrayList;

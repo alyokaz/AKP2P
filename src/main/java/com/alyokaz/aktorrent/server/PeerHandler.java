@@ -1,7 +1,8 @@
 package com.alyokaz.aktorrent.server;
 
-import com.alyokaz.aktorrent.*;
 import com.alyokaz.aktorrent.fileservice.FileService;
+import com.alyokaz.aktorrent.fileservice.Piece;
+import com.alyokaz.aktorrent.fileservice.PieceContainer;
 import com.alyokaz.aktorrent.peerservice.PeerService;
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
@@ -74,7 +75,7 @@ public class PeerHandler implements Runnable {
             else
                 out.writeObject(piece.get());
             //TODO Replace with download speed settings option
-            Thread.sleep(1); //simulate download speed limit / connection speed
+            Thread.sleep(0); //simulate download speed limit / connection speed
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {

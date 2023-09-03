@@ -2,7 +2,7 @@ package com.alyokaz.akatorrent.cli;
 
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.cli.CLI;
-import com.alyokaz.aktorrent.FileInfo;
+import com.alyokaz.aktorrent.fileservice.FileInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

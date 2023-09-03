@@ -1,6 +1,5 @@
-package com.alyokaz.aktorrent;
+package com.alyokaz.aktorrent.fileservice;
 
-import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
 import com.alyokaz.aktorrent.server.message.RequestPieceMessage;

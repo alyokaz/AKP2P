@@ -139,7 +139,7 @@ public class CLIIntegrationTests {
                     client);
 
                 cli.start();
-                assertTrue(client.getConnectedPeers().contains(new InetSocketAddress(LOCAL_HOST, serverPort)));
+                assertTrue(client.getLivePeers().contains(new InetSocketAddress(LOCAL_HOST, serverPort)));
                 exitLatch.countDown();
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);

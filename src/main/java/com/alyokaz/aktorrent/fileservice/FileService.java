@@ -1,9 +1,5 @@
 package com.alyokaz.aktorrent.fileservice;
 
-import com.alyokaz.aktorrent.AKTorrent;
-import com.alyokaz.aktorrent.FileInfo;
-import com.alyokaz.aktorrent.Piece;
-import com.alyokaz.aktorrent.PieceContainer;
 import com.alyokaz.aktorrent.peerservice.PeerService;
 
 import java.io.*;
@@ -16,6 +12,8 @@ import java.util.stream.IntStream;
 
 public class FileService {
 
+    public static final int BUFFER_SIZE = 1000000;
+
     private final Map<String, PieceContainer> files = Collections.synchronizedMap(new HashMap<>());
     private final Map<String, File> completedFiles = new HashMap<>();
     private final Set<FileInfo> availableFiles = Collections.synchronizedSet(new HashSet<>());
@@ -25,13 +23,8 @@ public class FileService {
     public FileService(PeerService peerService) {
         this.peerService = peerService;
     }
-
     public Map<String, PieceContainer> getFiles() {
         return this.files;
-    }
-
-    public Map<String, File> getCompletedFiles() {
-        return this.completedFiles;
     }
 
     public void addFile(File file) {
@@ -48,6 +41,7 @@ public class FileService {
     }
 
     public Set<FileInfo> getAvailableFiles() {
+        peerService.discoverPeers();
         updateAvailableFiles();
         return availableFiles;
     }
@@ -64,6 +58,12 @@ public class FileService {
         });
     }
 
+    public void downloadAllFiles() {
+        peerService.discoverPeers();
+        executor.execute(() -> this.peerService.getPeers().forEach(address ->
+                executor.execute(new DownloadHandler(address, this))));
+    }
+
     public PieceContainer getFile(String filename) {
         return this.files.get(filename);
     }
@@ -73,7 +73,6 @@ public class FileService {
             return;
 
         File outputFile = new File(container.getFilename());
-
         outputFile.createNewFile();
 
         try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFile))) {
@@ -89,8 +88,8 @@ public class FileService {
     }
 
     private static int getNoOfPieces(File file) {
-        int numberOfPieces = (int) file.length() / AKTorrent.BUFFER_SIZE;
-        if ((file.length() % AKTorrent.BUFFER_SIZE) != 0) {
+        int numberOfPieces = (int) file.length() / BUFFER_SIZE;
+        if ((file.length() % BUFFER_SIZE) != 0) {
             numberOfPieces++;
         }
         return numberOfPieces;
@@ -101,13 +100,13 @@ public class FileService {
         int numberOfPieces = getNoOfPieces(file);
 
         try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
-            byte[] buffer = new byte[AKTorrent.BUFFER_SIZE];
+            byte[] buffer = new byte[BUFFER_SIZE];
             IntStream.range(0, numberOfPieces).forEach(i -> {
                 try {
                     int bytesRead = in.read(buffer);
                     pieces.add(new Piece(i,
                             // make last Piece correct length
-                            bytesRead < AKTorrent.BUFFER_SIZE ? Arrays.copyOf(buffer, bytesRead) : buffer.clone()
+                            bytesRead < BUFFER_SIZE ? Arrays.copyOf(buffer, bytesRead) : buffer.clone()
                     ));
                 } catch (IOException e) {
                     throw new RuntimeException(e);

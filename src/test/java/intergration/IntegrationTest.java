@@ -2,7 +2,7 @@ package intergration;
 
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.beacon.Beacon;
-import com.alyokaz.aktorrent.FileInfo;
+import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import org.junit.jupiter.api.Test;
 
@@ -166,7 +166,7 @@ public class IntegrationTest {
         final int serverPort = server.startServer();
         AKTorrent client = new AKTorrent();
         client.addPeer(LOCAL_HOST, serverPort);
-        assertTrue(client.getConnectedPeers().contains(new InetSocketAddress(LOCAL_HOST, serverPort)));
+        assertTrue(client.getLivePeers().contains(new InetSocketAddress(LOCAL_HOST, serverPort)));
         server.shutDown();
     }
 
@@ -180,7 +180,7 @@ public class IntegrationTest {
         nodes.forEach(node -> node.addPeer(LOCAL_HOST, serverPort));
 
         InetSocketAddress expectedAddress = new InetSocketAddress(LOCAL_HOST, serverPort);
-        nodes.forEach(node -> assertTrue(node.getConnectedPeers().contains(expectedAddress)));
+        nodes.forEach(node -> assertTrue(node.getLivePeers().contains(expectedAddress)));
         server.shutDown();
     }
 

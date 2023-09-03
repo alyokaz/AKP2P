@@ -1,6 +1,7 @@
 package com.alyokaz.aktorrent;
 
 import com.alyokaz.aktorrent.cli.CLI;
+import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.peerservice.PeerService;
 import com.alyokaz.aktorrent.pingserver.PingServer;
@@ -101,7 +102,17 @@ public class AKTorrent {
         return fileService.getAvailableFiles();
     }
 
-    public void setBeaconAddress(String hostname, int port) {
-        this.beaconAddress = new InetSocketAddress(hostname, port);
+    public static AKTorrent createAndInitialize(InetSocketAddress beaconAddress) {
+        AKTorrent akTorrent = new AKTorrent();
+        akTorrent.startServer();
+        akTorrent.peerService.contactBeacon(akTorrent.server.getServerAddress(), beaconAddress);
+        akTorrent.peerService.discoverPeers();
+        return akTorrent;
+    }
+
+    public static void main(String[] args) throws IOException {
+        AKTorrent node = new AKTorrent(Integer.parseInt(args[0]));
+        CLI cli = new CLI(System.in, System.out, node);
+        cli.start();
     }
 }

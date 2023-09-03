@@ -185,22 +185,15 @@ public class IntegrationTest {
     }
 
     @Test
-    public void canDownloadPeersFromBeacon() throws InterruptedException {
+    public void canDownloadPeersFromBeacon() {
         Beacon beacon = new Beacon();
         final int beaconPort = beacon.start();
 
-        Thread.sleep(1000);
-
-        AKTorrent nodeA = new AKTorrent();
-        nodeA.setBeaconAddress(LOCAL_HOST, beaconPort);
+        AKTorrent nodeA = AKTorrent.createAndInitialize(new InetSocketAddress(LOCAL_HOST, beaconPort));
         File file = getFile(FILENAME);
         nodeA.seedFile(file);
 
-        Thread.sleep(1000);
-
-        AKTorrent nodeB = new AKTorrent();
-        nodeB.setBeaconAddress(LOCAL_HOST, beaconPort);
-        nodeB.startServer();
+        AKTorrent nodeB = AKTorrent.createAndInitialize(new InetSocketAddress(LOCAL_HOST, beaconPort));
         Set<FileInfo> fileInfos = nodeB.getAvailableFiles();
         assertTrue(fileInfos.contains(FileService.getFileInfo(file)));
 

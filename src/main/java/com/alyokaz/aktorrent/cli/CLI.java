@@ -4,6 +4,7 @@ import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -56,7 +57,7 @@ public class CLI {
     private void processAddPeer(BufferedReader reader, PrintStream outputStream) throws IOException {
         outputStream.println(CLI.INPUT_PEER_ADDRESS_PROMPT);
         String[] address = reader.readLine().split(" ");
-        node.addPeer(address[0], Integer.parseInt(address[1]));
+        node.addPeer(new InetSocketAddress(address[0], Integer.parseInt(address[1])));
         outputStream.println(CLI.PEER_CONNECTED_MESSAGE);
     }
 

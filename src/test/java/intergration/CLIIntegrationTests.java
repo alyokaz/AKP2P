@@ -25,7 +25,7 @@ public class CLIIntegrationTests {
     public void testCliSendReceiveFile() throws IOException, InterruptedException {
         CountDownLatch countDownLatch_A = new CountDownLatch(1);
         CountDownLatch countDownLatch_B = new CountDownLatch(1);
-        BlockingQueue<Integer> port = new LinkedBlockingQueue<>();
+        BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
 
         new Thread(()-> {
             InputStream in = new InputStream() {
@@ -50,8 +50,8 @@ public class CLIIntegrationTests {
             };
 
             PrintStream out = new PrintStream(new ByteArrayOutputStream(1024));
-            AKTorrent node = new AKTorrent();
-            port.add(node.startServer());
+            AKTorrent node = AKTorrent.createAndInitializeNoBeacon();
+            serverAddress.add(node.getAddress());
             CLI cli = new CLI(in, out, node);
             try {
                 cli.start();
@@ -62,8 +62,8 @@ public class CLIIntegrationTests {
 
         countDownLatch_B.await();
 
-        AKTorrent client = new AKTorrent();
-        client.addPeer(LOCAL_HOST, port.take());
+        AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
+        client.addPeer(serverAddress.take());
         File file = getFile(FILENAME);
         client.downloadFile(FileService.getFileInfo(file));
 
@@ -74,21 +74,23 @@ public class CLIIntegrationTests {
         
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
         countDownLatch_A.countDown();
+        client.shutDown();
     }
 
     @Test
     public void canDownloadFileByNumber() throws InterruptedException {
         CountDownLatch exit = new CountDownLatch(1);
 
-        AKTorrent server = new AKTorrent();
+        AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
         File file = getFile(FILENAME);
-        BlockingQueue<Integer> port = new LinkedBlockingQueue<>();
-        port.add(server.seedFile(file));
+        BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
+        server.seedFile(file);
+        serverAddress.add(server.getAddress());
 
         Thread clientThread = new Thread(() -> {
-            AKTorrent client = new AKTorrent();
+            AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
             try {
-                client.addPeer(LOCAL_HOST, port.take());
+                client.addPeer(serverAddress.take());
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -125,21 +127,22 @@ public class CLIIntegrationTests {
     @Test
     public void canAddPeer() throws InterruptedException {
         CountDownLatch exitLatch = new CountDownLatch(1);
-        BlockingQueue<Integer> port = new LinkedBlockingQueue<>();
+        BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
 
-        AKTorrent server = new AKTorrent();
-        port.add(server.startServer());
+        AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
+        serverAddress.add(server.getAddress());
 
-        AKTorrent client = new AKTorrent();
         new Thread(() -> {
             try {
-                final int serverPort = port.take();
-            CLI cli = new CLI(new ByteArrayInputStream(("3\n" + LOCAL_HOST + " " + serverPort).getBytes()),
+                final InetSocketAddress socketAddress = serverAddress.take();
+                AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
+
+                CLI cli = new CLI(new ByteArrayInputStream(("3\n" + socketAddress.getHostName() + " " + socketAddress.getPort()).getBytes()),
                     new PrintStream(new ByteArrayOutputStream()),
                     client);
-
                 cli.start();
-                assertTrue(client.getLivePeers().contains(new InetSocketAddress(LOCAL_HOST, serverPort)));
+
+                assertTrue(client.getLivePeers().contains(socketAddress));
                 exitLatch.countDown();
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);

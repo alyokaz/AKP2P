@@ -14,28 +14,24 @@ import java.util.*;
 
 
 public class AKTorrent {
+    private final Server server;
+    private final PingServer udpServer;
+    private final PeerService peerService;
+    private final FileService fileService;
 
-    private  int port;
-    private Server server;
-    private PingServer udpServer;
-    private final PeerService peerService = new PeerService();
-    private final FileService fileService = new FileService(peerService);
-
-    public AKTorrent(int port) {
-        this.port = port;
-    }
-
-    public AKTorrent() {
-        this(0);
+    public AKTorrent(Server server, PingServer udpServer, PeerService peerService, FileService fileService) {
+        this.server = server;
+        this.udpServer = udpServer;
+        this.peerService = peerService;
+        this.fileService = fileService;
     }
 
     public void downloadAllFiles() {
         fileService.downloadAllFiles();
     }
 
-    public int seedFile(File file) {
+    public void seedFile(File file) {
         fileService.addFile(file);
-        return startServer();
     }
 
     public void downloadFile(FileInfo fileInfo) {
@@ -43,34 +39,13 @@ public class AKTorrent {
         downloadAllFiles();
     }
 
-    public void addPeer(String hostName, int port) {
-        this.peerService.addPeer(hostName, port);
+    public void addPeer(InetSocketAddress address) {
+        if(peerService.addPeer(address))
+            fileService.updateAvailableFiles();
     }
 
     public Optional<File> getFile(String filename) {
-        File file = fileService.getCompletedFile(filename);
-        if (file == null) return Optional.empty();
-        return Optional.of(file);
-    }
-
-    public int startServer() {
-        if (this.server == null) {
-            try {
-                ServerSocket serverSocket = new ServerSocket(port);
-                this.port = serverSocket.getLocalPort();
-                this.server = new Server(serverSocket, peerService, fileService);
-                server.start();
-                peerService.discoverPeers();
-
-                if (this.udpServer == null) {
-                    this.udpServer = new PingServer(new DatagramSocket(port));
-                    this.udpServer.start();
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return this.port;
+        return fileService.getCompletedFile(filename);
     }
 
     public void shutDown() {
@@ -86,16 +61,53 @@ public class AKTorrent {
         return fileService.getAvailableFiles();
     }
 
-    public static AKTorrent createAndInitialize(InetSocketAddress beaconAddress) {
-        AKTorrent akTorrent = new AKTorrent();
-        akTorrent.startServer();
-        akTorrent.peerService.contactBeacon(akTorrent.server.getServerAddress(), beaconAddress);
-        akTorrent.peerService.discoverPeers();
-        return akTorrent;
+    public InetSocketAddress getAddress() {
+        return this.server.getServerAddress();
     }
 
+    public static AKTorrent createAndInitialize(InetSocketAddress beaconAddress) {
+        AKTorrent node = init();
+        node.peerService.contactBeacon(node.server.getServerAddress(), beaconAddress);
+        initServices(node);
+        return node;
+    }
+
+    public static AKTorrent createAndInitializeNoBeacon() {
+        AKTorrent node = init();
+        initServices(node);
+        return node;
+    }
+    private static void initServices(AKTorrent node) {
+        node.peerService.discoverPeers();
+        node.fileService.updateAvailableFiles();
+    }
+
+    private static AKTorrent init()  {
+        PeerService peerService = new PeerService();
+        FileService fileService = new FileService(peerService);
+
+        ServerSocket serverSocket = null;
+        DatagramSocket datagramSocket = null;
+        try {
+            serverSocket = new ServerSocket(0);
+            datagramSocket = new DatagramSocket(serverSocket.getLocalPort());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Server server = new Server(serverSocket, peerService, fileService);
+        server.start();
+
+        PingServer pingServer = new PingServer(datagramSocket);
+        pingServer.start();
+
+        return new AKTorrent(server, pingServer, peerService, fileService);
+    }
+
+
     public static void main(String[] args) throws IOException {
-        AKTorrent node = new AKTorrent(Integer.parseInt(args[0]));
+        InetSocketAddress beaconAddress = new InetSocketAddress(args[0], Integer.parseInt(args[1]));
+        AKTorrent node = AKTorrent.createAndInitialize(beaconAddress);
         CLI cli = new CLI(System.in, System.out, node);
         cli.start();
     }

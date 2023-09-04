@@ -1,5 +1,6 @@
 package com.alyokaz.aktorrent.peerservice;
 
+import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.pingserver.PingServer;
 
 import java.io.IOException;
@@ -32,13 +33,16 @@ public class PeerService {
         });
     }
 
-    public void addPeer(String hostName, int port) {
-        InetSocketAddress address = new InetSocketAddress(hostName, port);
+    public boolean addPeer(InetSocketAddress address) {
         peers.add(address);
-        pingPeer(address);
+        if(pingPeer(address)) {
+            livePeers.add(address);
+            return true;
+        } else
+            return false;
     }
 
-    private void pingPeer(InetSocketAddress address) {
+    private boolean pingPeer(InetSocketAddress address) {
         try (DatagramSocket socket = new DatagramSocket()) {
             byte[] buf = PingServer.PING_PAYLOAD.getBytes();
             DatagramPacket packet = new DatagramPacket(buf, buf.length, address.getAddress(), address.getPort());
@@ -49,7 +53,7 @@ public class PeerService {
             socket.receive(packet);
 
             String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
-            if (payload.equals(PingServer.PONG_PAYLOAD)) this.livePeers.add(address);
+            return (payload.equals(PingServer.PONG_PAYLOAD));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -36,8 +36,11 @@ public class FileService {
         files.put(fileInfo.getFilename(), new PieceContainer(fileInfo));
     }
 
-    public File getCompletedFile(String filename) {
-        return this.completedFiles.get(filename);
+    public Optional<File> getCompletedFile(String filename) {
+        if(completedFiles.containsKey(filename))
+            return Optional.of(completedFiles.get(filename));
+        else
+            return Optional.empty();
     }
 
     public Set<FileInfo> getAvailableFiles() {

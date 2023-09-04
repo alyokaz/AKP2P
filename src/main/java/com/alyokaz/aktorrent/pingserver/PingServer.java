@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,7 +42,6 @@ public class PingServer {
 
     public void shutdown() {
         System.out.println("Ping Server Shutdown");
-        Thread.currentThread().interrupt();
         this.socket.close();
     }
 

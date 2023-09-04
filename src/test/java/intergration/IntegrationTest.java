@@ -201,6 +201,27 @@ public class IntegrationTest {
         nodeB.shutDown();
     }
 
+    @Test
+    public void deadNodeWillNotBeAddedToLivePeers() throws InterruptedException {
+        AKTorrent deadNode = AKTorrent.createAndInitializeNoBeacon();
+        InetSocketAddress deadNodeAddress = deadNode.getAddress();
+        deadNode.shutDown();
+
+        AKTorrent liveNode = AKTorrent.createAndInitializeNoBeacon();
+        InetSocketAddress liveNodeAddress = liveNode.getAddress();
+
+        AKTorrent clientNode = AKTorrent.createAndInitializeNoBeacon();
+
+        clientNode.addPeer(deadNodeAddress);
+        clientNode.addPeer(liveNodeAddress);
+
+        assertTrue(clientNode.getLivePeers().contains(liveNodeAddress));
+        assertFalse(clientNode.getLivePeers().contains(deadNodeAddress));
+
+        liveNode.shutDown();
+        clientNode.shutDown();
+    }
+
     private File getFile(String filename) {
         return new File(getClass().getResource("/" + filename).getFile());
     }

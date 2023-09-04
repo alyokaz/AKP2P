@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -23,7 +24,7 @@ public class PeerService {
 
     public void discoverPeers() {
         Set<Future<?>> futures = new HashSet<>();
-        peers.forEach(address -> futures.add(executor.submit(new DiscoverPeersTask(address, peers))));
+        peers.forEach(address -> futures.add(executor.submit(new DiscoverPeersTask(address, this))));
         futures.forEach(future -> {
             try {
                 future.get();
@@ -33,9 +34,10 @@ public class PeerService {
         });
     }
 
-    public boolean addPeer(InetSocketAddress address) {
+    public synchronized boolean addPeer(InetSocketAddress address) {
         peers.add(address);
         if(pingPeer(address)) {
+            //TODO remove peer from unknown live peers
             livePeers.add(address);
             return true;
         } else
@@ -50,10 +52,14 @@ public class PeerService {
 
             buf = new byte[PingServer.BUFFER_SIZE];
             packet = new DatagramPacket(buf, buf.length);
+            socket.setSoTimeout(1000);
             socket.receive(packet);
 
             String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
             return (payload.equals(PingServer.PONG_PAYLOAD));
+        } catch (SocketTimeoutException e) {
+            System.out.println("Ping timed out for: " + address.getHostName() + ":" + address.getPort());
+            return false;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -61,7 +67,7 @@ public class PeerService {
 
     public void contactBeacon(InetSocketAddress serverAddress, InetSocketAddress beaconAddress) {
         try {
-            executor.submit(new ContactBeaconTask(beaconAddress, peers, serverAddress)).get();
+            executor.submit(new ContactBeaconTask(beaconAddress, this, serverAddress)).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -70,7 +76,7 @@ public class PeerService {
     public Set<InetSocketAddress> getLivePeers() {
         return this.livePeers;
     }
-
+    //TODO return copy / immutable
     public List<InetSocketAddress> getPeers() {
         return this.peers;
     }

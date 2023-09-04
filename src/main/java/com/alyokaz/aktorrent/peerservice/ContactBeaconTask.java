@@ -13,9 +13,8 @@ public class ContactBeaconTask extends AbstractPeersServiceTask {
 
     private final InetSocketAddress serverAddress;
 
-    public ContactBeaconTask(InetSocketAddress beaconAddress, List<InetSocketAddress> peers,
-                             InetSocketAddress serverAddress) {
-        super(beaconAddress, peers);
+    public ContactBeaconTask(InetSocketAddress address, PeerService peerService, InetSocketAddress serverAddress) {
+        super(address, peerService);
         this.serverAddress = serverAddress;
     }
 
@@ -25,7 +24,7 @@ public class ContactBeaconTask extends AbstractPeersServiceTask {
             out.writeObject(new BeaconMessage(MessageType.REQUEST_PEERS, serverAddress));
             Object obj = in.readObject();
             if(obj instanceof List<?>)
-                peers.addAll(((List<InetSocketAddress>)obj));
+                ((List<InetSocketAddress>)obj).forEach(peerService::addPeer);
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

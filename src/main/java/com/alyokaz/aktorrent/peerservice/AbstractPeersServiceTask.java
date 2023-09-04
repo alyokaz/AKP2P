@@ -5,16 +5,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.List;
 
 public abstract class AbstractPeersServiceTask implements Runnable {
 
     private final InetSocketAddress address;
-    protected final List<InetSocketAddress> peers;
+    protected final PeerService peerService;
 
-    public AbstractPeersServiceTask(InetSocketAddress address, List<InetSocketAddress> peers) {
+    public AbstractPeersServiceTask(InetSocketAddress address, PeerService peerService) {
         this.address = address;
-        this.peers = peers;
+        this.peerService = peerService;
     }
 
     @Override

@@ -37,7 +37,6 @@ public class PeerService {
     public synchronized boolean addPeer(InetSocketAddress address) {
         peers.add(address);
         if(pingPeer(address)) {
-            //TODO remove peer from unknown live peers
             livePeers.add(address);
             return true;
         } else
@@ -74,10 +73,10 @@ public class PeerService {
     }
 
     public Set<InetSocketAddress> getLivePeers() {
-        return this.livePeers;
+        return Collections.unmodifiableSet(this.livePeers);
     }
-    //TODO return copy / immutable
+
     public List<InetSocketAddress> getPeers() {
-        return this.peers;
+        return Collections.unmodifiableList(this.peers);
     }
 }

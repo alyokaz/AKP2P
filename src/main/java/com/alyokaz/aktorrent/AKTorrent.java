@@ -111,4 +111,8 @@ public class AKTorrent {
         CLI cli = new CLI(System.in, System.out, node);
         cli.start();
     }
+
+    public List<InetSocketAddress> getPeers() {
+        return peerService.getPeers();
+    }
 }

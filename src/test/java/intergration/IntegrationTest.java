@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -208,6 +209,20 @@ public class IntegrationTest {
         liveNode.shutDown();
         clientNode.shutDown();
     }
+
+    @Test
+    public void canAddNodes() {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeC = AKTorrent.createAndInitializeNoBeacon();
+
+        nodeA.addPeer(nodeB.getAddress());
+        nodeA.addPeer(nodeC.getAddress());
+
+        assertTrue(nodeA.getPeers().size() == 2);
+        assertTrue(nodeA.getPeers().containsAll(List.of(nodeB.getAddress(), nodeC.getAddress())));
+    }
+
 
     private static Optional<File> getDownloadedFile(AKTorrent node, String filename) {
         Optional<File> downloadedFile;

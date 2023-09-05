@@ -223,6 +223,16 @@ public class IntegrationTest {
         assertTrue(nodeA.getPeers().containsAll(List.of(nodeB.getAddress(), nodeC.getAddress())));
     }
 
+    @Test
+    public void preventDuplicatePeer() {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+
+        nodeA.addPeer(nodeB.getAddress());
+        nodeA.addPeer(nodeB.getAddress());
+
+        assertEquals(1, nodeA.getPeers().size());
+    }
 
     private static Optional<File> getDownloadedFile(AKTorrent node, String filename) {
         Optional<File> downloadedFile;

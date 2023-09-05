@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Set;
 
 public class DiscoverPeersTask extends AbstractPeersServiceTask {
 
@@ -20,8 +21,8 @@ public class DiscoverPeersTask extends AbstractPeersServiceTask {
         try {
             out.writeObject(new Message(MessageType.REQUEST_PEERS));
             Object obj = in.readObject();
-            if (obj instanceof List<?>) {
-                ((List<InetSocketAddress>) obj).forEach(peerService::addPeer);
+            if (obj instanceof Set<?>) {
+                ((Set<InetSocketAddress>) obj).forEach(peerService::addPeer);
             }
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);

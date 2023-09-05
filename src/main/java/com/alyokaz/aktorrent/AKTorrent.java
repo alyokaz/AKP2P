@@ -112,7 +112,7 @@ public class AKTorrent {
         cli.start();
     }
 
-    public List<InetSocketAddress> getPeers() {
+    public Set<InetSocketAddress> getPeers() {
         return peerService.getPeers();
     }
 }

@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class PeerService {
-    private final List<InetSocketAddress> peers = Collections.synchronizedList(new ArrayList<>());
+    private final Set<InetSocketAddress> peers = Collections.synchronizedSet(new HashSet<>());
     private final Set<InetSocketAddress> livePeers = new HashSet<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
     public PeerService() {
@@ -76,7 +76,7 @@ public class PeerService {
         return Collections.unmodifiableSet(this.livePeers);
     }
 
-    public List<InetSocketAddress> getPeers() {
-        return Collections.unmodifiableList(this.peers);
+    public Set<InetSocketAddress> getPeers() {
+        return Collections.unmodifiableSet(this.peers);
     }
 }

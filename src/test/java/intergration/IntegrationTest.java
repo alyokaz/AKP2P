@@ -179,14 +179,13 @@ public class IntegrationTest {
 
     @Test
     public void canDownloadPeersFromBeacon() throws IOException {
-        Beacon beacon = new Beacon();
-        final int beaconPort = beacon.start();
+        Beacon beacon = Beacon.createAndInitialise();
 
-        AKTorrent nodeA = AKTorrent.createAndInitialize(new InetSocketAddress(LOCAL_HOST, beaconPort));
+        AKTorrent nodeA = AKTorrent.createAndInitialize(beacon.getAddress());
         File file = getFile(FILENAME);
         nodeA.seedFile(file);
 
-        AKTorrent nodeB = AKTorrent.createAndInitialize(new InetSocketAddress(LOCAL_HOST, beaconPort));
+        AKTorrent nodeB = AKTorrent.createAndInitialize(beacon.getAddress());
         Set<FileInfo> fileInfos = nodeB.getAvailableFiles();
         assertTrue(fileInfos.contains(FileService.getFileInfo(file)));
 

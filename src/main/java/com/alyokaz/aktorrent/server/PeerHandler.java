@@ -34,6 +34,7 @@ public class PeerHandler implements Runnable {
             ObjectOutputStream out = new ObjectOutputStream(peerSocket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(peerSocket.getInputStream())
         ){
+            //TODO thread name is adding PeerHandler everytime it is reused
             Thread.currentThread().setName(Thread.currentThread().getName() + " PeerHandler");
             System.out.println(Thread.currentThread().getName() + " Client Connected");
             boolean end = false;

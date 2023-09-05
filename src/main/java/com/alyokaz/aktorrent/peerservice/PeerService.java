@@ -7,10 +7,7 @@ import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class PeerService {
     private final Set<InetSocketAddress> peers = Collections.synchronizedSet(new HashSet<>());
@@ -32,6 +29,7 @@ public class PeerService {
     }
 
     public synchronized boolean addPeer(InetSocketAddress address) {
+        //TODO prevent double add
         peers.add(address);
         if(pingPeer(address)) {
             livePeers.add(address);

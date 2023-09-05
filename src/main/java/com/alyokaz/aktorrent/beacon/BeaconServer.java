@@ -37,4 +37,8 @@ public class BeaconServer {
             throw new RuntimeException(e);
         }
     }
+
+    public InetSocketAddress getAddress() {
+        return new InetSocketAddress(serverSocket.getInetAddress(), serverSocket.getLocalPort());
+    }
 }

@@ -34,11 +34,7 @@ public class IntegrationTest {
         AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
         client.addPeer(server.getAddress());
         client.downloadFile(FileService.getFileInfo(file));
-        Optional<File> completedFile;
-        //TODO add some form of timeout
-        do {
-            completedFile = client.getFile(FILENAME);
-        } while(completedFile.isEmpty());
+        Optional<File> completedFile = getDownloadedFile(client, FILENAME);
 
         assertEquals(-1, Files.mismatch(file.toPath(), completedFile.get().toPath()));
         server.shutDown();
@@ -63,10 +59,7 @@ public class IntegrationTest {
 
         nodeD.downloadFile(FileService.getFileInfo(file));
 
-        Optional<File> downloadedFile;
-        do {
-            downloadedFile = nodeD.getFile(FILENAME);
-        } while (downloadedFile.isEmpty());
+        Optional<File> downloadedFile = getDownloadedFile(nodeD, FILENAME);
 
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
 
@@ -94,10 +87,7 @@ public class IntegrationTest {
 
         client.downloadFile(FileService.getFileInfo(file));
 
-        Optional<File> downloadedFile;
-        do {
-            downloadedFile = client.getFile(FILENAME);
-        } while (downloadedFile.isEmpty());
+        Optional<File> downloadedFile = getDownloadedFile(client, FILENAME);
 
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
         nodes.forEach(AKTorrent::shutDown);
@@ -149,10 +139,7 @@ public class IntegrationTest {
 
         client.downloadFile(FileService.getFileInfo(file));
 
-        Optional<File> downloadedFile;
-        do{
-            downloadedFile = client.getFile(file.getName());
-        } while (downloadedFile.isEmpty());
+        Optional<File> downloadedFile = getDownloadedFile(client, file.getName());
 
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
         nodeA.shutDown();
@@ -220,6 +207,15 @@ public class IntegrationTest {
 
         liveNode.shutDown();
         clientNode.shutDown();
+    }
+
+    private static Optional<File> getDownloadedFile(AKTorrent node, String filename) {
+        Optional<File> downloadedFile;
+        //TODO add some kind of timeout
+        do {
+            downloadedFile = node.getFile(filename);
+        } while (downloadedFile.isEmpty());
+        return downloadedFile;
     }
 
     private File getFile(String filename) {

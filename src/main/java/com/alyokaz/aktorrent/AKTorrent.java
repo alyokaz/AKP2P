@@ -68,18 +68,13 @@ public class AKTorrent {
     public static AKTorrent createAndInitialize(InetSocketAddress beaconAddress) {
         AKTorrent node = init();
         node.peerService.contactBeacon(node.server.getServerAddress(), beaconAddress);
-        initServices(node);
+        node.peerService.discoverPeers();
+        node.fileService.updateAvailableFiles();
         return node;
     }
 
     public static AKTorrent createAndInitializeNoBeacon() {
-        AKTorrent node = init();
-        initServices(node);
-        return node;
-    }
-    private static void initServices(AKTorrent node) {
-        node.peerService.discoverPeers();
-        node.fileService.updateAvailableFiles();
+        return init();
     }
 
     private static AKTorrent init()  {

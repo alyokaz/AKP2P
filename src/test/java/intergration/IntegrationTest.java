@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -25,9 +26,10 @@ public class IntegrationTest {
     private static final String LOCAL_HOST = "127.0.0.1";
     private static final String FILENAME = "test_file.mp4";
     private static final String FILENAME_2 = "test_file_2.mp4";
+    private final static ExecutorService executor = Executors.newCachedThreadPool();
 
     @Test
-    public void canSeedAndReceiveFile() throws IOException {
+    public void canSeedAndReceiveFile() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         File file = getFile(FILENAME);
         AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
         server.seedFile(file);
@@ -35,14 +37,14 @@ public class IntegrationTest {
         AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
         client.addPeer(server.getAddress());
         client.downloadFile(FileService.getFileInfo(file));
-        Optional<File> completedFile = getDownloadedFile(client, FILENAME);
+        File completedFile = getDownloadedFile(client, FILENAME).get(3000, TimeUnit.MILLISECONDS);
 
-        assertEquals(-1, Files.mismatch(file.toPath(), completedFile.get().toPath()));
+        assertEquals(-1, Files.mismatch(file.toPath(), completedFile.toPath()));
         server.shutDown();
     }
 
     @Test
-    public void canDownloadFromTwoPeers() throws IOException {
+    public void canDownloadFromTwoPeers() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         File file = getFile(FILENAME);
 
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
@@ -60,9 +62,9 @@ public class IntegrationTest {
 
         nodeD.downloadFile(FileService.getFileInfo(file));
 
-        Optional<File> downloadedFile = getDownloadedFile(nodeD, FILENAME);
+        File downloadedFile = getDownloadedFile(nodeD, FILENAME).get(3000, TimeUnit.SECONDS);
 
-        assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
+        assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.toPath()));
 
         nodeA.shutDown();
         nodeB.shutDown();
@@ -72,7 +74,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void canDownloadFromMultiplePeers() throws IOException {
+    public void canDownloadFromMultiplePeers() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         final int numberOfPeers = 10;
         File file = getFile(FILENAME);
 
@@ -88,9 +90,9 @@ public class IntegrationTest {
 
         client.downloadFile(FileService.getFileInfo(file));
 
-        Optional<File> downloadedFile = getDownloadedFile(client, FILENAME);
+        File downloadedFile = getDownloadedFile(client, FILENAME).get(3000, TimeUnit.MILLISECONDS);
 
-        assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
+        assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.toPath()));
         nodes.forEach(AKTorrent::shutDown);
     }
 
@@ -122,7 +124,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void testDiscoverTransientPeers() throws IOException {
+    public void testDiscoverTransientPeers() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeC = AKTorrent.createAndInitializeNoBeacon();
@@ -140,9 +142,9 @@ public class IntegrationTest {
 
         client.downloadFile(FileService.getFileInfo(file));
 
-        Optional<File> downloadedFile = getDownloadedFile(client, file.getName());
+        File downloadedFile = getDownloadedFile(client, file.getName()).get(3000, TimeUnit.MILLISECONDS);
 
-        assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
+        assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.toPath()));
         nodeA.shutDown();
         nodeB.shutDown();
         nodeC.shutDown();
@@ -234,13 +236,14 @@ public class IntegrationTest {
         assertEquals(1, nodeA.getPeers().size());
     }
 
-    private static Optional<File> getDownloadedFile(AKTorrent node, String filename) {
-        Optional<File> downloadedFile;
-        //TODO add some kind of timeout
-        do {
-            downloadedFile = node.getFile(filename);
-        } while (downloadedFile.isEmpty());
-        return downloadedFile;
+    private static Future<File> getDownloadedFile(AKTorrent node, String filename) {
+        return executor.submit(() -> {
+            Optional<File> downloadedFile;
+            do {
+                downloadedFile = node.getFile(filename);
+            } while (downloadedFile.isEmpty());
+            return downloadedFile.get();
+        });
     }
 
     private File getFile(String filename) {

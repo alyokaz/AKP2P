@@ -1,10 +1,12 @@
 package com.alyokaz.aktorrent.fileservice;
 
+import com.alyokaz.aktorrent.peerservice.PeerService;
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
 import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Set;
@@ -13,11 +15,13 @@ public class DownloadHandler implements Runnable {
 
     private final InetSocketAddress address;
     private final FileService fileService;
+    private final PeerService peerService;
 
     public DownloadHandler(InetSocketAddress address,
-                           FileService fileService) {
+                           FileService fileService, PeerService peerService) {
         this.address = address;
         this.fileService = fileService;
+        this.peerService = peerService;
     }
 
     @Override
@@ -33,6 +37,9 @@ public class DownloadHandler implements Runnable {
             filenames.stream().filter(fileService.getFiles()::containsKey).forEach(filename -> downloadPieces(filename, out, in));
             // signal to peer to close connection as we are finished
             out.writeObject(new Message(MessageType.END));
+        } catch (ConnectException e) {
+            peerService.removeFromLivePeers(address);
+            System.out.println("Peer at " + address + "not reachable");
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

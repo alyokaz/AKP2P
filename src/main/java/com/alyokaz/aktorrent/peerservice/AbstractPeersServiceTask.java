@@ -3,6 +3,7 @@ package com.alyokaz.aktorrent.peerservice;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -22,6 +23,9 @@ public abstract class AbstractPeersServiceTask implements Runnable {
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
             process(in, out);
+        } catch (ConnectException e) {
+            System.out.println("Could not connect to peer :" + address + " : " + e);
+            peerService.removeFromLivePeers(address);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

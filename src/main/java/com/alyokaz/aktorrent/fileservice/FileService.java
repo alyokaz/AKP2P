@@ -60,11 +60,11 @@ public class FileService {
             }
         });
     }
-
     public void downloadAllFiles() {
         peerService.discoverPeers();
-        executor.execute(() -> this.peerService.getPeers().forEach(address ->
-                executor.execute(new DownloadHandler(address, this))));
+        //TODO do we need to signal that a download is or is not in progress for a quick return from the getFile method?
+        executor.execute(() -> this.peerService.getLivePeers().forEach(address ->
+                executor.execute(new DownloadHandler(address, this, peerService))));
     }
 
     public PieceContainer getFile(String filename) {

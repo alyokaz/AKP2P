@@ -58,7 +58,7 @@ public class PeerHandler implements Runnable {
     }
 
     private void processRequestPeers(ObjectOutputStream out) throws IOException {
-        out.writeObject(peerService.getPeers());
+        out.writeObject(peerService.getLivePeers());
     }
 
     private void processAvailableFilesRequest(ObjectOutputStream out) throws IOException {

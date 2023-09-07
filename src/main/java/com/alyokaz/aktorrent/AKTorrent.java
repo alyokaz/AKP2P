@@ -26,6 +26,7 @@ public class AKTorrent {
         this.fileService = fileService;
     }
 
+    //TODO this is redundant, remove and use direct call
     public void downloadAllFiles() {
         fileService.downloadAllFiles();
     }

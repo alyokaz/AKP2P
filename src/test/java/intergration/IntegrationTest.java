@@ -4,12 +4,14 @@ import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.beacon.Beacon;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +64,7 @@ public class IntegrationTest {
 
         nodeD.downloadFile(FileService.getFileInfo(file));
 
-        File downloadedFile = getDownloadedFile(nodeD, FILENAME).get(3000, TimeUnit.SECONDS);
+        File downloadedFile = getDownloadedFile(nodeD, FILENAME).get(3000, TimeUnit.MILLISECONDS);
 
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.toPath()));
 
@@ -133,13 +135,15 @@ public class IntegrationTest {
         nodeC.seedFile(file);
 
         nodeB.addPeer(nodeC.getAddress());
+        nodeB.getAvailableFiles();
 
         nodeA.addPeer(nodeB.getAddress());
+        nodeB.getAvailableFiles();
 
         AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
 
         client.addPeer(nodeA.getAddress());
-
+        // discover peers is not called when peers are added
         client.downloadFile(FileService.getFileInfo(file));
 
         File downloadedFile = getDownloadedFile(client, file.getName()).get(3000, TimeUnit.MILLISECONDS);
@@ -213,6 +217,27 @@ public class IntegrationTest {
     }
 
     @Test
+    public void willNotDownloadFromDeadNode() {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+        File file = getFile(FILENAME);
+        nodeA.seedFile(file);
+        nodeB.addPeer(nodeA.getAddress());
+
+        nodeA.shutDown();
+        nodeB.downloadFile(FileService.getFileInfo(file));
+
+        assertThrows(TimeoutException.class,
+                () -> getDownloadedFile(nodeB, FILENAME).get(3000, TimeUnit.MILLISECONDS));
+        // dead node removed from live peers and placed back into peers
+        assertFalse(nodeB.getLivePeers().contains(nodeA.getAddress()));
+        assertTrue(nodeB.getPeers().contains(nodeA.getAddress()));
+
+        nodeA.shutDown();
+        nodeB.shutDown();
+    }
+
+    @Test
     public void canAddNodes() {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
@@ -221,9 +246,10 @@ public class IntegrationTest {
         nodeA.addPeer(nodeB.getAddress());
         nodeA.addPeer(nodeC.getAddress());
 
-        assertTrue(nodeA.getPeers().size() == 2);
-        assertTrue(nodeA.getPeers().containsAll(List.of(nodeB.getAddress(), nodeC.getAddress())));
+        assertTrue(nodeA.getLivePeers().size() == 2);
+        assertTrue(nodeA.getLivePeers().containsAll(List.of(nodeB.getAddress(), nodeC.getAddress())));
     }
+
 
     @Test
     public void preventDuplicatePeer() {
@@ -233,7 +259,7 @@ public class IntegrationTest {
         nodeA.addPeer(nodeB.getAddress());
         nodeA.addPeer(nodeB.getAddress());
 
-        assertEquals(1, nodeA.getPeers().size());
+        assertEquals(1, nodeA.getLivePeers().size());
     }
 
     private static Future<File> getDownloadedFile(AKTorrent node, String filename) {
@@ -241,7 +267,7 @@ public class IntegrationTest {
             Optional<File> downloadedFile;
             do {
                 downloadedFile = node.getFile(filename);
-            } while (downloadedFile.isEmpty());
+            } while (!Thread.interrupted() && downloadedFile.isEmpty());
             return downloadedFile.get();
         });
     }

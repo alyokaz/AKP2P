@@ -4,10 +4,7 @@ import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.pingserver.PingServer;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -24,7 +21,7 @@ public class PeerService {
 
     public void discoverPeers() {
         Set<Future<?>> futures = new HashSet<>();
-        peers.forEach(address -> futures.add(executor.submit(new DiscoverPeersTask(address, this))));
+        livePeers.forEach(address -> futures.add(executor.submit(new DiscoverPeersTask(address, this))));
         futures.forEach(future -> {
             try {
                 future.get();
@@ -38,6 +35,7 @@ public class PeerService {
         peers.add(address);
         if(pingPeer(address)) {
             livePeers.add(address);
+            peers.remove(address);
             return true;
         } else
             return false;
@@ -78,5 +76,10 @@ public class PeerService {
 
     public Set<InetSocketAddress> getPeers() {
         return Collections.unmodifiableSet(this.peers);
+    }
+
+    public void removeFromLivePeers(InetSocketAddress address) {
+        livePeers.remove(address);
+        peers.add(address);
     }
 }

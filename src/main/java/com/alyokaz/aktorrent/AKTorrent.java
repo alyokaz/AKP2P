@@ -63,18 +63,14 @@ public class AKTorrent {
 
 
     public static AKTorrent createAndInitialize(InetSocketAddress beaconAddress) {
-        AKTorrent node = init();
-        node.peerService.contactBeacon(node.server.getServerAddress(), beaconAddress);
-        node.peerService.discoverPeers();
-        node.fileService.updateAvailableFiles();
-        return node;
+        return init(beaconAddress);
     }
 
     public static AKTorrent createAndInitializeNoBeacon() {
-        return init();
+        return init(null);
     }
 
-    private static AKTorrent init()  {
+    private static AKTorrent init(InetSocketAddress beaconAddress)  {
         PeerService peerService = new PeerService();
         FileService fileService = new FileService(peerService);
 
@@ -95,6 +91,12 @@ public class AKTorrent {
 
         PingServer pingServer = new PingServer(datagramSocket);
         pingServer.start();
+
+        if(beaconAddress != null) {
+            peerService.contactBeacon(server.getServerAddress(), beaconAddress);
+            peerService.discoverPeers();
+            fileService.updateAvailableFiles();
+        }
 
         return new AKTorrent(server, pingServer, peerService, fileService);
     }

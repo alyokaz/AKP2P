@@ -1,5 +1,6 @@
 package com.alyokaz.aktorrent;
 
+import com.alyokaz.aktorrent.beacon.Beacon;
 import com.alyokaz.aktorrent.cli.CLI;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
@@ -18,12 +19,22 @@ public class AKTorrent {
     private final PingServer udpServer;
     private final PeerService peerService;
     private final FileService fileService;
+    private final InetSocketAddress beaconAddress;
+
+    public AKTorrent(Server server, PingServer udpServer, PeerService peerService, FileService fileService, InetSocketAddress beaconAddress) {
+        this.server = server;
+        this.udpServer = udpServer;
+        this.peerService = peerService;
+        this.fileService = fileService;
+        this.beaconAddress = beaconAddress;
+    }
 
     public AKTorrent(NodeServer server, PingServer udpServer, PeerService peerService, FileService fileService) {
         this.server = server;
         this.udpServer = udpServer;
         this.peerService = peerService;
         this.fileService = fileService;
+        this.beaconAddress = null;
     }
 
     public void seedFile(File file) {
@@ -96,6 +107,8 @@ public class AKTorrent {
             peerService.contactBeacon(server.getServerAddress(), beaconAddress);
             peerService.discoverPeers();
             fileService.updateAvailableFiles();
+            return new AKTorrent(server, pingServer, peerService, fileService,
+                    beaconAddress);
         }
 
         return new AKTorrent(server, pingServer, peerService, fileService);

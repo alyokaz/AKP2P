@@ -5,7 +5,7 @@ import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.peerservice.PeerService;
 import com.alyokaz.aktorrent.pingserver.PingServer;
-import com.alyokaz.aktorrent.server.Server;
+import com.alyokaz.aktorrent.server.NodeServer;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,12 +14,12 @@ import java.util.*;
 
 
 public class AKTorrent {
-    private final Server server;
+    private final NodeServer server;
     private final PingServer udpServer;
     private final PeerService peerService;
     private final FileService fileService;
 
-    public AKTorrent(Server server, PingServer udpServer, PeerService peerService, FileService fileService) {
+    public AKTorrent(NodeServer server, PingServer udpServer, PeerService peerService, FileService fileService) {
         this.server = server;
         this.udpServer = udpServer;
         this.peerService = peerService;
@@ -86,7 +86,7 @@ public class AKTorrent {
             throw new RuntimeException(e);
         }
 
-        Server server = new Server(serverSocket, peerService, fileService);
+        NodeServer server = new NodeServer(serverSocket, peerService, fileService);
         server.start();
 
         PingServer pingServer = new PingServer(datagramSocket);

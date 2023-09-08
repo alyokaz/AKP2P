@@ -1,6 +1,8 @@
 package com.alyokaz.aktorrent.beacon;
 
 import com.alyokaz.aktorrent.pingserver.PingServer;
+import com.alyokaz.aktorrent.server.BeaconServer;
+import com.alyokaz.aktorrent.server.Server;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -11,23 +13,23 @@ import java.util.List;
 
 public class Beacon {
 
-    final private BeaconServer beaconServer;
+    final private Server beaconServer;
     final private PingServer pingServer;
 
-    public Beacon(BeaconServer beaconServer, PingServer pingServer) {
+    public Beacon(Server beaconServer, PingServer pingServer) {
         this.beaconServer = beaconServer;
         this.pingServer = pingServer;
     }
 
     public void shutDown() {
         if(this.beaconServer != null)
-            this.beaconServer.shutDown();
+            this.beaconServer.shutdown();
         if(this.pingServer != null)
             this.pingServer.shutdown();
     }
 
     public InetSocketAddress getAddress() {
-        return beaconServer.getAddress();
+        return beaconServer.getServerAddress();
     }
 
     public static Beacon createAndInitialise() {
@@ -42,7 +44,7 @@ public class Beacon {
 
         List<InetSocketAddress> peers = new ArrayList<>();
 
-        BeaconServer beaconServer = new BeaconServer(serverSocket, peers);
+        Server beaconServer = new BeaconServer(serverSocket, peers);
         beaconServer.start();
 
         PingServer pingServer = new PingServer(datagramSocket);

@@ -13,6 +13,7 @@ public class PeerService {
     private final Set<InetSocketAddress> peers = Collections.synchronizedSet(new HashSet<>());
     private final Set<InetSocketAddress> livePeers = new HashSet<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
+    private Set<InetSocketAddress> excluded = new HashSet<>();
     public PeerService() {
     }
 
@@ -29,8 +30,8 @@ public class PeerService {
     }
 
     public synchronized boolean addPeer(InetSocketAddress address) {
-        //TODO prevent double add
-        peers.add(address);
+        if(excluded.contains(address) || !peers.add(address))
+            return false;
         if(pingPeer(address)) {
             livePeers.add(address);
             peers.remove(address);
@@ -79,5 +80,13 @@ public class PeerService {
     public void removeFromLivePeers(InetSocketAddress address) {
         livePeers.remove(address);
         peers.add(address);
+    }
+
+    public boolean addExcluded(InetSocketAddress address) {
+        return excluded.add(address);
+    }
+
+    public boolean removeExcluded(InetSocketAddress address) {
+        return excluded.remove(address);
     }
 }

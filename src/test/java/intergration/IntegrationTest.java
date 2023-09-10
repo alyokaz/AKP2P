@@ -4,6 +4,7 @@ import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.beacon.Beacon;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
+import com.alyokaz.aktorrent.server.NodeServer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -244,6 +245,18 @@ public class IntegrationTest {
         nodeA.addPeer(nodeB.getAddress());
         nodeB.addPeer(nodeA.getAddress());
         nodeB.getAvailableFiles();
+    }
+
+    @Test
+    public void shouldNotAddSelfToPeers() {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+        nodeA.addPeer(nodeB.getAddress());
+        nodeB.addPeer(nodeA.getAddress());
+
+        nodeA.getAvailableFiles();
+
+        assertFalse(nodeA.getLivePeers().contains(nodeA.getAddress()));
     }
 
     @Test

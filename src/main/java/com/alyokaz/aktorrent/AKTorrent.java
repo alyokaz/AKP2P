@@ -36,7 +36,7 @@ public class AKTorrent {
     }
 
     public void addPeer(InetSocketAddress address) {
-        if(peerService.addPeer(address))
+        if(address != server.getServerAddress() && peerService.addPeer(address))
             fileService.updateAvailableFiles();
     }
 
@@ -88,6 +88,8 @@ public class AKTorrent {
 
         NodeServer server = new NodeServer(serverSocket, peerService, fileService);
         server.start();
+
+        peerService.addExcluded(server.getServerAddress());
 
         PingServer pingServer = new PingServer(datagramSocket);
         pingServer.start();

@@ -121,6 +121,12 @@ public class IntegrationTest {
         node_B.shutDown();
     }
 
+    // Why is this passing if with beacon it fails?
+    // The test only works because the client node runs updatePeers transitively
+    // through getAvailableFiles. It gathers all peers and then tries to download
+    // the file from all of them. It should only download from nodes that have
+    // the file. The address of the node(s) should be stored with the file for
+    // this.
     @Test
     public void testDiscoverTransientPeers() throws IOException, ExecutionException, InterruptedException, TimeoutException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
@@ -131,10 +137,8 @@ public class IntegrationTest {
         nodeC.seedFile(file);
 
         nodeB.addPeer(nodeC.getAddress());
-        nodeB.getAvailableFiles();
 
         nodeA.addPeer(nodeB.getAddress());
-        nodeB.getAvailableFiles();
 
         AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
 

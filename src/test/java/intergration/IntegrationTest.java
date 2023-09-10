@@ -5,6 +5,7 @@ import com.alyokaz.aktorrent.beacon.Beacon;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -143,7 +144,7 @@ public class IntegrationTest {
         AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
 
         client.addPeer(nodeA.getAddress());
-        // discover peers is not called when peers are added
+        client.getAvailableFiles();
         client.downloadFile(FileService.getFileInfo(file));
 
         File downloadedFile = getDownloadedFile(client, file.getName()).get(3000, TimeUnit.MILLISECONDS);
@@ -234,6 +235,15 @@ public class IntegrationTest {
 
         nodeA.shutDown();
         nodeB.shutDown();
+    }
+
+    @Test
+    public void gettingAvailableFilesShouldNotCauseLoop() {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+        nodeA.addPeer(nodeB.getAddress());
+        nodeB.addPeer(nodeA.getAddress());
+        nodeB.getAvailableFiles();
     }
 
     @Test

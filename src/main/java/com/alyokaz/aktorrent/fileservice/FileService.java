@@ -43,10 +43,14 @@ public class FileService {
             return Optional.empty();
     }
 
-    public Set<FileInfo> getAvailableFiles() {
+    public Set<FileInfo> updateAndGetAvailableFiles() {
         peerService.discoverPeers();
         updateAvailableFiles();
         return availableFiles;
+    }
+
+    public Set<FileInfo> getAvailableFiles() {
+        return Set.copyOf(availableFiles);
     }
 
     public void updateAvailableFiles() {

@@ -54,7 +54,7 @@ public class AKTorrent {
     }
 
     public Set<FileInfo> getAvailableFiles() {
-        return fileService.getAvailableFiles();
+        return fileService.updateAndGetAvailableFiles();
     }
 
     public InetSocketAddress getAddress() {

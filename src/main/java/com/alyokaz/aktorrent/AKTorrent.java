@@ -26,18 +26,13 @@ public class AKTorrent {
         this.fileService = fileService;
     }
 
-    //TODO this is redundant, remove and use direct call
-    public void downloadAllFiles() {
-        fileService.downloadAllFiles();
-    }
-
     public void seedFile(File file) {
         fileService.addFile(file);
     }
 
     public void downloadFile(FileInfo fileInfo) {
         fileService.addFile(fileInfo);
-        downloadAllFiles();
+        fileService.downloadAllFiles();
     }
 
     public void addPeer(InetSocketAddress address) {

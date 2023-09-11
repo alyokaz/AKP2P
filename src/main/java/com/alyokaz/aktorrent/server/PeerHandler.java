@@ -12,6 +12,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Optional;
 import java.util.Set;
@@ -37,9 +38,11 @@ public class PeerHandler implements Runnable {
             //TODO thread name is adding PeerHandler everytime it is reused
             Thread.currentThread().setName(Thread.currentThread().getName() + " PeerHandler");
             System.out.println(Thread.currentThread().getName() + " Client Connected");
+
             boolean end = false;
             while(!Thread.currentThread().isInterrupted() && !end) {
                 Message message = (Message) in.readObject();
+                peerService.addPeer(message.getServerAddress());
                 switch (message.getType()) {
                     case REQUEST_FILENAMES -> out.writeObject(Set.copyOf(fileService.getFiles().keySet()));
                     case REQUEST_PIECE -> processPieceRequest((RequestPieceMessage) message, out);
@@ -72,7 +75,7 @@ public class PeerHandler implements Runnable {
 
         try {
             if(piece.isEmpty())
-                out.writeObject(new Message(MessageType.END));
+                out.writeObject(new Message(MessageType.END, null));
             else
                 out.writeObject(piece.get());
             //TODO Replace with download speed settings option

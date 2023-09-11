@@ -31,12 +31,14 @@ public class DownloadHandler implements Runnable {
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
             Thread.currentThread().setName(Thread.currentThread().getName() + " DownloadHandler");
             // request names of available files from peer
-            out.writeObject(new Message(MessageType.REQUEST_FILENAMES));
+            out.writeObject(new Message(MessageType.REQUEST_FILENAMES,
+                    peerService.getServerAddress()));
             Set<String> filenames = (Set<String>) in.readObject();
             // check if we are interested in any of the available files and begin download
             filenames.stream().filter(fileService.getFiles()::containsKey).forEach(filename -> downloadPieces(filename, out, in));
             // signal to peer to close connection as we are finished
-            out.writeObject(new Message(MessageType.END));
+            out.writeObject(new Message(MessageType.END,
+                    peerService.getServerAddress()));
         } catch (ConnectException e) {
             peerService.removeFromLivePeers(address);
             System.out.println("Peer at " + address + "not reachable");
@@ -57,7 +59,8 @@ public class DownloadHandler implements Runnable {
                 int nextId = container.requestPiece();
                 if (nextId == -1) break;
                 // request piece from peer
-                out.writeObject(new RequestPieceMessage(filename, nextId));
+                out.writeObject(new RequestPieceMessage(filename, nextId,
+                        peerService.getServerAddress()));
                 Object readObject = in.readObject();
                 if (readObject instanceof Piece) {
                     container.addPiece((Piece) readObject);

@@ -7,7 +7,7 @@ public class BeaconMessage extends Message {
     private InetSocketAddress serverAddress;
 
     public BeaconMessage(MessageType type, InetSocketAddress serverAddress) {
-        super(type);
+        super(type, serverAddress);
         this.serverAddress = serverAddress;
     }
 

@@ -14,12 +14,16 @@ public class PeerService {
     private final Set<InetSocketAddress> livePeers = new HashSet<>();
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private Set<InetSocketAddress> excluded = new HashSet<>();
+    private InetSocketAddress serverAddress;
+
     public PeerService() {
     }
 
     public void discoverPeers() {
         Set<Future<?>> futures = new HashSet<>();
-        livePeers.forEach(address -> futures.add(executor.submit(new DiscoverPeersTask(address, this))));
+        livePeers.forEach(address ->
+                futures.add(executor.submit(new DiscoverPeersTask(address,
+                        this, serverAddress))));
         futures.forEach(future -> {
             try {
                 future.get();
@@ -88,5 +92,13 @@ public class PeerService {
 
     public boolean removeExcluded(InetSocketAddress address) {
         return excluded.remove(address);
+    }
+
+    public void setServerAddress(InetSocketAddress serverAddress) {
+        this.serverAddress = serverAddress;
+    }
+
+    public InetSocketAddress getServerAddress() {
+        return serverAddress;
     }
 }

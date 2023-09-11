@@ -61,6 +61,7 @@ public class AKTorrent {
         return this.server.getServerAddress();
     }
 
+
     public static AKTorrent createAndInitialize(InetSocketAddress beaconAddress) {
         AKTorrent node = init();
         node.peerService.contactBeacon(node.server.getServerAddress(), beaconAddress);
@@ -90,6 +91,7 @@ public class AKTorrent {
         server.start();
 
         peerService.addExcluded(server.getServerAddress());
+        peerService.setServerAddress(server.getServerAddress());
 
         PingServer pingServer = new PingServer(datagramSocket);
         pingServer.start();

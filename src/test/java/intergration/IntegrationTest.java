@@ -4,23 +4,17 @@ import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.beacon.Beacon;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
-import com.alyokaz.aktorrent.server.NodeServer;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
-import java.time.Duration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -270,6 +264,16 @@ public class IntegrationTest {
 
         assertTrue(nodeA.getLivePeers().size() == 2);
         assertTrue(nodeA.getLivePeers().containsAll(List.of(nodeB.getAddress(), nodeC.getAddress())));
+    }
+
+    @Test
+    public void peerIsRegisteredOnContact() {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+
+        nodeB.addPeer(nodeA.getAddress());
+
+        assertTrue(nodeA.getLivePeers().contains(nodeB.getAddress()));
     }
 
 

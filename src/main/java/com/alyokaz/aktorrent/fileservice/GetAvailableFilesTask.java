@@ -14,9 +14,11 @@ import java.util.concurrent.Callable;
 public class GetAvailableFilesTask implements Callable<Set<FileInfo>> {
 
     InetSocketAddress address;
+    private final InetSocketAddress serverAddress;
 
-    public GetAvailableFilesTask(InetSocketAddress address) {
+    public GetAvailableFilesTask(InetSocketAddress address, InetSocketAddress serverAddress) {
         this.address = address;
+        this.serverAddress = serverAddress;
     }
 
     @Override
@@ -25,7 +27,7 @@ public class GetAvailableFilesTask implements Callable<Set<FileInfo>> {
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
 
-            out.writeObject(new Message(MessageType.REQUEST_AVAILABLE_FILES));
+            out.writeObject(new Message(MessageType.REQUEST_AVAILABLE_FILES, serverAddress));
             Object obj = in.readObject();
             return (Set<FileInfo>) obj;
         } catch (IOException | ClassNotFoundException e) {

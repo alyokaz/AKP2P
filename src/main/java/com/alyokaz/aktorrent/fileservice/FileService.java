@@ -55,7 +55,9 @@ public class FileService {
 
     public void updateAvailableFiles() {
         Set<Future<Set<FileInfo>>> futures = new HashSet<>();
-        this.peerService.getLivePeers().forEach(address -> futures.add(executor.submit(new GetAvailableFilesTask(address))));
+        this.peerService.getLivePeers().forEach(address ->
+                futures.add(executor.submit(new GetAvailableFilesTask(address,
+                        peerService.getServerAddress()))));
         futures.forEach(f -> {
             try {
                 availableFiles.addAll(f.get());

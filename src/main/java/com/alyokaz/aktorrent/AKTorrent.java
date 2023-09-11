@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.net.*;
 import java.util.*;
 
-
+//TODO This class should be refactored to get rid of the null argument for
+// beacon address. It seems a lot of the logic that requires communication between
+// the services could be simplified by pulling it up into this class.
 public class AKTorrent {
     private final NodeServer server;
     private final PingServer udpServer;
@@ -21,7 +23,7 @@ public class AKTorrent {
     private final FileService fileService;
     private final InetSocketAddress beaconAddress;
 
-    public AKTorrent(Server server, PingServer udpServer, PeerService peerService, FileService fileService, InetSocketAddress beaconAddress) {
+    public AKTorrent(NodeServer server, PingServer udpServer, PeerService peerService, FileService fileService, InetSocketAddress beaconAddress) {
         this.server = server;
         this.udpServer = udpServer;
         this.peerService = peerService;
@@ -65,6 +67,8 @@ public class AKTorrent {
     }
 
     public Set<FileInfo> getAvailableFiles() {
+        if(beaconAddress != null)
+            peerService.contactBeacon(server.getServerAddress(), beaconAddress);
         return fileService.updateAndGetAvailableFiles();
     }
 

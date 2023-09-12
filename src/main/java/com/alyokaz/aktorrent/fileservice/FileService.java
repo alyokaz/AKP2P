@@ -85,13 +85,15 @@ public class FileService {
         outputFile.createNewFile();
 
         try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFile))) {
-            container.getPieces().stream().sorted(Comparator.comparing(Piece::getId)).forEach(p -> {
-                try {
-                    out.write(p.getData());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            container.getPieces().stream()
+                    .sorted(Comparator.comparing(Piece::getId))
+                    .forEach(p -> {
+                        try {
+                            out.write(p.getData());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
             completedFiles.put(outputFile.getName(), outputFile);
         }
     }

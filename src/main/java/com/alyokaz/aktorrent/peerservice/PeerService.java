@@ -22,8 +22,8 @@ public class PeerService {
     public void discoverPeers() {
         Set<Future<?>> futures = new HashSet<>();
         livePeers.forEach(address ->
-                futures.add(executor.submit(new DiscoverPeersTask(address,
-                        this, serverAddress))));
+                futures.add(executor.submit(new DiscoverPeersTask(address, this, serverAddress))));
+
         futures.forEach(future -> {
             try {
                 future.get();
@@ -58,7 +58,8 @@ public class PeerService {
             String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
             return (payload.equals(PingServer.PONG_PAYLOAD));
         } catch (SocketTimeoutException e) {
-            System.out.println("Ping timed out for: " + address.getHostName() + ":" + address.getPort());
+            System.out.println("Ping timed out for: " + address.getHostName()
+                    + ":" + address.getPort());
             return false;
         } catch (IOException e) {
             throw new RuntimeException(e);

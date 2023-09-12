@@ -51,7 +51,8 @@ public class PieceContainer {
             return -1;
 
         List<Integer> ids = this.pieces.stream().map(Piece::getId).collect(Collectors.toList());
-        List<Integer> candidateIds = IntStream.range(0, this.fileInfo.getTotalPieces()).filter(i -> !ids.contains(i)).boxed().collect(Collectors.toList());
+        List<Integer> candidateIds = IntStream.range(0, this.fileInfo.getTotalPieces())
+                .filter(i -> !ids.contains(i)).boxed().collect(Collectors.toList());
         int chosenId = candidateIds.get(new Random().nextInt(candidateIds.size()));
         this.downloadingPieces.add(chosenId);
         return chosenId;

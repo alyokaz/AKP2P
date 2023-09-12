@@ -23,7 +23,8 @@ public class AKTorrent {
     private final FileService fileService;
     private final InetSocketAddress beaconAddress;
 
-    public AKTorrent(NodeServer server, PingServer udpServer, PeerService peerService, FileService fileService, InetSocketAddress beaconAddress) {
+    public AKTorrent(NodeServer server, PingServer udpServer, PeerService peerService, FileService fileService,
+                     InetSocketAddress beaconAddress) {
         this.server = server;
         this.udpServer = udpServer;
         this.peerService = peerService;
@@ -120,7 +121,8 @@ public class AKTorrent {
 
 
     public static void main(String[] args) throws IOException {
-        InetSocketAddress beaconAddress = new InetSocketAddress(args[0], Integer.parseInt(args[1]));
+        InetSocketAddress beaconAddress =
+                new InetSocketAddress(args[0], Integer.parseInt(args[1]));
         AKTorrent node = AKTorrent.createAndInitialize(beaconAddress);
         CLI cli = new CLI(System.in, System.out, node);
         cli.start();

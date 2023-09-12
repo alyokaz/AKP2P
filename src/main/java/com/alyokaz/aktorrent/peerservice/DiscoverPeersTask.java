@@ -13,8 +13,7 @@ public class DiscoverPeersTask extends AbstractPeersServiceTask {
 
     private InetSocketAddress serverAddress;
 
-    public DiscoverPeersTask(InetSocketAddress address, PeerService peerService,
-                             InetSocketAddress serverAddress) {
+    public DiscoverPeersTask(InetSocketAddress address, PeerService peerService, InetSocketAddress serverAddress) {
         super(address, peerService);
         this.serverAddress = serverAddress;
     }

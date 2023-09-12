@@ -115,7 +115,8 @@ public class CLITests {
         buildAndStartCLI(in, out, node);
         Scanner scanner = new Scanner(bytes.toString());
 
-        assertDisplayOutput(() -> assertEquals(command + CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine()), scanner);
+        assertDisplayOutput(() ->
+                assertEquals(command + CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine()), scanner);
     }
 
     @Test

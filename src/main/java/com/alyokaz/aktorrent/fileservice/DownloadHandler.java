@@ -30,15 +30,18 @@ public class DownloadHandler implements Runnable {
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
             Thread.currentThread().setName(Thread.currentThread().getName() + " DownloadHandler");
+
             // request names of available files from peer
-            out.writeObject(new Message(MessageType.REQUEST_FILENAMES,
-                    peerService.getServerAddress()));
+            out.writeObject(new Message(MessageType.REQUEST_FILENAMES, peerService.getServerAddress()));
             Set<String> filenames = (Set<String>) in.readObject();
+
             // check if we are interested in any of the available files and begin download
-            filenames.stream().filter(fileService.getFiles()::containsKey).forEach(filename -> downloadPieces(filename, out, in));
+            filenames.stream()
+                    .filter(fileService.getFiles()::containsKey)
+                    .forEach(filename -> downloadPieces(filename, out, in));
+
             // signal to peer to close connection as we are finished
-            out.writeObject(new Message(MessageType.END,
-                    peerService.getServerAddress()));
+            out.writeObject(new Message(MessageType.END, peerService.getServerAddress()));
         } catch (ConnectException e) {
             peerService.removeFromLivePeers(address);
             System.out.println("Peer at " + address + "not reachable");
@@ -52,12 +55,14 @@ public class DownloadHandler implements Runnable {
         // allocation of which pieces should be downloaded
         PieceContainer container = fileService.getFile(filename);
         if (container.complete()) return;
+
         try {
             while (!container.complete()) {
                 // claim a piece that is not yet downloaded, or is not currently downloading, to prevent duplicate
                 // downloads of the same piece
                 int nextId = container.requestPiece();
                 if (nextId == -1) break;
+
                 // request piece from peer
                 out.writeObject(new RequestPieceMessage(filename, nextId,
                         peerService.getServerAddress()));
@@ -65,9 +70,11 @@ public class DownloadHandler implements Runnable {
                 if (readObject instanceof Piece) {
                     container.addPiece((Piece) readObject);
                 }
+
                 System.out.printf(Thread.currentThread().getName() + " - %.2f %%%n",
                         (container.getPieces().size() / (double) container.getTotalPieces()) * 100);
             }
+
             // build the file and save it to the local file system
             fileService.buildFile(container);
         } catch (EOFException e) {

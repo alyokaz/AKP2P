@@ -169,7 +169,9 @@ public class IntegrationTest {
     public void pingByMultipleNodes() throws IOException {
         AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
 
-        Set<AKTorrent> nodes = Stream.generate(AKTorrent::createAndInitializeNoBeacon).limit(100).collect(Collectors.toSet());
+        Set<AKTorrent> nodes = Stream.generate(AKTorrent::createAndInitializeNoBeacon)
+                .limit(100)
+                .collect(Collectors.toSet());
         InetSocketAddress serverAddress = server.getAddress();
         nodes.forEach(node -> node.addPeer(serverAddress));
 
@@ -207,8 +209,7 @@ public class IntegrationTest {
 
         nodeB.downloadFile(FileService.getFileInfo(file));
 
-        File downloadedFile = getDownloadedFile(nodeB, FILENAME)
-                .get(3000, TimeUnit.MILLISECONDS);
+        File downloadedFile = getDownloadedFile(nodeB, FILENAME).get(3000, TimeUnit.MILLISECONDS);
 
         assertEquals(-1, Files.mismatch(file.toPath(),
                 downloadedFile.toPath()));
@@ -232,8 +233,7 @@ public class IntegrationTest {
         nodeA.getAvailableFiles();
         nodeA.downloadFile(FileService.getFileInfo(file));
 
-        File downloadedFile = getDownloadedFile(nodeA, FILENAME)
-                .get(30000, TimeUnit.MILLISECONDS);
+        File downloadedFile = getDownloadedFile(nodeA, FILENAME).get(30000, TimeUnit.MILLISECONDS);
 
         assertEquals(-1, Files.mismatch(file.toPath(),
                 downloadedFile.toPath()));
@@ -244,7 +244,8 @@ public class IntegrationTest {
     }
 
     @Test
-    public void canDownloadFromTransientPeerWithBeacon() throws ExecutionException, InterruptedException, TimeoutException, IOException {
+    public void canDownloadFromTransientPeerWithBeacon() throws ExecutionException, InterruptedException,
+            TimeoutException, IOException {
         Beacon beacon = Beacon.createAndInitialise();
         InetSocketAddress beaconAddress = beacon.getAddress();
 
@@ -261,8 +262,7 @@ public class IntegrationTest {
 
         nodeA.downloadFile(FileService.getFileInfo(file));
 
-        File downloadedFile = getDownloadedFile(nodeA, FILENAME)
-                .get(10000, TimeUnit.MILLISECONDS);
+        File downloadedFile = getDownloadedFile(nodeA, FILENAME).get(10000, TimeUnit.MILLISECONDS);
 
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.toPath()));
 
@@ -272,7 +272,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void deadNodeWillNotBeAddedToLivePeers() throws InterruptedException {
+    public void deadNodeWillNotBeAddedToLivePeers() {
         AKTorrent deadNode = AKTorrent.createAndInitializeNoBeacon();
         InetSocketAddress deadNodeAddress = deadNode.getAddress();
         deadNode.shutDown();
@@ -305,6 +305,7 @@ public class IntegrationTest {
 
         assertThrows(TimeoutException.class,
                 () -> getDownloadedFile(nodeB, FILENAME).get(3000, TimeUnit.MILLISECONDS));
+
         // dead node removed from live peers and placed back into peers
         assertFalse(nodeB.getLivePeers().contains(nodeA.getAddress()));
         assertTrue(nodeB.getPeers().contains(nodeA.getAddress()));
@@ -317,8 +318,10 @@ public class IntegrationTest {
     public void gettingAvailableFilesShouldNotCauseLoop() {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+
         nodeA.addPeer(nodeB.getAddress());
         nodeB.addPeer(nodeA.getAddress());
+
         nodeB.getAvailableFiles();
     }
 

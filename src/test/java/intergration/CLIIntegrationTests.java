@@ -137,9 +137,9 @@ public class CLIIntegrationTests {
                 final InetSocketAddress socketAddress = serverAddress.take();
                 AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
 
-                CLI cli = new CLI(new ByteArrayInputStream(("3\n" + socketAddress.getHostName() + " " + socketAddress.getPort()).getBytes()),
-                    new PrintStream(new ByteArrayOutputStream()),
-                    client);
+                CLI cli = new CLI(new ByteArrayInputStream(("3\n" + socketAddress.getHostName() + " "
+                        + socketAddress.getPort()).getBytes()),
+                    new PrintStream(new ByteArrayOutputStream()), client);
                 cli.start();
 
                 assertTrue(client.getLivePeers().contains(socketAddress));

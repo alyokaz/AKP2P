@@ -2,6 +2,8 @@ package com.alyokaz.aktorrent.peerservice;
 
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.pingserver.PingServer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.*;
@@ -15,6 +17,7 @@ public class PeerService {
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private Set<InetSocketAddress> excluded = new HashSet<>();
     private InetSocketAddress serverAddress;
+    private static Logger logger = LogManager.getLogger();
 
     public PeerService() {
     }
@@ -58,8 +61,7 @@ public class PeerService {
             String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
             return (payload.equals(PingServer.PONG_PAYLOAD));
         } catch (SocketTimeoutException e) {
-            System.out.println("Ping timed out for: " + address.getHostName()
-                    + ":" + address.getPort());
+            logger.error("Ping timed out for {}", address);
             return false;
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -1,5 +1,8 @@
 package com.alyokaz.aktorrent.peerservice;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,6 +14,7 @@ public abstract class AbstractPeersServiceTask implements Runnable {
 
     private final InetSocketAddress address;
     protected final PeerService peerService;
+    private final static Logger logger = LogManager.getLogger();
 
     public AbstractPeersServiceTask(InetSocketAddress address, PeerService peerService) {
         this.address = address;
@@ -24,7 +28,7 @@ public abstract class AbstractPeersServiceTask implements Runnable {
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
             process(in, out);
         } catch (ConnectException e) {
-            System.out.println("Could not connect to peer :" + address + " : " + e);
+            logger.error("Could not connect to peer at {}", address);
             peerService.removeFromLivePeers(address);
         } catch (IOException e) {
             throw new RuntimeException(e);

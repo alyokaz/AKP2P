@@ -1,5 +1,8 @@
 package com.alyokaz.aktorrent.pingserver;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -16,6 +19,7 @@ public class PingServer {
     public static final String PONG_PAYLOAD = "pong";
     private final DatagramSocket socket;
     private final ExecutorService executor = Executors.newCachedThreadPool();
+    private static final Logger logger = LogManager.getLogger();
 
     public PingServer(DatagramSocket socket) {
         this.socket = socket;
@@ -33,7 +37,7 @@ public class PingServer {
                         executor.execute(new PingHandler(packet, inSocket));
                 }
             } catch (SocketException e) {
-                System.out.println("Ping Server closed");
+                logger.info("Ping server socket closed");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -41,7 +45,7 @@ public class PingServer {
     }
 
     public void shutdown() {
-        System.out.println("Ping Server Shutdown");
+        logger.info("Ping server at {} shutting down...", socket.getLocalSocketAddress());
         this.socket.close();
     }
 

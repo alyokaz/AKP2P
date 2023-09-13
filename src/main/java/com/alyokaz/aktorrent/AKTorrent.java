@@ -7,11 +7,15 @@ import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.peerservice.PeerService;
 import com.alyokaz.aktorrent.pingserver.PingServer;
 import com.alyokaz.aktorrent.server.NodeServer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
+
 
 //TODO This class should be refactored to get rid of the null argument for
 // beacon address. It seems a lot of the logic that requires communication between
@@ -22,7 +26,7 @@ public class AKTorrent {
     private final PeerService peerService;
     private final FileService fileService;
     private final InetSocketAddress beaconAddress;
-
+    private static final Logger logger = LogManager.getLogger();
     public AKTorrent(NodeServer server, PingServer udpServer, PeerService peerService, FileService fileService,
                      InetSocketAddress beaconAddress) {
         this.server = server;
@@ -79,10 +83,12 @@ public class AKTorrent {
 
 
     public static AKTorrent createAndInitialize(InetSocketAddress beaconAddress) {
+        logger.atInfo().log("Initialising with Beacon at : " + beaconAddress);
         return init(beaconAddress);
     }
 
     public static AKTorrent createAndInitializeNoBeacon() {
+        logger.atInfo().log("Initialising without Beacon");
         return init(null);
     }
 

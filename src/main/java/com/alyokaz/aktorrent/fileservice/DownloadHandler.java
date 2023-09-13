@@ -4,6 +4,9 @@ import com.alyokaz.aktorrent.peerservice.PeerService;
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
 import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.message.StringFormattedMessage;
 
 import java.io.*;
 import java.net.ConnectException;
@@ -16,6 +19,7 @@ public class DownloadHandler implements Runnable {
     private final InetSocketAddress address;
     private final FileService fileService;
     private final PeerService peerService;
+    private static final Logger logger = LogManager.getLogger();
 
     public DownloadHandler(InetSocketAddress address,
                            FileService fileService, PeerService peerService) {
@@ -29,8 +33,6 @@ public class DownloadHandler implements Runnable {
         try (Socket socket = new Socket(address.getAddress(), address.getPort());
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-            Thread.currentThread().setName(Thread.currentThread().getName() + " DownloadHandler");
-
             // request names of available files from peer
             out.writeObject(new Message(MessageType.REQUEST_FILENAMES, peerService.getServerAddress()));
             Set<String> filenames = (Set<String>) in.readObject();
@@ -44,7 +46,7 @@ public class DownloadHandler implements Runnable {
             out.writeObject(new Message(MessageType.END, peerService.getServerAddress()));
         } catch (ConnectException e) {
             peerService.removeFromLivePeers(address);
-            System.out.println("Peer at " + address + "not reachable");
+            logger.error("Peer at {} is not reachable", address);
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -57,6 +59,7 @@ public class DownloadHandler implements Runnable {
         if (container.complete()) return;
 
         try {
+            logger.info("Beginning download of {} ... from {}", filename, address);
             while (!container.complete()) {
                 // claim a piece that is not yet downloaded, or is not currently downloading, to prevent duplicate
                 // downloads of the same piece
@@ -71,10 +74,11 @@ public class DownloadHandler implements Runnable {
                     container.addPiece((Piece) readObject);
                 }
 
-                System.out.printf(Thread.currentThread().getName() + " - %.2f %%%n",
+                StringFormattedMessage formattedMessage = new StringFormattedMessage("%.2f %%%n",
                         (container.getPieces().size() / (double) container.getTotalPieces()) * 100);
+                logger.info(formattedMessage);
             }
-
+            logger.info("Download of {} from {} complete.", filename, address);
             // build the file and save it to the local file system
             fileService.buildFile(container);
         } catch (EOFException e) {

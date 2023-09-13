@@ -1,6 +1,8 @@
 package com.alyokaz.aktorrent.beacon;
 
 import com.alyokaz.aktorrent.server.message.BeaconMessage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,6 +15,8 @@ public class BeaconTask implements Runnable {
 
     private final Socket socket;
     private final List<InetSocketAddress> peers;
+    private static final Logger logger = LogManager.getLogger();
+
 
     public BeaconTask(Socket socket, List<InetSocketAddress> peers) {
         this.socket = socket;
@@ -29,6 +33,7 @@ public class BeaconTask implements Runnable {
                 BeaconMessage message = (BeaconMessage) obj;
                 out.writeObject(peers);
                 peers.add(message.getServerAddress());
+                logger.info("Peer at {} registered", message.getServerAddress());
             }
         } catch (IOException | ClassNotFoundException ex) {
             throw new RuntimeException(ex);

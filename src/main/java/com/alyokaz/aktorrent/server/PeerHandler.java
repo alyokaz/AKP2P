@@ -7,6 +7,8 @@ import com.alyokaz.aktorrent.peerservice.PeerService;
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
 import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -22,6 +24,7 @@ public class PeerHandler implements Runnable {
     private final Socket peerSocket;
     private final PeerService peerService;
     private final FileService fileService;
+    private static final Logger logger = LogManager.getLogger();
 
     public PeerHandler(Socket peerSocket, PeerService peerService, FileService fileService) {
         this.peerSocket = peerSocket;
@@ -35,9 +38,7 @@ public class PeerHandler implements Runnable {
             ObjectOutputStream out = new ObjectOutputStream(peerSocket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(peerSocket.getInputStream())
         ){
-            //TODO thread name is adding PeerHandler everytime it is reused
-            Thread.currentThread().setName(Thread.currentThread().getName() + " PeerHandler");
-            System.out.println(Thread.currentThread().getName() + " Client Connected");
+            logger.info("Client connected to server at {}", peerService.getServerAddress());
 
             boolean end = false;
             while(!Thread.currentThread().isInterrupted() && !end) {
@@ -52,13 +53,13 @@ public class PeerHandler implements Runnable {
                 }
             }
         } catch (EOFException e){
-            System.out.println(Thread.currentThread().getName() + " - Client closed");
+            logger.error("Client connected at {} closed with {}", peerService.getServerAddress(), e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("Client Closed");
+        logger.info("Client connect to server at {} closed", peerService.getServerAddress());
     }
 
     private void processRequestPeers(ObjectOutputStream out) throws IOException {

@@ -2,6 +2,7 @@ package com.alyokaz.aktorrent.cli;
 
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
+import com.alyokaz.aktorrent.peerservice.PingPeerException;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -48,13 +49,15 @@ public class CLI {
                 }
             } catch (NumberFormatException e) {
                 outputStream.println(NOT_A_NUMBER_ERROR);
+            } catch (PingPeerException e) {
+                //TODO write test and implement
             }
             outputStream.println(MAIN_MENU);
         }
         node.shutDown();
     }
 
-    private void processAddPeer(BufferedReader reader, PrintStream outputStream) throws IOException {
+    private void processAddPeer(BufferedReader reader, PrintStream outputStream) throws IOException, PingPeerException {
         outputStream.println(CLI.INPUT_PEER_ADDRESS_PROMPT);
         String[] address = reader.readLine().split(" ");
         node.addPeer(new InetSocketAddress(address[0], Integer.parseInt(address[1])));

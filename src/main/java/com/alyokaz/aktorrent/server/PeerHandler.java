@@ -4,6 +4,7 @@ import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.fileservice.Piece;
 import com.alyokaz.aktorrent.fileservice.PieceContainer;
 import com.alyokaz.aktorrent.peerservice.PeerService;
+import com.alyokaz.aktorrent.peerservice.PingPeerException;
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
 import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
@@ -58,6 +59,8 @@ public class PeerHandler implements Runnable {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
+        } catch (PingPeerException e) {
+            //TODO write tests and implementation
         }
         logger.info("Client connect to server at {} closed", peerService.getServerAddress());
     }

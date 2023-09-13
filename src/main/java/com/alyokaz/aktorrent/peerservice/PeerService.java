@@ -1,6 +1,5 @@
 package com.alyokaz.aktorrent.peerservice;
 
-import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.pingserver.PingServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +35,7 @@ public class PeerService {
         });
     }
 
-    public synchronized boolean addPeer(InetSocketAddress address) {
+    public synchronized boolean addPeer(InetSocketAddress address) throws PingPeerException {
         if(excluded.contains(address) || !peers.add(address))
             return false;
         if(pingPeer(address)) {
@@ -47,7 +46,7 @@ public class PeerService {
             return false;
     }
 
-    private boolean pingPeer(InetSocketAddress address) {
+    private boolean pingPeer(InetSocketAddress address) throws PingPeerException {
         try (DatagramSocket socket = new DatagramSocket()) {
             byte[] buf = PingServer.PING_PAYLOAD.getBytes();
             DatagramPacket packet = new DatagramPacket(buf, buf.length, address.getAddress(), address.getPort());
@@ -60,11 +59,9 @@ public class PeerService {
 
             String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
             return (payload.equals(PingServer.PONG_PAYLOAD));
-        } catch (SocketTimeoutException e) {
+        } catch (IllegalArgumentException | IOException  e){
             logger.error("Ping timed out for {}", address);
-            return false;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new PingPeerException("Ping of peer at " + address + " failed", e);
         }
     }
 

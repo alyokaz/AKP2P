@@ -3,6 +3,8 @@ package intergration;
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.cli.CLI;
+import com.alyokaz.aktorrent.fileservice.SeedFileException;
+import com.alyokaz.aktorrent.peerservice.PingPeerException;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -22,7 +24,7 @@ public class CLIIntegrationTests {
     private static final String FILENAME = "test_file.mp4";
 
     @Test
-    public void testCliSendReceiveFile() throws IOException, InterruptedException {
+    public void testCliSendReceiveFile() throws IOException, InterruptedException, PingPeerException {
         CountDownLatch countDownLatch_A = new CountDownLatch(1);
         CountDownLatch countDownLatch_B = new CountDownLatch(1);
         BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
@@ -78,7 +80,9 @@ public class CLIIntegrationTests {
     }
 
     @Test
-    public void canDownloadFileByNumber() throws InterruptedException {
+    public void canDownloadFileByNumber() throws InterruptedException, SeedFileException {
+        CountDownLatch countDownLatch_A = new CountDownLatch(1);
+        //CountDownLatch countDownLatch_B = new CountDownLatch(1);
         CountDownLatch exit = new CountDownLatch(1);
 
         AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
@@ -87,15 +91,38 @@ public class CLIIntegrationTests {
         server.seedFile(file);
         serverAddress.add(server.getAddress());
 
+        InputStream in = new InputStream() {
+            private final byte[] command = ("2\n1\n").getBytes();
+            int index = 0;
+            @Override
+            public int read() {
+                if (index == command.length) {
+                    index++;
+                    return -1;
+                } else if (index > command.length) {
+                    try {
+                        //countDownLatch_B.countDown();
+                        countDownLatch_A.await();
+                        return -1;
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                return command[index++];
+            }
+        };
+
         Thread clientThread = new Thread(() -> {
             AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
             try {
                 client.addPeer(serverAddress.take());
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            } catch (PingPeerException e) {
+                throw new RuntimeException(e);
             }
             CLI cli = new CLI(
-                    new ByteArrayInputStream(("2\n1").getBytes()),
+                    in,
                     new PrintStream(new ByteArrayOutputStream()),
                     client
             );
@@ -107,11 +134,13 @@ public class CLIIntegrationTests {
                 }
             }).start();
             Optional<File> downloadedFile;
+            //TODO refactor out and make timeout
             do{
                 downloadedFile = client.getFile(FILENAME);
             } while (downloadedFile.isEmpty());
             try {
                 assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
+                countDownLatch_A.countDown();
                 exit.countDown();
             } catch (IOException e) {
                 throw new RuntimeException(e);

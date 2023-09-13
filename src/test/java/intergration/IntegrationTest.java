@@ -4,6 +4,7 @@ import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.beacon.Beacon;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
+import com.alyokaz.aktorrent.peerservice.PingPeerException;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -27,7 +28,7 @@ public class IntegrationTest {
     private final static ExecutorService executor = Executors.newCachedThreadPool();
 
     @Test
-    public void canSeedAndReceiveFile() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    public void canSeedAndReceiveFile() throws IOException, ExecutionException, InterruptedException, TimeoutException, PingPeerException {
         File file = getFile(FILENAME);
         AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
         server.seedFile(file);
@@ -42,7 +43,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void canDownloadFromTwoPeers() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    public void canDownloadFromTwoPeers() throws IOException, ExecutionException, InterruptedException, TimeoutException, PingPeerException {
         File file = getFile(FILENAME);
 
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
@@ -84,7 +85,13 @@ public class IntegrationTest {
 
         AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
 
-        nodes.forEach(node -> client.addPeer(node.getAddress()));
+        nodes.forEach(node -> {
+            try {
+                client.addPeer(node.getAddress());
+            } catch (PingPeerException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         client.downloadFile(FileService.getFileInfo(file));
 
@@ -95,7 +102,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void getAvailableFiles() {
+    public void getAvailableFiles() throws PingPeerException {
         File testFileA = getFile(FILENAME);
         File testFileB = getFile(FILENAME_2);
 
@@ -128,7 +135,7 @@ public class IntegrationTest {
     // the file. The address of the node(s) should be stored with the file for
     // this.
     @Test
-    public void testDiscoverTransientPeers() throws IOException, ExecutionException, InterruptedException, TimeoutException {
+    public void testDiscoverTransientPeers() throws IOException, ExecutionException, InterruptedException, TimeoutException, PingPeerException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeC = AKTorrent.createAndInitializeNoBeacon();
@@ -156,7 +163,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void pingPeerWhenAdded() {
+    public void pingPeerWhenAdded() throws PingPeerException {
         AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
         client.addPeer(server.getAddress());
@@ -173,7 +180,13 @@ public class IntegrationTest {
                 .limit(100)
                 .collect(Collectors.toSet());
         InetSocketAddress serverAddress = server.getAddress();
-        nodes.forEach(node -> node.addPeer(serverAddress));
+        nodes.forEach(node -> {
+            try {
+                node.addPeer(serverAddress);
+            } catch (PingPeerException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         nodes.forEach(node -> assertTrue(node.getLivePeers().contains(serverAddress)));
         server.shutDown();
@@ -245,7 +258,7 @@ public class IntegrationTest {
 
     @Test
     public void canDownloadFromTransientPeerWithBeacon() throws ExecutionException, InterruptedException,
-            TimeoutException, IOException {
+            TimeoutException, IOException, PingPeerException {
         Beacon beacon = Beacon.createAndInitialise();
         InetSocketAddress beaconAddress = beacon.getAddress();
 
@@ -272,7 +285,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void deadNodeWillNotBeAddedToLivePeers() {
+    public void deadNodeWillNotBeAddedToLivePeers() throws PingPeerException {
         AKTorrent deadNode = AKTorrent.createAndInitializeNoBeacon();
         InetSocketAddress deadNodeAddress = deadNode.getAddress();
         deadNode.shutDown();
@@ -282,7 +295,8 @@ public class IntegrationTest {
 
         AKTorrent clientNode = AKTorrent.createAndInitializeNoBeacon();
 
-        clientNode.addPeer(deadNodeAddress);
+        assertThrows(PingPeerException.class, () ->  clientNode.addPeer(deadNodeAddress));
+
         clientNode.addPeer(liveNodeAddress);
 
         assertTrue(clientNode.getLivePeers().contains(liveNodeAddress));
@@ -293,7 +307,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void willNotDownloadFromDeadNode() {
+    public void willNotDownloadFromDeadNode() throws PingPeerException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
         File file = getFile(FILENAME);
@@ -315,7 +329,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void gettingAvailableFilesShouldNotCauseLoop() {
+    public void gettingAvailableFilesShouldNotCauseLoop() throws PingPeerException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
 
@@ -326,7 +340,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void shouldNotAddSelfToPeers() {
+    public void shouldNotAddSelfToPeers() throws PingPeerException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
         nodeA.addPeer(nodeB.getAddress());
@@ -338,7 +352,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void canAddNodes() {
+    public void canAddNodes() throws PingPeerException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeC = AKTorrent.createAndInitializeNoBeacon();
@@ -351,7 +365,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void peerIsRegisteredOnContact() {
+    public void peerIsRegisteredOnContact() throws PingPeerException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
 
@@ -362,7 +376,7 @@ public class IntegrationTest {
 
 
     @Test
-    public void preventDuplicatePeer() {
+    public void preventDuplicatePeer() throws PingPeerException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
 
@@ -370,6 +384,12 @@ public class IntegrationTest {
         nodeA.addPeer(nodeB.getAddress());
 
         assertEquals(1, nodeA.getLivePeers().size());
+    }
+
+    @Test
+    public void canHandleAttemptToAddBadPeerAddress() throws PingPeerException {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        assertThrows(PingPeerException.class, () -> nodeA.addPeer(new InetSocketAddress("dsafdf", 80)));
     }
 
     //TODO move timeout to this method

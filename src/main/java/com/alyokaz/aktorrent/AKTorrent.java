@@ -5,6 +5,7 @@ import com.alyokaz.aktorrent.cli.CLI;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.peerservice.PeerService;
+import com.alyokaz.aktorrent.peerservice.PingPeerException;
 import com.alyokaz.aktorrent.pingserver.PingServer;
 import com.alyokaz.aktorrent.server.NodeServer;
 import org.apache.logging.log4j.LogManager;
@@ -53,9 +54,13 @@ public class AKTorrent {
         fileService.downloadAllFiles();
     }
 
-    public void addPeer(InetSocketAddress address) {
-        if(address != server.getServerAddress() && peerService.addPeer(address))
+    public boolean addPeer(InetSocketAddress address) throws PingPeerException {
+        if(address != server.getServerAddress() && peerService.addPeer(address)) {
             fileService.updateAvailableFiles();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public Optional<File> getFile(String filename) {

@@ -3,6 +3,7 @@ package com.alyokaz.akatorrent.cli;
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.cli.CLI;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
+import com.alyokaz.aktorrent.fileservice.SeedFileException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,7 @@ public class CLITests {
     }
 
     @Test
-    public void seedFileTest() throws IOException {
+    public void seedFileTest() throws IOException, SeedFileException {
         String command = "1\n " + this.getClass().getResource("/" + FILENAME).getPath() + "\n";
         InputStream in = buildInputStream(command);
         buildAndStartCLI(in, out, node);

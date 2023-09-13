@@ -82,7 +82,6 @@ public class CLIIntegrationTests {
     @Test
     public void canDownloadFileByNumber() throws InterruptedException, SeedFileException {
         CountDownLatch countDownLatch_A = new CountDownLatch(1);
-        //CountDownLatch countDownLatch_B = new CountDownLatch(1);
         CountDownLatch exit = new CountDownLatch(1);
 
         AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
@@ -101,7 +100,6 @@ public class CLIIntegrationTests {
                     return -1;
                 } else if (index > command.length) {
                     try {
-                        //countDownLatch_B.countDown();
                         countDownLatch_A.await();
                         return -1;
                     } catch (InterruptedException e) {

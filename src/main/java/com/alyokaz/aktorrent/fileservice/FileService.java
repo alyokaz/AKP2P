@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
+
 public class FileService {
 
     public static final int BUFFER_SIZE = 1000000;
@@ -27,7 +28,7 @@ public class FileService {
         return this.files;
     }
 
-    public void addFile(File file) {
+    public void addFile(File file) throws SeedFileException {
         this.files.put(file.getName(), buildPieceContainer(file));
         this.availableFiles.add(getFileInfo(file));
     }
@@ -106,10 +107,9 @@ public class FileService {
         return numberOfPieces;
     }
 
-    public static PieceContainer buildPieceContainer(File file) {
+    public static PieceContainer buildPieceContainer(File file) throws SeedFileException {
         SortedSet<Piece> pieces = new TreeSet<>();
         int numberOfPieces = getNoOfPieces(file);
-
         try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(file))) {
             byte[] buffer = new byte[BUFFER_SIZE];
             IntStream.range(0, numberOfPieces).forEach(i -> {
@@ -117,15 +117,14 @@ public class FileService {
                     int bytesRead = in.read(buffer);
                     pieces.add(new Piece(i,
                             // make last Piece correct length
-                            bytesRead < BUFFER_SIZE ? Arrays.copyOf(buffer, bytesRead) : buffer.clone()
-                    ));
+                            bytesRead < BUFFER_SIZE ? Arrays.copyOf(buffer, bytesRead) : buffer.clone()));
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new UncheckedIOException(e);
                 }
             });
             return new PieceContainer(getFileInfo(file), pieces);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | UncheckedIOException e) {
+            throw new SeedFileException("Seeding file " + file.getName() + " failed", e);
         }
     }
 

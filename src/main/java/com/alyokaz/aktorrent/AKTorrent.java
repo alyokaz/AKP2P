@@ -1,7 +1,7 @@
 package com.alyokaz.aktorrent;
 
-import com.alyokaz.aktorrent.beacon.Beacon;
 import com.alyokaz.aktorrent.cli.CLI;
+import com.alyokaz.aktorrent.fileservice.SeedFileException;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.peerservice.PeerService;
@@ -45,7 +45,7 @@ public class AKTorrent {
         this.beaconAddress = null;
     }
 
-    public void seedFile(File file) {
+    public void seedFile(File file) throws SeedFileException {
         fileService.addFile(file);
     }
 

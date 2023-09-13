@@ -54,6 +54,7 @@ public class PeerHandler implements Runnable {
                 }
             }
         } catch (EOFException e){
+            //TODO confusing error message
             logger.error("Client connected at {} closed with {}", peerService.getServerAddress(), e);
         } catch (IOException e) {
             throw new RuntimeException(e);

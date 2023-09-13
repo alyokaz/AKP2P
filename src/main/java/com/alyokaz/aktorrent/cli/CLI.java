@@ -2,6 +2,7 @@ package com.alyokaz.aktorrent.cli;
 
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
+import com.alyokaz.aktorrent.fileservice.SeedFileException;
 import com.alyokaz.aktorrent.peerservice.PingPeerException;
 
 import java.io.*;
@@ -51,6 +52,8 @@ public class CLI {
                 outputStream.println(NOT_A_NUMBER_ERROR);
             } catch (PingPeerException e) {
                 //TODO write test and implement
+            } catch (SeedFileException e) {
+                //TODO write test and implement
             }
             outputStream.println(MAIN_MENU);
         }
@@ -78,7 +81,7 @@ public class CLI {
         node.downloadFile(files.get(fileNumber));
     }
 
-    private void processSeedFile(BufferedReader reader, PrintStream out) throws IOException {
+    private void processSeedFile(BufferedReader reader, PrintStream out) throws IOException, SeedFileException {
         out.println(INPUT_PROMPT);
         String filename = reader.readLine().trim();
         File file = new File(filename);

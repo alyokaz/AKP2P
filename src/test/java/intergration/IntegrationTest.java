@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -395,6 +396,20 @@ public class IntegrationTest {
     public void canHandleAttemptToAddBadPeerAddress() throws PingPeerException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         assertThrows(PingPeerException.class, () -> nodeA.addPeer(new InetSocketAddress("dsafdf", 80)));
+    }
+
+    @Test
+    public void canRegisterFileFromPeerByAddress() throws SeedFileException, PingPeerException {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+
+        File file = getFile(FILENAME);
+        nodeA.seedFile(file);
+        nodeB.addPeer(nodeA.getAddress());
+
+        Map<FileInfo, Set<InetSocketAddress>> fileAddressRegistry = nodeB.getConnectedPeersFiles();
+        assertTrue(fileAddressRegistry.containsKey(FileService.getFileInfo(file)));
+        assertTrue(fileAddressRegistry.get(FileService.getFileInfo(file)).contains(nodeA.getAddress()));
     }
 
     //TODO move timeout to this method

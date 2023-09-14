@@ -1,5 +1,6 @@
 package com.alyokaz.aktorrent.server;
 
+import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.fileservice.Piece;
 import com.alyokaz.aktorrent.fileservice.PieceContainer;
@@ -17,8 +18,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class PeerHandler implements Runnable {
 
@@ -50,6 +53,7 @@ public class PeerHandler implements Runnable {
                     case REQUEST_PIECE -> processPieceRequest((RequestPieceMessage) message, out);
                     case REQUEST_AVAILABLE_FILES -> processAvailableFilesRequest(out);
                     case REQUEST_PEERS -> processRequestPeers(out);
+                    case REQUSET_FILE_INFOS -> processRequestFileInfos(out);
                     case END -> end = true;
                 }
             }
@@ -65,6 +69,17 @@ public class PeerHandler implements Runnable {
         }
         logger.info("Client connect to server at {} closed", peerService.getServerAddress());
     }
+
+    private void processRequestFileInfos(ObjectOutputStream out) {
+        Set<FileInfo> fileInfos = fileService.getFiles().entrySet().stream()
+                .map(Map.Entry::getValue).map(PieceContainer::getFileInfo).collect(Collectors.toSet());
+        try {
+            out.writeObject(fileInfos);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     private void processRequestPeers(ObjectOutputStream out) throws IOException {
         out.writeObject(peerService.getLivePeers());

@@ -63,6 +63,11 @@ public class AKTorrent {
         }
     }
 
+    public Map<FileInfo, Set<InetSocketAddress>> getConnectedPeersFiles() {
+        fileService.getConnectedPeersFiles();
+        return fileService.getFileAddressRegistry();
+    }
+
     public Optional<File> getFile(String filename) {
         return fileService.getCompletedFile(filename);
     }

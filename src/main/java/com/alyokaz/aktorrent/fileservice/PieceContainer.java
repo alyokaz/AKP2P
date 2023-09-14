@@ -57,4 +57,8 @@ public class PieceContainer {
         this.downloadingPieces.add(chosenId);
         return chosenId;
     }
+
+    public FileInfo getFileInfo() {
+        return this.fileInfo;
+    }
 }

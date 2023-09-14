@@ -23,7 +23,7 @@ public class ContactBeaconTask extends AbstractPeersServiceTask {
     }
 
     @Override
-    void process(ObjectInputStream in, ObjectOutputStream out) {
+    protected void process(ObjectInputStream in, ObjectOutputStream out) {
         try {
             out.writeObject(new BeaconMessage(MessageType.REQUEST_PEERS, serverAddress));
             Object obj = in.readObject();

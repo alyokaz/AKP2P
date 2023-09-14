@@ -34,5 +34,9 @@ public abstract class AbstractPeersServiceTask implements Runnable {
             throw new RuntimeException(e);
         }
     }
-    abstract void process(ObjectInputStream in, ObjectOutputStream out);
+    protected abstract void process(ObjectInputStream in, ObjectOutputStream out);
+
+    public InetSocketAddress getAddress() {
+        return this.address;
+    }
 }

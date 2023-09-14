@@ -3,6 +3,7 @@ package com.alyokaz.aktorrent.fileservice;
 import com.alyokaz.aktorrent.peerservice.PeerService;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -20,6 +21,8 @@ public class FileService {
     private final Set<FileInfo> availableFiles = Collections.synchronizedSet(new HashSet<>());
     private final PeerService peerService;
     private final ExecutorService executor = Executors.newCachedThreadPool();
+
+    private final Map<FileInfo, Set<InetSocketAddress>> fileAddressRegistry = new HashMap<>();
 
     public FileService(PeerService peerService) {
         this.peerService = peerService;
@@ -132,4 +135,31 @@ public class FileService {
         return new FileInfo(file.getName(), getNoOfPieces(file), (int) file.length());
     }
 
+    public void getConnectedPeersFiles() {
+        Set<Future> futures = new HashSet<>();
+        peerService.getLivePeers().forEach(address ->
+                futures.add(executor.submit(new GetConnectedPeersFilesTask(address, peerService, this))));
+        futures.forEach(f -> {
+            try {
+                f.get();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+    }
+
+    public Map<FileInfo, Set<InetSocketAddress>> getFileAddressRegistry() {
+        return fileAddressRegistry;
+    }
+
+    public void registerFile(FileInfo fileInfo, InetSocketAddress address) {
+        if(fileAddressRegistry.containsKey(fileInfo))
+            fileAddressRegistry.get(fileInfo).add(address);
+        else
+            fileAddressRegistry.put(fileInfo, Set.of(address));
+
+    }
 }

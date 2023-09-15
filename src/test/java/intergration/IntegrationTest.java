@@ -55,11 +55,11 @@ public class IntegrationTest {
 
         nodeA.seedFile(file);
         nodeB.seedFile(file);
-        nodeC.seedFile(file);
+        //nodeC.seedFile(file);
 
         nodeD.addPeer(nodeA.getAddress());
         nodeD.addPeer(nodeB.getAddress());
-        nodeD.addPeer(nodeC.getAddress());
+        //nodeD.addPeer(nodeC.getAddress());
 
         nodeD.downloadFile(FileService.getFileInfo(file));
 
@@ -226,6 +226,7 @@ public class IntegrationTest {
         File file = getFile(FILENAME);
         nodeA.seedFile(file);
 
+        nodeB.getAvailableFiles();
         nodeB.downloadFile(FileService.getFileInfo(file));
 
         File downloadedFile = getDownloadedFile(nodeB, FILENAME).get(3000, TimeUnit.MILLISECONDS);
@@ -270,16 +271,17 @@ public class IntegrationTest {
 
         AKTorrent nodeA = AKTorrent.createAndInitialize(beaconAddress);
         AKTorrent nodeB = AKTorrent.createAndInitialize(beaconAddress);
-        nodeA.getAvailableFiles();
         AKTorrent nodeC = AKTorrent.createAndInitializeNoBeacon();
 
         nodeC.addPeer(nodeB.getAddress());
+
         File file = getFile(FILENAME);
         nodeC.seedFile(file);
-        nodeC.getAvailableFiles();
+
         nodeB.getAvailableFiles();
 
-        nodeA.downloadFile(FileService.getFileInfo(file));
+        FileInfo fileInfo = nodeA.getAvailableFiles().stream().findFirst().get();
+        nodeA.downloadFile(fileInfo);
 
         File downloadedFile = getDownloadedFile(nodeA, FILENAME).get(10000, TimeUnit.MILLISECONDS);
 
@@ -407,7 +409,7 @@ public class IntegrationTest {
         nodeA.seedFile(file);
         nodeB.addPeer(nodeA.getAddress());
 
-        Map<FileInfo, Set<InetSocketAddress>> fileAddressRegistry = nodeB.getConnectedPeersFiles();
+        Map<FileInfo, Set<InetSocketAddress>> fileAddressRegistry = nodeB.getFileRegistry();
         assertTrue(fileAddressRegistry.containsKey(FileService.getFileInfo(file)));
         assertTrue(fileAddressRegistry.get(FileService.getFileInfo(file)).contains(nodeA.getAddress()));
     }
@@ -424,9 +426,9 @@ public class IntegrationTest {
         nodeB.addPeer(nodeC.getAddress());
 
 
-        Map<FileInfo, Set<InetSocketAddress>> fileAddressRegistry = nodeB.getConnectedPeersFiles();
+        FileInfo fileInfo = nodeB.getAvailableFiles().stream().findFirst().get();
 
-        nodeB.downloadFileTarget(fileAddressRegistry.keySet().stream().findFirst().get());
+        nodeB.downloadFile(fileInfo);
 
         File downloadedFile = getDownloadedFile(nodeB, file.getName()).get(3000, TimeUnit.MILLISECONDS);
 

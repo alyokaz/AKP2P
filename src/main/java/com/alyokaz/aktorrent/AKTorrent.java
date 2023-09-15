@@ -50,26 +50,17 @@ public class AKTorrent {
     }
 
     public void downloadFile(FileInfo fileInfo) {
-        fileService.addFile(fileInfo);
-        fileService.downloadAllFiles();
-    }
-
-    public void downloadFileTarget(FileInfo fileInfo) {
         fileService.downloadFileTarget(fileInfo);
     }
 
     public boolean addPeer(InetSocketAddress address) throws PingPeerException {
         if(address != server.getServerAddress() && peerService.addPeer(address)) {
-            fileService.updateAvailableFiles();
+            peerService.discoverPeers();
+            fileService.getConnectedPeersFiles();
             return true;
         } else {
             return false;
         }
-    }
-
-    public Map<FileInfo, Set<InetSocketAddress>> getConnectedPeersFiles() {
-        fileService.getConnectedPeersFiles();
-        return fileService.getFileAddressRegistry();
     }
 
     public Optional<File> getFile(String filename) {
@@ -88,11 +79,17 @@ public class AKTorrent {
     public Set<FileInfo> getAvailableFiles() {
         if(beaconAddress != null)
             peerService.contactBeacon(server.getServerAddress(), beaconAddress);
-        return fileService.updateAndGetAvailableFiles();
+        peerService.discoverPeers();
+        fileService.getConnectedPeersFiles();
+        return fileService.getFileAddressRegistry().keySet();
     }
 
     public InetSocketAddress getAddress() {
         return this.server.getServerAddress();
+    }
+
+    public Map<FileInfo, Set<InetSocketAddress>> getFileRegistry() {
+        return Map.copyOf(fileService.getFileAddressRegistry());
     }
 
 

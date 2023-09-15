@@ -7,10 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 
@@ -24,7 +21,7 @@ public class FileService {
     private final PeerService peerService;
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    private final Map<FileInfo, Set<InetSocketAddress>> fileAddressRegistry = new HashMap<>();
+    private final Map<FileInfo, Set<InetSocketAddress>> fileAddressRegistry = new ConcurrentHashMap<>();
 
     public FileService(PeerService peerService) {
         this.peerService = peerService;
@@ -158,10 +155,8 @@ public class FileService {
     }
 
     public void registerFile(FileInfo fileInfo, InetSocketAddress address) {
-        if(fileAddressRegistry.containsKey(fileInfo))
-            fileAddressRegistry.get(fileInfo).add(address);
-        else
-            fileAddressRegistry.put(fileInfo, Set.of(address));
+        fileAddressRegistry.putIfAbsent(fileInfo, Collections.synchronizedSet(new HashSet<>()));
+        fileAddressRegistry.get(fileInfo).add(address);
     }
 
     public void downloadFileTarget(FileInfo fileInfo) {

@@ -54,6 +54,10 @@ public class AKTorrent {
         fileService.downloadAllFiles();
     }
 
+    public void downloadFileTarget(FileInfo fileInfo) {
+        fileService.downloadFileTarget(fileInfo);
+    }
+
     public boolean addPeer(InetSocketAddress address) throws PingPeerException {
         if(address != server.getServerAddress() && peerService.addPeer(address)) {
             fileService.updateAvailableFiles();

@@ -412,6 +412,27 @@ public class IntegrationTest {
         assertTrue(fileAddressRegistry.get(FileService.getFileInfo(file)).contains(nodeA.getAddress()));
     }
 
+    @Test
+    public void willContactOnlyPeersWithFile() throws SeedFileException, PingPeerException, IOException, ExecutionException, InterruptedException, TimeoutException {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeC = AKTorrent.createAndInitializeNoBeacon();
+
+        File file = getFile(FILENAME);
+        nodeA.seedFile(file);
+        nodeB.addPeer(nodeA.getAddress());
+        nodeB.addPeer(nodeC.getAddress());
+
+
+        Map<FileInfo, Set<InetSocketAddress>> fileAddressRegistry = nodeB.getConnectedPeersFiles();
+
+        nodeB.downloadFileTarget(fileAddressRegistry.keySet().stream().findFirst().get());
+
+        File downloadedFile = getDownloadedFile(nodeB, file.getName()).get(3000, TimeUnit.MILLISECONDS);
+
+        assertEquals(-1, Files.mismatch(downloadedFile.toPath(), file.toPath()));
+    }
+
     //TODO move timeout to this method
     private static Future<File> getDownloadedFile(AKTorrent node, String filename) {
         return executor.submit(() -> {

@@ -4,6 +4,8 @@ import com.alyokaz.aktorrent.peerservice.PeerService;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -160,6 +162,15 @@ public class FileService {
             fileAddressRegistry.get(fileInfo).add(address);
         else
             fileAddressRegistry.put(fileInfo, Set.of(address));
-
     }
+
+    public void downloadFileTarget(FileInfo fileInfo) {
+        if(fileAddressRegistry.containsKey(fileInfo)) {
+            addFile(fileInfo);
+            fileAddressRegistry.get(fileInfo).forEach(address ->
+                    executor.execute(new DownloadFileTargetTask(address, this, peerService, fileInfo)));
+        }
+    }
+
+
 }

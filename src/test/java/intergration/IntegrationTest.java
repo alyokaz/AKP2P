@@ -41,6 +41,7 @@ public class IntegrationTest {
         File completedFile = getDownloadedFile(client, FILENAME).get(3000, TimeUnit.MILLISECONDS);
 
         assertEquals(-1, Files.mismatch(file.toPath(), completedFile.toPath()));
+        client.shutDown();
         server.shutDown();
     }
 
@@ -195,6 +196,7 @@ public class IntegrationTest {
         });
 
         nodes.forEach(node -> assertTrue(node.getLivePeers().contains(serverAddress)));
+        nodes.forEach(AKTorrent::shutDown);
         server.shutDown();
     }
 
@@ -345,6 +347,9 @@ public class IntegrationTest {
         nodeB.addPeer(nodeA.getAddress());
 
         nodeB.getAvailableFiles();
+
+        nodeA.shutDown();
+        nodeB.shutDown();
     }
 
     @Test
@@ -357,6 +362,9 @@ public class IntegrationTest {
         nodeA.getAvailableFiles();
 
         assertFalse(nodeA.getLivePeers().contains(nodeA.getAddress()));
+
+        nodeA.shutDown();
+        nodeB.shutDown();
     }
 
     @Test
@@ -370,6 +378,10 @@ public class IntegrationTest {
 
         assertTrue(nodeA.getLivePeers().size() == 2);
         assertTrue(nodeA.getLivePeers().containsAll(List.of(nodeB.getAddress(), nodeC.getAddress())));
+
+        nodeA.shutDown();
+        nodeB.shutDown();
+        nodeC.shutDown();
     }
 
     @Test
@@ -380,6 +392,9 @@ public class IntegrationTest {
         nodeB.addPeer(nodeA.getAddress());
 
         assertTrue(nodeA.getLivePeers().contains(nodeB.getAddress()));
+
+        nodeA.shutDown();
+        nodeB.shutDown();
     }
 
 
@@ -392,12 +407,16 @@ public class IntegrationTest {
         nodeA.addPeer(nodeB.getAddress());
 
         assertEquals(1, nodeA.getLivePeers().size());
+
+        nodeA.shutDown();
+        nodeB.shutDown();
     }
 
     @Test
     public void canHandleAttemptToAddBadPeerAddress() throws PingPeerException {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
         assertThrows(PingPeerException.class, () -> nodeA.addPeer(new InetSocketAddress("dsafdf", 80)));
+        nodeA.shutDown();
     }
 
     @Test
@@ -412,6 +431,9 @@ public class IntegrationTest {
         Map<FileInfo, Set<InetSocketAddress>> fileAddressRegistry = nodeB.getFileRegistry();
         assertTrue(fileAddressRegistry.containsKey(FileService.getFileInfo(file)));
         assertTrue(fileAddressRegistry.get(FileService.getFileInfo(file)).contains(nodeA.getAddress()));
+
+        nodeA.shutDown();
+        nodeB.shutDown();
     }
 
     @Test
@@ -433,6 +455,10 @@ public class IntegrationTest {
         File downloadedFile = getDownloadedFile(nodeB, file.getName()).get(3000, TimeUnit.MILLISECONDS);
 
         assertEquals(-1, Files.mismatch(downloadedFile.toPath(), file.toPath()));
+
+        nodeA.shutDown();
+        nodeB.shutDown();
+        nodeC.shutDown();
     }
 
     //TODO move timeout to this method

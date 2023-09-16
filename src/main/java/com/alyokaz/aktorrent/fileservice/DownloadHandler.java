@@ -22,19 +22,24 @@ public class DownloadHandler extends AbstractDownloadHandler{
     }
 
     @Override
-    protected void process(ObjectOutputStream out, ObjectInputStream in) throws IOException, ClassNotFoundException {
+    protected void process(ObjectOutputStream out, ObjectInputStream in)  {
         // request names of available files from peer
-        out.writeObject(new Message(MessageType.REQUEST_FILENAMES, peerService.getServerAddress()));
-        Set<String> filenames = (Set<String>) in.readObject();
+        try {
+            out.writeObject(new Message(MessageType.REQUEST_FILENAMES, peerService.getServerAddress()));
+            Set<String> filenames = (Set<String>) in.readObject();
 
-        // check if we are interested in any of the available files and begin download
-        filenames.stream()
-                .filter(fileService.getFiles()::containsKey)
-                .forEach(filename -> downloadPieces(filename, out, in));
+            // check if we are interested in any of the available files and begin download
+            filenames.stream()
+                    .filter(fileService.getFiles()::containsKey)
+                    .forEach(filename -> {
+                        downloadPieces(filename, out, in);
+                    });
 
-        // signal to peer to close connection as we are finished
-        out.writeObject(new Message(MessageType.END, peerService.getServerAddress()));
+            // signal to peer to close connection as we are finished
+            out.writeObject(new Message(MessageType.END, peerService.getServerAddress()));
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
-
 
 }

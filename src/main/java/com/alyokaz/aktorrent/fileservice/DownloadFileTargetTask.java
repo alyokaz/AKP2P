@@ -18,7 +18,7 @@ public class DownloadFileTargetTask extends AbstractDownloadHandler {
     }
 
     @Override
-    protected void process(ObjectOutputStream out, ObjectInputStream in) throws IOException, ClassNotFoundException {
+    protected void process(ObjectOutputStream out, ObjectInputStream in) {
             downloadPieces(fileInfo.getFilename(), out, in);
     }
 }

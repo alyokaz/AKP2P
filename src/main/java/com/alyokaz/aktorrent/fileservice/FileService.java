@@ -80,24 +80,27 @@ public class FileService {
         return this.files.get(filename);
     }
 
-    public synchronized void buildFile(PieceContainer container) throws IOException {
+    public synchronized void buildFile(PieceContainer container)  {
         if (completedFiles.containsKey(container.getFilename()))
             return;
 
         File outputFile = new File(container.getFilename());
-        outputFile.createNewFile();
-
-        try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFile))) {
-            container.getPieces().stream()
-                    .sorted(Comparator.comparing(Piece::getId))
-                    .forEach(p -> {
-                        try {
-                            out.write(p.getData());
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-            completedFiles.put(outputFile.getName(), outputFile);
+        try {
+            outputFile.createNewFile();
+            try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outputFile))) {
+                container.getPieces().stream()
+                        .sorted(Comparator.comparing(Piece::getId))
+                        .forEach(p -> {
+                            try {
+                                out.write(p.getData());
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                completedFiles.put(outputFile.getName(), outputFile);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -179,6 +179,7 @@ public class IntegrationTest {
         client.shutDown();
     }
 
+    //TODO this is now more of addPeers functionality stress test rather than stress test of pinging.
     @Test
     public void pingByMultipleNodes() throws IOException {
         AKTorrent server = AKTorrent.createAndInitializeNoBeacon();

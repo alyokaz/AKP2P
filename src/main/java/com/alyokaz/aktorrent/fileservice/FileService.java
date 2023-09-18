@@ -44,34 +44,8 @@ public class FileService {
             return Optional.empty();
     }
 
-    public Set<FileInfo> updateAndGetAvailableFiles() {
-        peerService.discoverPeers();
-        updateAvailableFiles();
-        return availableFiles;
-    }
-
     public Set<FileInfo> getAvailableFiles() {
         return Set.copyOf(availableFiles);
-    }
-
-    public void updateAvailableFiles() {
-        Set<Future<Set<FileInfo>>> futures = new HashSet<>();
-        this.peerService.getLivePeers().forEach(address ->
-                futures.add(executor.submit(new GetAvailableFilesTask(address,
-                        peerService.getServerAddress()))));
-        futures.forEach(f -> {
-            try {
-                availableFiles.addAll(f.get());
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-    public void downloadAllFiles() {
-        peerService.discoverPeers();
-        //TODO do we need to signal that a download is or is not in progress for a quick return from the getFile method?
-        executor.execute(() -> this.peerService.getLivePeers().forEach(address ->
-                executor.execute(new DownloadHandler(address, this, peerService))));
     }
 
     public PieceContainer getFile(String filename) {

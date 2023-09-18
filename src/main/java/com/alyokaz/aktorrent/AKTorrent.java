@@ -128,7 +128,7 @@ public class AKTorrent {
         if(beaconAddress != null) {
             peerService.contactBeacon(server.getServerAddress(), beaconAddress);
             peerService.discoverPeers();
-            fileService.updateAvailableFiles(); //TODO needs refactor, redundant code, replace with getConnectedPeersFiles
+            fileService.getConnectedPeersFiles();
             return new AKTorrent(server, pingServer, peerService, fileService,
                     beaconAddress);
         }

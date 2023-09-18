@@ -1,5 +1,9 @@
 package com.alyokaz.aktorrent.peerservice;
 
+import com.alyokaz.aktorrent.peerservice.exceptions.ContactBeaconException;
+import com.alyokaz.aktorrent.peerservice.exceptions.DiscoverPeersException;
+import com.alyokaz.aktorrent.peerservice.exceptions.PingPeerException;
+import com.alyokaz.aktorrent.peerservice.tasks.DiscoverPeersTask;
 import com.alyokaz.aktorrent.pingserver.PingServer;
 import com.alyokaz.aktorrent.server.message.BeaconMessage;
 import com.alyokaz.aktorrent.server.message.MessageType;

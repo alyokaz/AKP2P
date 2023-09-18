@@ -1,21 +1,17 @@
 package com.alyokaz.aktorrent.fileservice;
 
+import com.alyokaz.aktorrent.fileservice.exceptions.DownloadException;
 import com.alyokaz.aktorrent.peerservice.PeerService;
-import com.alyokaz.aktorrent.server.message.Message;
-import com.alyokaz.aktorrent.server.message.MessageType;
 import com.alyokaz.aktorrent.server.message.RequestPieceMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.StringFormattedMessage;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Set;
 
 public abstract class AbstractDownloadHandler implements Runnable {
 

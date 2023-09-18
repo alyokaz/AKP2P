@@ -3,8 +3,8 @@ package intergration;
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.cli.CLI;
-import com.alyokaz.aktorrent.fileservice.SeedFileException;
-import com.alyokaz.aktorrent.peerservice.PingPeerException;
+import com.alyokaz.aktorrent.fileservice.exceptions.SeedFileException;
+import com.alyokaz.aktorrent.peerservice.exceptions.PingPeerException;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;

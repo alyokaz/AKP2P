@@ -1,5 +1,8 @@
-package com.alyokaz.aktorrent.fileservice;
+package com.alyokaz.aktorrent.fileservice.tasks;
 
+import com.alyokaz.aktorrent.fileservice.AbstractDownloadHandler;
+import com.alyokaz.aktorrent.fileservice.FileInfo;
+import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.peerservice.PeerService;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.alyokaz.aktorrent.peerservice;
+package com.alyokaz.aktorrent.peerservice.exceptions;
 
 public class PingPeerException extends RuntimeException {
 

@@ -1,4 +1,4 @@
-package com.alyokaz.aktorrent.fileservice;
+package com.alyokaz.aktorrent.fileservice.exceptions;
 
 public class DownloadException extends RuntimeException {
 

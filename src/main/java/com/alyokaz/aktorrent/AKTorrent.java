@@ -1,11 +1,10 @@
 package com.alyokaz.aktorrent;
 
 import com.alyokaz.aktorrent.cli.CLI;
-import com.alyokaz.aktorrent.fileservice.SeedFileException;
+import com.alyokaz.aktorrent.fileservice.exceptions.SeedFileException;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.peerservice.PeerService;
-import com.alyokaz.aktorrent.peerservice.PingPeerException;
 import com.alyokaz.aktorrent.pingserver.PingServer;
 import com.alyokaz.aktorrent.server.NodeServer;
 import org.apache.logging.log4j.LogManager;

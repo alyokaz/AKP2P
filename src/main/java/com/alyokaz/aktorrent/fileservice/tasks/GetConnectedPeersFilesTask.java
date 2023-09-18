@@ -1,5 +1,8 @@
-package com.alyokaz.aktorrent.peerservice;
+package com.alyokaz.aktorrent.fileservice.tasks;
 
+import com.alyokaz.aktorrent.fileservice.FileInfo;
+import com.alyokaz.aktorrent.fileservice.FileService;
+import com.alyokaz.aktorrent.peerservice.PeerService;
 import com.alyokaz.aktorrent.server.message.Message;
 import com.alyokaz.aktorrent.server.message.MessageType;
 import org.apache.logging.log4j.LogManager;
@@ -12,34 +15,34 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Set;
 
-public class DiscoverPeersTask implements Runnable {
+public class GetConnectedPeersFilesTask implements Runnable {
 
+    private final FileService fileService;
     private final InetSocketAddress address;
     private final PeerService peerService;
-    private final InetSocketAddress serverAddress;
+    private final static Logger logger = LogManager.getLogger();
 
-    private Logger logger = LogManager.getLogger();
-
-    public DiscoverPeersTask(InetSocketAddress address, PeerService peerService, InetSocketAddress serverAddress) {
+    public GetConnectedPeersFilesTask(FileService fileService, InetSocketAddress address, PeerService peerService) {
+        this.fileService = fileService;
         this.address = address;
         this.peerService = peerService;
-        this.serverAddress = serverAddress;
     }
+
 
     @Override
     public void run() {
         try (Socket socket = new Socket(address.getHostName(), address.getPort());
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-            out.writeObject(new Message(MessageType.REQUEST_PEERS, serverAddress));
+            out.writeObject(new Message(MessageType.REQUSET_FILE_INFOS, peerService.getServerAddress()));
             Object obj = in.readObject();
-            if (obj instanceof Set<?>) {
-                ((Set<InetSocketAddress>) obj).forEach(peerService::addPeer);
+            if(obj instanceof Set<?>) {
+                Set<FileInfo> remoteFileInfos = (Set<FileInfo>) obj;
+                remoteFileInfos.forEach(fileInfo -> fileService.registerFile(fileInfo, address));
             }
         } catch (IOException | ClassNotFoundException e) {
             peerService.removeFromLivePeers(address);
-            logger.error("Peer discovery failed at {} with {}", address, e.getMessage());
+            logger.error("Downloading of file info list from {} failed with {}", address, e.getMessage());
         }
     }
-
 }

@@ -2,8 +2,8 @@ package com.alyokaz.aktorrent.cli;
 
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
-import com.alyokaz.aktorrent.fileservice.SeedFileException;
-import com.alyokaz.aktorrent.peerservice.PingPeerException;
+import com.alyokaz.aktorrent.fileservice.exceptions.SeedFileException;
+import com.alyokaz.aktorrent.peerservice.exceptions.PingPeerException;
 
 import java.io.*;
 import java.net.InetSocketAddress;

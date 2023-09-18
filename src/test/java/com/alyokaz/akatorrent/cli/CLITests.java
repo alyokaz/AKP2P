@@ -3,7 +3,7 @@ package com.alyokaz.akatorrent.cli;
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.cli.CLI;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
-import com.alyokaz.aktorrent.fileservice.SeedFileException;
+import com.alyokaz.aktorrent.fileservice.exceptions.SeedFileException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

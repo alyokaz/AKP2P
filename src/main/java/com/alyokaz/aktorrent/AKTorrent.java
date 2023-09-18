@@ -53,7 +53,7 @@ public class AKTorrent {
         fileService.downloadFileTarget(fileInfo);
     }
 
-    public boolean addPeer(InetSocketAddress address) throws PingPeerException {
+    public boolean addPeer(InetSocketAddress address) {
         if(address != server.getServerAddress() && peerService.addPeer(address)) {
             peerService.discoverPeers();
             fileService.getConnectedPeersFiles();
@@ -128,7 +128,7 @@ public class AKTorrent {
         if(beaconAddress != null) {
             peerService.contactBeacon(server.getServerAddress(), beaconAddress);
             peerService.discoverPeers();
-            fileService.updateAvailableFiles();
+            fileService.updateAvailableFiles(); //TODO needs refactor, redundant code, replace with getConnectedPeersFiles
             return new AKTorrent(server, pingServer, peerService, fileService,
                     beaconAddress);
         }

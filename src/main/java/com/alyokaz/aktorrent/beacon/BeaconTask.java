@@ -36,7 +36,9 @@ public class BeaconTask implements Runnable {
                 logger.info("Peer at {} registered", message.getServerAddress());
             }
         } catch (IOException | ClassNotFoundException ex) {
-            throw new RuntimeException(ex);
+            logger.error("Handling beacon connection from {} failed with {}",
+                    socket.getInetAddress().getHostAddress() +  socket.getLocalPort(),
+                    ex.getMessage());
         }
     }
 }

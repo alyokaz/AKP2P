@@ -64,8 +64,6 @@ public class PeerHandler implements Runnable {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
-        } catch (PingPeerException e) {
-            //TODO write tests and implementation
         }
         logger.info("Client connect to server at {} closed", peerService.getServerAddress());
     }

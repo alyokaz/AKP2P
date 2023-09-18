@@ -4,8 +4,6 @@ import com.alyokaz.aktorrent.peerservice.PeerService;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
@@ -100,7 +98,7 @@ public class FileService {
                 completedFiles.put(outputFile.getName(), outputFile);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new BuildFileException("Building file" + container.getFilename() + " failed with " + e.getMessage(), e);
         }
     }
 
@@ -140,14 +138,12 @@ public class FileService {
     public void getConnectedPeersFiles() {
         Set<Future> futures = new HashSet<>();
         peerService.getLivePeers().forEach(address ->
-                futures.add(executor.submit(new GetConnectedPeersFilesTask(address, peerService, this))));
+                futures.add(executor.submit(new GetConnectedPeersFilesTask(this, address, peerService))));
         futures.forEach(f -> {
             try {
                 f.get();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
-                throw new RuntimeException(e);
+            } catch (InterruptedException | ExecutionException e) {
+                throw new GetPeersFileInfoException("Getting File Info from connected peers failed", e);
             }
         });
 

@@ -50,8 +50,6 @@ public class CLI {
                 }
             } catch (NumberFormatException e) {
                 outputStream.println(NOT_A_NUMBER_ERROR);
-            } catch (PingPeerException e) {
-                //TODO write test and implement
             } catch (SeedFileException e) {
                 //TODO write test and implement
             }

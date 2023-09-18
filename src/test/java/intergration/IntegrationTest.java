@@ -295,7 +295,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void deadNodeWillNotBeAddedToLivePeers() throws PingPeerException {
+    public void deadNodeWillNotBeAddedToLivePeers()  {
         AKTorrent deadNode = AKTorrent.createAndInitializeNoBeacon();
         InetSocketAddress deadNodeAddress = deadNode.getAddress();
         deadNode.shutDown();
@@ -304,8 +304,6 @@ public class IntegrationTest {
         InetSocketAddress liveNodeAddress = liveNode.getAddress();
 
         AKTorrent clientNode = AKTorrent.createAndInitializeNoBeacon();
-
-        assertThrows(PingPeerException.class, () ->  clientNode.addPeer(deadNodeAddress));
 
         clientNode.addPeer(liveNodeAddress);
 
@@ -413,9 +411,9 @@ public class IntegrationTest {
     }
 
     @Test
-    public void canHandleAttemptToAddBadPeerAddress() throws PingPeerException {
+    public void canHandleAttemptToAddBadPeerAddress() {
         AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
-        assertThrows(PingPeerException.class, () -> nodeA.addPeer(new InetSocketAddress("dsafdf", 80)));
+        nodeA.addPeer(new InetSocketAddress("dsafdf", 80));
         nodeA.shutDown();
     }
 
@@ -459,6 +457,19 @@ public class IntegrationTest {
         nodeA.shutDown();
         nodeB.shutDown();
         nodeC.shutDown();
+    }
+
+    @Test
+    public void deadPeerRemovedWhenUpdatingFiles() {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeC = AKTorrent.createAndInitializeNoBeacon();
+
+        nodeB.addPeer(nodeA.getAddress());
+        nodeB.addPeer(nodeC.getAddress());
+        nodeC.shutDown();
+        nodeB.getAvailableFiles();
+        assertEquals(1, nodeB.getLivePeers().size());
     }
 
     //TODO move timeout to this method

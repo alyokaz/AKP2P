@@ -1,10 +1,14 @@
 package com.alyokaz.aktorrent.peerservice;
 
 import com.alyokaz.aktorrent.pingserver.PingServer;
+import com.alyokaz.aktorrent.server.message.BeaconMessage;
+import com.alyokaz.aktorrent.server.message.MessageType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -21,7 +25,7 @@ public class PeerService {
     public PeerService() {
     }
 
-    public void discoverPeers() {
+    public void discoverPeers() throws PingPeerException {
         Set<Future<?>> futures = new HashSet<>();
         livePeers.forEach(address ->
                 futures.add(executor.submit(new DiscoverPeersTask(address, this, serverAddress))));
@@ -30,12 +34,12 @@ public class PeerService {
             try {
                 future.get();
             } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
+                throw new DiscoverPeersException("Peer discovery failed", e);
             }
         });
     }
 
-    public synchronized boolean addPeer(InetSocketAddress address) throws PingPeerException {
+    public synchronized boolean addPeer(InetSocketAddress address) {
         if(excluded.contains(address) || !peers.add(address))
             return false;
         if(pingPeer(address)) {
@@ -46,7 +50,7 @@ public class PeerService {
             return false;
     }
 
-    private boolean pingPeer(InetSocketAddress address) throws PingPeerException {
+    private boolean pingPeer(InetSocketAddress address) {
         try (DatagramSocket socket = new DatagramSocket()) {
             byte[] buf = PingServer.PING_PAYLOAD.getBytes();
             DatagramPacket packet = new DatagramPacket(buf, buf.length, address.getAddress(), address.getPort());
@@ -59,18 +63,27 @@ public class PeerService {
 
             String payload = new String(packet.getData(), StandardCharsets.UTF_8).trim();
             return (payload.equals(PingServer.PONG_PAYLOAD));
-        } catch (IllegalArgumentException | IOException  e){
+        } catch (IllegalArgumentException e){
             logger.error("Ping timed out for {}", address);
-            throw new PingPeerException("Ping of peer at " + address + " failed", e);
+            return false;
+        } catch (IOException e) {
+            logger.error("Ping for peer at {} failed", address);
+            return false;
         }
     }
 
     public void contactBeacon(InetSocketAddress serverAddress, InetSocketAddress beaconAddress) {
-        try {
-            executor.submit(new ContactBeaconTask(beaconAddress, this, serverAddress)).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+       try(Socket socket  = new Socket(beaconAddress.getHostName(), beaconAddress.getPort());
+           ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+           ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
+
+           out.writeObject(new BeaconMessage(MessageType.REQUEST_PEERS, serverAddress));
+           Object obj = in.readObject();
+           ((List<InetSocketAddress>) obj).forEach(this::addPeer);
+
+       } catch (IOException | ClassNotFoundException e) {
+           throw new ContactBeaconException("Contacting Beacon failed", e);
+       }
     }
 
     public Set<InetSocketAddress> getLivePeers() {

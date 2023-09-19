@@ -25,6 +25,7 @@ public class CLI {
     public static final String PEER_CONNECTION_FAILED = "Failed to connect to peer";
     public static final String SEED_FILE_EXCEPTION = "Failed to seed file";
     public static final String BAD_ADDRESS_FORMAT_ERROR = "Bad address format. Please enter <Hostname> <port>";
+    public static final String NO_FILES_AVAILABLE = "No files are available for download";
     private final InputStream inputStream;
     private final PrintStream outputStream;
     private final AKTorrent node;
@@ -81,11 +82,15 @@ public class CLI {
     private void processDisplayFiles(BufferedReader reader, PrintStream outputStream) throws IOException {
         List<FileInfo> files = new ArrayList<>(node.getAvailableFiles());
         IntStream.range(0, files.size()).forEach(i -> outputStream.println((i + 1) + ": " + files.get(i).getFilename()));
-        outputStream.println(DOWNLOAD_INPUT_PROMPT);
-        String line = reader.readLine();
-        if (line == null) return;
-        int fileNumber = Integer.parseInt(line) - 1;
-        node.downloadFile(files.get(fileNumber));
+        if(files.size() > 0) {
+            outputStream.println(DOWNLOAD_INPUT_PROMPT);
+            String line = reader.readLine();
+            if (line == null) return;
+            int fileNumber = Integer.parseInt(line) - 1;
+            node.downloadFile(files.get(fileNumber));
+        } else {
+            outputStream.println(CLI.NO_FILES_AVAILABLE);
+        }
     }
 
     private void processSeedFile(BufferedReader reader, PrintStream out) throws IOException, SeedFileException {

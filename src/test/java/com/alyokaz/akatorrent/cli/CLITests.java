@@ -177,6 +177,18 @@ public class CLITests {
 
     }
 
+    @Test
+    public void noFilesAvailable() throws IOException {
+        String command = "2\n";
+        InputStream in = buildInputStream(command);
+        buildAndStartCLI(in, out, node);
+        Scanner scanner = new Scanner(bytes.toString());
+
+        assertDisplayOutput(() -> {
+            assertEquals(CLI.NO_FILES_AVAILABLE, scanner.nextLine());
+        }, scanner);
+    }
+
     private static InputStream buildInputStream(String command) {
         return new ByteArrayInputStream(command.getBytes());
     }

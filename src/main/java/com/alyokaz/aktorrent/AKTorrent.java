@@ -137,8 +137,9 @@ public class AKTorrent {
 
 
     public static void main(String[] args) throws IOException {
-        InetSocketAddress beaconAddress =
-                new InetSocketAddress(args[0], Integer.parseInt(args[1]));
+        InetSocketAddress beaconAddress = null;
+        if(args.length == 2)
+                beaconAddress = new InetSocketAddress(args[0], Integer.parseInt(args[1]));
         AKTorrent node = AKTorrent.createAndInitialize(beaconAddress);
         CLI cli = new CLI(System.in, System.out, node);
         cli.start();

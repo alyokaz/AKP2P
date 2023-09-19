@@ -24,6 +24,7 @@ public class CLI {
     public static final String PEER_CONNECTED_MESSAGE = "Peer Connected";
     public static final String PEER_CONNECTION_FAILED = "Failed to connect to peer";
     public static final String SEED_FILE_EXCEPTION = "Failed to seed file";
+    public static final String BAD_ADDRESS_FORMAT_ERROR = "Bad address format. Please enter <Hostname> <port>";
     private final InputStream inputStream;
     private final PrintStream outputStream;
     private final AKTorrent node;
@@ -63,10 +64,14 @@ public class CLI {
     private void processAddPeer(BufferedReader reader, PrintStream outputStream) throws IOException, PingPeerException {
         outputStream.println(CLI.INPUT_PEER_ADDRESS_PROMPT);
         String[] address = reader.readLine().split(" ");
-        if(node.addPeer(new InetSocketAddress(address[0], Integer.parseInt(address[1]))))
-            outputStream.println(CLI.PEER_CONNECTED_MESSAGE);
-        else
-            outputStream.println(CLI.PEER_CONNECTION_FAILED);
+        if(address.length == 2) {
+            if (node.addPeer(new InetSocketAddress(address[0], Integer.parseInt(address[1]))))
+                outputStream.println(CLI.PEER_CONNECTED_MESSAGE);
+            else
+                outputStream.println(CLI.PEER_CONNECTION_FAILED);
+        } else {
+            outputStream.println(CLI.BAD_ADDRESS_FORMAT_ERROR);
+        }
     }
 
     private void processDefault(PrintStream outputStream, Integer selection) {

@@ -163,6 +163,20 @@ public class CLITests {
 
     }
 
+    @Test
+    public void badPeerAddressFormat() throws IOException {
+        String command = "3\n" + "fasdf23423 ds fa sdf d";
+        InputStream in = buildInputStream(command);
+        buildAndStartCLI(in, out, node);
+        Scanner scanner = new Scanner(bytes.toString());
+
+        assertDisplayOutput(() -> {
+            assertEquals(CLI.INPUT_PEER_ADDRESS_PROMPT, scanner.nextLine());
+            assertEquals(CLI.BAD_ADDRESS_FORMAT_ERROR, scanner.nextLine());
+        }, scanner);
+
+    }
+
     private static InputStream buildInputStream(String command) {
         return new ByteArrayInputStream(command.getBytes());
     }

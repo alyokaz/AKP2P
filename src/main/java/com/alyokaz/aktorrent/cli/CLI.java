@@ -87,7 +87,10 @@ public class CLI {
             String line = reader.readLine();
             if (line == null) return;
             int fileNumber = Integer.parseInt(line) - 1;
-            node.downloadFile(files.get(fileNumber));
+            if(fileNumber + 1 > files.size())
+                outputStream.println(CLI.NON_EXISTENT_MENU_OPTION);
+            else
+                node.downloadFile(files.get(fileNumber));
         } else {
             outputStream.println(CLI.NO_FILES_AVAILABLE);
         }

@@ -189,6 +189,22 @@ public class CLITests {
         }, scanner);
     }
 
+    @Test
+    public void noFileForNumber() throws IOException {
+        String command = "2\n2";
+        InputStream in = buildInputStream(command);
+        when(node.getAvailableFiles()).thenReturn(Set.of(new FileInfo(FILENAME, 100, 100)));
+        buildAndStartCLI(in, out, node);
+        Scanner scanner = new Scanner(bytes.toString());
+
+        assertDisplayOutput(() -> {
+            assertEquals("1: " + FILENAME, scanner.nextLine());
+            assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, scanner.nextLine());
+            assertEquals(CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine());
+        }, scanner);
+    }
+
+
     private static InputStream buildInputStream(String command) {
         return new ByteArrayInputStream(command.getBytes());
     }

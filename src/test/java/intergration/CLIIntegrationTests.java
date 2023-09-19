@@ -15,8 +15,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CLIIntegrationTests {
 
@@ -178,6 +177,64 @@ public class CLIIntegrationTests {
 
         exitLatch.await();
         server.shutDown();
+    }
+
+    @Test
+    public void canHandleBadPeerAddress() throws InterruptedException {
+        CountDownLatch exitLatch = new CountDownLatch(1);
+        BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
+
+        AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
+        serverAddress.add(server.getAddress());
+
+        new Thread(() -> {
+            try {
+                final InetSocketAddress socketAddress = serverAddress.take();
+                AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
+
+                CLI cli = new CLI(new ByteArrayInputStream(("3\n" + "bad peer address").getBytes()),
+                        new PrintStream(new ByteArrayOutputStream()), client);
+                cli.start();
+
+                assertFalse(client.getLivePeers().contains(socketAddress));
+                exitLatch.countDown();
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+
+        exitLatch.await();
+        server.shutDown();
+    }
+
+    @Test
+    public void canHandleDeadPeer() throws InterruptedException {
+        CountDownLatch exitLatch = new CountDownLatch(1);
+        BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
+
+        AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
+        serverAddress.add(server.getAddress());
+        server.shutDown();
+
+        new Thread(() -> {
+            try {
+                final InetSocketAddress socketAddress = serverAddress.take();
+                AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
+
+                CLI cli = new CLI(new ByteArrayInputStream(("3\n" + socketAddress.getHostName() + " "
+                        + socketAddress.getPort()).getBytes()),
+                        new PrintStream(new ByteArrayOutputStream()), client);
+                cli.start();
+
+                assertFalse(client.getLivePeers().contains(socketAddress));
+                exitLatch.countDown();
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+
+        exitLatch.await();
+
     }
 
     private File getFile(String filename) {

@@ -22,6 +22,7 @@ public class CLI {
     public static final String FILE_NOT_FOUND = "Could not locate file: ";
     public static final String INPUT_PEER_ADDRESS_PROMPT = "Input peer hostname and port: ";
     public static final String PEER_CONNECTED_MESSAGE = "Peer Connected";
+    public static final String PEER_CONNECTION_FAILED = "Failed to connect to peer";
     private final InputStream inputStream;
     private final PrintStream outputStream;
     private final AKTorrent node;
@@ -61,8 +62,10 @@ public class CLI {
     private void processAddPeer(BufferedReader reader, PrintStream outputStream) throws IOException, PingPeerException {
         outputStream.println(CLI.INPUT_PEER_ADDRESS_PROMPT);
         String[] address = reader.readLine().split(" ");
-        node.addPeer(new InetSocketAddress(address[0], Integer.parseInt(address[1])));
-        outputStream.println(CLI.PEER_CONNECTED_MESSAGE);
+        if(node.addPeer(new InetSocketAddress(address[0], Integer.parseInt(address[1]))))
+            outputStream.println(CLI.PEER_CONNECTED_MESSAGE);
+        else
+            outputStream.println(CLI.PEER_CONNECTION_FAILED);
     }
 
     private void processDefault(PrintStream outputStream, Integer selection) {

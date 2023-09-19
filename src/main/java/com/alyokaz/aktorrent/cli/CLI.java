@@ -23,6 +23,7 @@ public class CLI {
     public static final String INPUT_PEER_ADDRESS_PROMPT = "Input peer hostname and port: ";
     public static final String PEER_CONNECTED_MESSAGE = "Peer Connected";
     public static final String PEER_CONNECTION_FAILED = "Failed to connect to peer";
+    public static final String SEED_FILE_EXCEPTION = "Failed to seed file";
     private final InputStream inputStream;
     private final PrintStream outputStream;
     private final AKTorrent node;
@@ -52,7 +53,7 @@ public class CLI {
             } catch (NumberFormatException e) {
                 outputStream.println(NOT_A_NUMBER_ERROR);
             } catch (SeedFileException e) {
-                //TODO write test and implement
+                outputStream.println(SEED_FILE_EXCEPTION);
             }
             outputStream.println(MAIN_MENU);
         }

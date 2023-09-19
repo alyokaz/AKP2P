@@ -148,6 +148,21 @@ public class CLITests {
         }, scanner);
     }
 
+    @Test
+    public void canHandleSeedFileException() throws IOException, SeedFileException {
+        String command = "1\n " + this.getClass().getResource("/" + FILENAME).getPath() + "\n";
+        InputStream in = buildInputStream(command);
+        doThrow(SeedFileException.class).when(node).seedFile(any());
+        buildAndStartCLI(in, out, node);
+        Scanner scanner = new Scanner(bytes.toString());
+
+        assertDisplayOutput(() -> {
+            assertEquals(CLI.INPUT_PROMPT, scanner.nextLine());
+            assertEquals(CLI.SEED_FILE_EXCEPTION, scanner.nextLine());
+        }, scanner);
+
+    }
+
     private static InputStream buildInputStream(String command) {
         return new ByteArrayInputStream(command.getBytes());
     }

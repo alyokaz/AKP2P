@@ -146,4 +146,9 @@ public class FileService {
     }
 
 
+    public double getProgress(String name) {
+        PieceContainer container = files.get(name);
+        return container.getPieces().size() / (double) container.getTotalPieces();
+
+    }
 }

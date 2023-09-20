@@ -6,6 +6,8 @@ import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.fileservice.exceptions.SeedFileException;
 import com.alyokaz.aktorrent.peerservice.exceptions.PingPeerException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -28,6 +30,7 @@ public class IntegrationTest {
     private static final String FILENAME = "test_file.mp4";
     private static final String FILENAME_2 = "test_file_2.mp4";
     private final static ExecutorService executor = Executors.newCachedThreadPool();
+    private Logger logger = LogManager.getLogger();
 
     @Test
     public void canSeedAndReceiveFile() throws IOException, ExecutionException, InterruptedException, TimeoutException, PingPeerException, SeedFileException {
@@ -471,6 +474,26 @@ public class IntegrationTest {
         nodeC.shutDown();
         nodeB.getAvailableFiles();
         assertEquals(1, nodeB.getLivePeers().size());
+    }
+
+    @Test
+    public void canGetProgressOfDownload() throws SeedFileException, InterruptedException {
+        AKTorrent nodeA = AKTorrent.createAndInitializeNoBeacon();
+        AKTorrent nodeB = AKTorrent.createAndInitializeNoBeacon();
+
+        File file = getFile(FILENAME);
+        nodeA.seedFile(file);
+
+        nodeB.addPeer(nodeA.getAddress());
+        Set<FileInfo> availableFiles = nodeB.getAvailableFiles();
+        nodeB.downloadFile(availableFiles.stream().findFirst().get());
+
+        while(nodeB.getProgressOfDownload(file.getName()) < 1) {
+            double progress = nodeB.getProgressOfDownload(file.getName());
+            logger.debug("Download progress = {}", progress * 100);
+            assertTrue(progress <= 1) ;
+            Thread.sleep(1);
+        }
     }
 
     //TODO move timeout to this method

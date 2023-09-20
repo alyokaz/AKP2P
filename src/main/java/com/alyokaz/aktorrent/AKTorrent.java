@@ -149,4 +149,8 @@ public class AKTorrent {
     public Set<InetSocketAddress> getPeers() {
         return peerService.getPeers();
     }
+
+    public double getProgressOfDownload(String name) {
+        return fileService.getProgress(name);
+    }
 }

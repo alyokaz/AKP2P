@@ -77,7 +77,7 @@ public class DownloadFileTargetTask implements Runnable {
 
             StringFormattedMessage formattedMessage = new StringFormattedMessage("%.2f %%%n",
                     (container.getPieces().size() / (double) container.getTotalPieces()) * 100);
-            logger.info(formattedMessage);
+            logger.debug(formattedMessage);
         }
         logger.info("Download of {} from {} complete.", filename, address);
         // build the file and save it to the local file system

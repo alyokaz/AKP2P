@@ -26,7 +26,7 @@ public class CLI {
     public static final String SEED_FILE_EXCEPTION = "Failed to seed file";
     public static final String BAD_ADDRESS_FORMAT_ERROR = "Bad address format. Please enter <Hostname> <port>";
     public static final String NO_FILES_AVAILABLE = "No files are available for download";
-    public static final String DOWNLOAD_PROGRESS = "Downloading %5.2f%%%n";
+    public static final String DOWNLOAD_PROGRESS = "Downloading %5.2f%%\r";
     public static final String DOWNLOAD_COMPLETE = "Downloading of %s complete%n";
 
     private final InputStream inputStream;
@@ -61,6 +61,8 @@ public class CLI {
                 outputStream.println(NOT_A_NUMBER_ERROR);
             } catch (SeedFileException e) {
                 outputStream.println(SEED_FILE_EXCEPTION);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
             outputStream.println(MAIN_MENU);
         }
@@ -84,7 +86,7 @@ public class CLI {
         outputStream.println(selection + NON_EXISTENT_MENU_OPTION);
     }
 
-    private void processDisplayFiles(BufferedReader reader, PrintStream outputStream) throws IOException {
+    private void processDisplayFiles(BufferedReader reader, PrintStream outputStream) throws IOException, InterruptedException {
         List<FileInfo> files = new ArrayList<>(node.getAvailableFiles());
         IntStream.range(0, files.size()).forEach(i -> outputStream.println((i + 1) + ": " + files.get(i).getFilename()));
         if(files.size() > 0) {
@@ -101,6 +103,7 @@ public class CLI {
                 while(progress < 1) {
                     progress = node.getProgressOfDownload(fileInfo.getFilename());
                     outputStream.printf(DOWNLOAD_PROGRESS, progress * 100);
+                    Thread.sleep(100);
                 }
                 outputStream.printf(DOWNLOAD_COMPLETE, fileInfo.getFilename());
             }

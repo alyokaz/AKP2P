@@ -234,12 +234,13 @@ public class CLITests {
             assertEquals(String.format(removeEOL(CLI.DOWNLOAD_PROGRESS), first_value * 100), scanner.nextLine());
             assertEquals(String.format(removeEOL(CLI.DOWNLOAD_PROGRESS), second_value * 100), scanner.nextLine());
             assertEquals(String.format(removeEOL(CLI.DOWNLOAD_PROGRESS), third_value * 100), scanner.nextLine());
-            assertEquals(String.format(removeEOL(CLI.DOWNLOAD_COMPLETE), fileInfo.getFilename()), scanner.nextLine());
+            assertEquals(String.format(CLI.DOWNLOAD_COMPLETE.replace("%n", ""),
+                    fileInfo.getFilename()), scanner.nextLine());
         }, scanner);
     }
 
     private String removeEOL(String string) {
-        return string.replace("%n", "");
+        return string.replace("\r", "");
     }
 
 

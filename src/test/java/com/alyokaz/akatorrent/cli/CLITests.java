@@ -84,6 +84,7 @@ public class CLITests {
     public void downloadFileByDisplayNumber() throws IOException {
         FileInfo fileInfo = new FileInfo(FILENAME, 100, 100);
         when(node.getAvailableFiles()).thenReturn(Set.of(fileInfo));
+        when(node.getProgressOfDownload(any())).thenReturn(1.0);
 
         String command = "2\n1";
         InputStream in = buildInputStream(command);
@@ -94,6 +95,9 @@ public class CLITests {
         assertDisplayOutput(() -> {
             assertEquals("1: " + FILENAME, scanner.nextLine());
             assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, scanner.nextLine());
+            assertEquals(String.format(removeEOL(CLI.DOWNLOAD_PROGRESS), 100.00), scanner.nextLine());
+            assertEquals(String.format(CLI.DOWNLOAD_COMPLETE.replace("%n", ""),
+                    fileInfo.getFilename()), scanner.nextLine());
         }, scanner);
 
         verify(node).downloadFile(fileInfo);

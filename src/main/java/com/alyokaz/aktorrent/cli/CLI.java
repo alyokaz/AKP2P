@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 public class CLI {
 
     public static final String WELCOME_MESSAGE = "Welcome to AKTorrent";
-    public static final String MAIN_MENU = "1: seed, 2: see files, 3: add peer";
+    public static final String MAIN_MENU = "1: seed, 2: see files, 3: add peer, 4: exit";
     public static final String INPUT_PROMPT = "Input Path:";
     public static final String DOWNLOAD_INPUT_PROMPT = "Input file number: ";
     public static final String NOT_A_NUMBER_ERROR = "Please select a menu number.";
@@ -42,7 +42,8 @@ public class CLI {
         outputStream.println(MAIN_MENU);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
-        while ((line = reader.readLine()) != null) {
+        boolean running = true;
+        while (running && (line = reader.readLine()) != null) {
             int selection;
             try {
                 selection = Integer.parseInt(line);
@@ -50,6 +51,7 @@ public class CLI {
                     case 1 -> processSeedFile(reader, outputStream);
                     case 2 -> processDisplayFiles(reader, outputStream);
                     case 3 -> processAddPeer(reader, outputStream);
+                    case 4 -> running = false;
                     default -> processDefault(outputStream, selection);
                 }
             } catch (NumberFormatException e) {

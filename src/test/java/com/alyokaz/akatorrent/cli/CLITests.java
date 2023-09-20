@@ -204,6 +204,16 @@ public class CLITests {
         }, scanner);
     }
 
+    @Test
+    public void canShutDownFromMenu() throws IOException {
+        String command = "4\n";
+        InputStream in = buildInputStream(command);
+        buildAndStartCLI(in, out, node);
+
+        verify(node).shutDown();
+    }
+
+
 
     private static InputStream buildInputStream(String command) {
         return new ByteArrayInputStream(command.getBytes());

@@ -143,6 +143,7 @@ public class AKTorrent {
         AKTorrent node = AKTorrent.createAndInitialize(beaconAddress);
         CLI cli = new CLI(System.in, System.out, node);
         cli.start();
+        System.exit(0);
     }
 
     public Set<InetSocketAddress> getPeers() {

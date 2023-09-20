@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Scanner;
@@ -21,6 +22,7 @@ import static org.mockito.Mockito.*;
 public class CLITests {
     private static final String FILENAME = "test_file.mp4";
     private static final String FILENAME_2 = "test_file_2.mp4";
+    private static final int PORT = 4444;
     private ByteArrayOutputStream bytes;
     private PrintStream out;
     private AKTorrent node;
@@ -30,6 +32,7 @@ public class CLITests {
         bytes = new ByteArrayOutputStream();
         out = new PrintStream(bytes);
         node = mock(AKTorrent.class);
+        when(node.getAddress()).thenReturn(new InetSocketAddress(PORT));
     }
 
     @Test
@@ -243,7 +246,7 @@ public class CLITests {
         }, scanner);
     }
 
-    private String removeEOL(String string) {
+    private static String removeEOL(String string) {
         return string.replace("\r", "");
     }
 
@@ -264,6 +267,7 @@ public class CLITests {
 
     public static void assertDisplayWelcomeMessage(Scanner scanner) {
         assertEquals(CLI.WELCOME_MESSAGE, scanner.nextLine());
+        assertEquals(String.format(CLI.SERVER_STARTUP_MESSAGE.replace("%n", ""), PORT), scanner.nextLine());
     }
 
     public static void assertDisplayMenu(Scanner scanner) {

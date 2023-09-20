@@ -28,6 +28,7 @@ public class CLI {
     public static final String NO_FILES_AVAILABLE = "No files are available for download";
     public static final String DOWNLOAD_PROGRESS = "Downloading %5.2f%%\r";
     public static final String DOWNLOAD_COMPLETE = "Downloading of %s complete%n";
+    public static final String SERVER_STARTUP_MESSAGE = "Server started on port: %s%n";
 
     private final InputStream inputStream;
     private final PrintStream outputStream;
@@ -42,6 +43,7 @@ public class CLI {
 
     public void start() throws IOException {
         outputStream.println(WELCOME_MESSAGE);
+        outputStream.printf(SERVER_STARTUP_MESSAGE, node.getAddress().getPort());
         outputStream.println(MAIN_MENU);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;

@@ -26,6 +26,9 @@ public class CLI {
     public static final String SEED_FILE_EXCEPTION = "Failed to seed file";
     public static final String BAD_ADDRESS_FORMAT_ERROR = "Bad address format. Please enter <Hostname> <port>";
     public static final String NO_FILES_AVAILABLE = "No files are available for download";
+    public static final String DOWNLOAD_PROGRESS = "Downloading %5.2f%%%n";
+    public static final String DOWNLOAD_COMPLETE = "Downloading of %s complete%n";
+
     private final InputStream inputStream;
     private final PrintStream outputStream;
     private final AKTorrent node;
@@ -91,8 +94,16 @@ public class CLI {
             int fileNumber = Integer.parseInt(line) - 1;
             if(fileNumber + 1 > files.size())
                 outputStream.println(CLI.NON_EXISTENT_MENU_OPTION);
-            else
-                node.downloadFile(files.get(fileNumber));
+            else {
+                FileInfo fileInfo = files.get(fileNumber);
+                node.downloadFile(fileInfo);
+                double progress = 0;
+                while(progress < 1) {
+                    progress = node.getProgressOfDownload(fileInfo.getFilename());
+                    outputStream.printf(DOWNLOAD_PROGRESS, progress * 100);
+                }
+                outputStream.printf(DOWNLOAD_COMPLETE, fileInfo.getFilename());
+            }
         } else {
             outputStream.println(CLI.NO_FILES_AVAILABLE);
         }

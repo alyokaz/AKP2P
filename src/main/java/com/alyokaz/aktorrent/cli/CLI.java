@@ -31,6 +31,7 @@ public class CLI {
     public static final String DOWNLOAD_COMPLETE = "Downloading of %s complete%n";
     public static final String SERVER_STARTUP_MESSAGE = "Server started on port: %s%n";
     public static final String BEACON_EXCEPTION = "Could not contact Beacon";
+    public static final String COMMAND_PROMPT = "AKTorrent:>";
 
     private final InputStream inputStream;
     private final PrintStream outputStream;
@@ -47,6 +48,7 @@ public class CLI {
         outputStream.println(WELCOME_MESSAGE);
         outputStream.printf(SERVER_STARTUP_MESSAGE, node.getAddress().getPort());
         outputStream.println(MAIN_MENU);
+        outputStream.print(COMMAND_PROMPT);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         boolean running = true;
@@ -71,12 +73,14 @@ public class CLI {
                 outputStream.println(BEACON_EXCEPTION);
             }
             outputStream.println(MAIN_MENU);
+            outputStream.print(COMMAND_PROMPT);
         }
         node.shutDown();
     }
 
     private void processAddPeer(BufferedReader reader, PrintStream outputStream) throws IOException, PingPeerException {
         outputStream.println(CLI.INPUT_PEER_ADDRESS_PROMPT);
+        outputStream.print(CLI.COMMAND_PROMPT);
         String[] address = reader.readLine().split(" ");
         if(address.length == 2) {
             if (node.addPeer(new InetSocketAddress(address[0], Integer.parseInt(address[1]))))
@@ -97,6 +101,7 @@ public class CLI {
         IntStream.range(0, files.size()).forEach(i -> outputStream.println((i + 1) + ": " + files.get(i).getFilename()));
         if(files.size() > 0) {
             outputStream.println(DOWNLOAD_INPUT_PROMPT);
+            outputStream.print(COMMAND_PROMPT);
             String line = reader.readLine();
             if (line == null) return;
             int fileNumber = Integer.parseInt(line) - 1;
@@ -120,6 +125,7 @@ public class CLI {
 
     private void processSeedFile(BufferedReader reader, PrintStream out) throws IOException, SeedFileException {
         out.println(INPUT_PROMPT);
+        out.print(COMMAND_PROMPT);
         String filename = reader.readLine().trim();
         File file = new File(filename);
         if (file.exists()) {

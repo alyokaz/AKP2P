@@ -18,12 +18,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class CLITests {
     private static final String FILENAME = "test_file.mp4";
     private static final String FILENAME_2 = "test_file_2.mp4";
     private static final int PORT = 4444;
+
+    public static final String DELIMITER = ">";
     private ByteArrayOutputStream bytes;
     private PrintStream out;
     private AKTorrent node;
@@ -41,9 +44,13 @@ public class CLITests {
         String command = "1\n " + this.getClass().getResource("/" + FILENAME).getPath() + "\n";
         InputStream in = buildInputStream(command);
         buildAndStartCLI(in, out, node);
-        Scanner scanner = new Scanner(bytes.toString());
+        Scanner scanner = buildScanner(bytes);
 
-        assertDisplayOutput(() -> assertEquals(CLI.INPUT_PROMPT, scanner.nextLine()), scanner);
+        assertDisplayOutput(() -> {
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
+            assertEquals(CLI.INPUT_PROMPT, scanner.nextLine());
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
+        }, scanner);
 
         File file = buildFile(FILENAME);
         verify(node).seedFile(file);
@@ -76,11 +83,14 @@ public class CLITests {
         buildAndStartCLI(in, out, node);
 
         Scanner scanner = new Scanner(bytes.toString());
+        scanner.useDelimiter(DELIMITER);
 
         assertDisplayOutput(() -> {
-            assertEquals("1: " + FILENAME, scanner.nextLine());
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
+            assertEquals( "1: " + FILENAME, scanner.nextLine());
             assertEquals("2: " + FILENAME_2, scanner.nextLine());
             assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, scanner.nextLine());
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
         }, scanner);
     }
 
@@ -97,9 +107,9 @@ public class CLITests {
         Scanner scanner = new Scanner(bytes.toString());
 
         assertDisplayOutput(() -> {
-            assertEquals("1: " + FILENAME, scanner.nextLine());
+            assertDisplayString("1: " + FILENAME, scanner.nextLine());
             assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, scanner.nextLine());
-            assertEquals(String.format(removeEOL(CLI.DOWNLOAD_PROGRESS), 100.00), scanner.nextLine());
+            assertDisplayString(String.format(removeEOL(CLI.DOWNLOAD_PROGRESS), 100.00), scanner.nextLine());
             assertEquals(String.format(CLI.DOWNLOAD_COMPLETE.replace("%n", ""),
                     fileInfo.getFilename()), scanner.nextLine());
         }, scanner);
@@ -114,7 +124,9 @@ public class CLITests {
         buildAndStartCLI(in, out, node);
         Scanner scanner = new Scanner(bytes.toString());
 
-        assertDisplayOutput(() -> assertEquals(CLI.NOT_A_NUMBER_ERROR, scanner.nextLine()), scanner);
+        assertDisplayOutput(() -> {
+            assertDisplayString(CLI.NOT_A_NUMBER_ERROR, scanner.nextLine());
+        }, scanner);
     }
 
     @Test
@@ -122,10 +134,12 @@ public class CLITests {
         String command = "99";
         InputStream in = buildInputStream(command);
         buildAndStartCLI(in, out, node);
-        Scanner scanner = new Scanner(bytes.toString());
+        Scanner scanner = buildScanner(bytes);
 
-        assertDisplayOutput(() ->
-                assertEquals(command + CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine()), scanner);
+        assertDisplayOutput(() ->{
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
+                assertEquals(command + CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine());
+        }, scanner);
     }
 
     @Test
@@ -135,9 +149,12 @@ public class CLITests {
         InputStream in = buildInputStream(command);
         buildAndStartCLI(in, out, node);
         Scanner scanner = new Scanner(bytes.toString());
+        scanner.useDelimiter(DELIMITER);
 
         assertDisplayOutput(() -> {
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
             assertEquals(CLI.INPUT_PROMPT, scanner.nextLine());
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
             assertEquals(CLI.FILE_NOT_FOUND + filename, scanner.nextLine());
         }, scanner);
     }
@@ -151,9 +168,14 @@ public class CLITests {
         Scanner scanner = new Scanner(bytes.toString());
 
         assertDisplayOutput(() -> {
-            assertEquals(CLI.INPUT_PEER_ADDRESS_PROMPT, scanner.nextLine());
-            assertEquals(CLI.PEER_CONNECTED_MESSAGE, scanner.nextLine());
+            assertDisplayString(CLI.INPUT_PEER_ADDRESS_PROMPT, scanner.nextLine());
+            assertDisplayString(CLI.PEER_CONNECTED_MESSAGE, scanner.nextLine());
         }, scanner);
+    }
+
+    private static void assertDisplayString(String expectedCommand, String line) {
+        assertEquals(CLI.COMMAND_PROMPT, line.substring(0, CLI.COMMAND_PROMPT.length()));
+        assertEquals(expectedCommand, line.substring(CLI.COMMAND_PROMPT.length()));
     }
 
     @Test
@@ -162,10 +184,12 @@ public class CLITests {
         InputStream in = buildInputStream(command);
         doThrow(SeedFileException.class).when(node).seedFile(any());
         buildAndStartCLI(in, out, node);
-        Scanner scanner = new Scanner(bytes.toString());
+        Scanner scanner = buildScanner(bytes);
 
         assertDisplayOutput(() -> {
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
             assertEquals(CLI.INPUT_PROMPT, scanner.nextLine());
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
             assertEquals(CLI.SEED_FILE_EXCEPTION, scanner.nextLine());
         }, scanner);
 
@@ -180,7 +204,7 @@ public class CLITests {
         Scanner scanner = new Scanner(bytes.toString());
 
         assertDisplayOutput(() -> {
-            assertEquals(CLI.BEACON_EXCEPTION, scanner.nextLine());
+            assertDisplayString(CLI.BEACON_EXCEPTION, scanner.nextLine());
         }, scanner);
     }
 
@@ -192,8 +216,8 @@ public class CLITests {
         Scanner scanner = new Scanner(bytes.toString());
 
         assertDisplayOutput(() -> {
-            assertEquals(CLI.INPUT_PEER_ADDRESS_PROMPT, scanner.nextLine());
-            assertEquals(CLI.BAD_ADDRESS_FORMAT_ERROR, scanner.nextLine());
+            assertDisplayString(CLI.INPUT_PEER_ADDRESS_PROMPT, scanner.nextLine());
+            assertDisplayString(CLI.BAD_ADDRESS_FORMAT_ERROR, scanner.nextLine());
         }, scanner);
 
     }
@@ -206,7 +230,7 @@ public class CLITests {
         Scanner scanner = new Scanner(bytes.toString());
 
         assertDisplayOutput(() -> {
-            assertEquals(CLI.NO_FILES_AVAILABLE, scanner.nextLine());
+            assertDisplayString(CLI.NO_FILES_AVAILABLE, scanner.nextLine());
         }, scanner);
     }
 
@@ -216,11 +240,13 @@ public class CLITests {
         InputStream in = buildInputStream(command);
         when(node.getAvailableFiles()).thenReturn(Set.of(new FileInfo(FILENAME, 100, 100)));
         buildAndStartCLI(in, out, node);
-        Scanner scanner = new Scanner(bytes.toString());
+        Scanner scanner = buildScanner(bytes);
 
         assertDisplayOutput(() -> {
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
             assertEquals("1: " + FILENAME, scanner.nextLine());
             assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, scanner.nextLine());
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
             assertEquals(CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine());
         }, scanner);
     }
@@ -247,11 +273,13 @@ public class CLITests {
         when(node.getProgressOfDownload(any())).thenReturn(first_value, second_value, third_value);
 
         buildAndStartCLI(in, out, node);
-        Scanner scanner = new Scanner(bytes.toString());
+        Scanner scanner = buildScanner(bytes);
 
         assertDisplayOutput(() -> {
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
             assertEquals("1: " + fileInfo.getFilename(), scanner.nextLine());
             assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, scanner.nextLine());
+            assertEquals(CLI.COMMAND_PROMPT, extractCommandPrompt(scanner));
             assertEquals(String.format(removeEOL(CLI.DOWNLOAD_PROGRESS), first_value * 100), scanner.nextLine());
             assertEquals(String.format(removeEOL(CLI.DOWNLOAD_PROGRESS), second_value * 100), scanner.nextLine());
             assertEquals(String.format(removeEOL(CLI.DOWNLOAD_PROGRESS), third_value * 100), scanner.nextLine());
@@ -264,7 +292,9 @@ public class CLITests {
         return string.replace("\r", "");
     }
 
-
+    private String extractCommandPrompt(Scanner scanner) {
+        return scanner.next() + scanner.findInLine(DELIMITER);
+    }
 
     private static InputStream buildInputStream(String command) {
         return new ByteArrayInputStream(command.getBytes());
@@ -277,6 +307,10 @@ public class CLITests {
     private static void buildAndStartCLI(InputStream in, PrintStream out, AKTorrent node) throws IOException {
         CLI cli = new CLI(in, out, node);
         cli.start();
+    }
+
+    private Scanner buildScanner(ByteArrayOutputStream bytes) {
+        return new Scanner(bytes.toString()).useDelimiter(DELIMITER);
     }
 
     public static void assertDisplayWelcomeMessage(Scanner scanner) {
@@ -294,6 +328,8 @@ public class CLITests {
         assertions.run();
         assertDisplayMenu(scanner);
     }
+
+
 
 
 

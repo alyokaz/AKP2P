@@ -1,10 +1,13 @@
 package com.alyokaz.aktorrent;
 
+import com.alyokaz.aktorrent.beacon.Beacon;
+import com.alyokaz.aktorrent.beacon.BeaconCLI;
 import com.alyokaz.aktorrent.cli.CLI;
 import com.alyokaz.aktorrent.fileservice.exceptions.SeedFileException;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.FileService;
 import com.alyokaz.aktorrent.peerservice.PeerService;
+import com.alyokaz.aktorrent.peerservice.exceptions.ContactBeaconException;
 import com.alyokaz.aktorrent.pingserver.PingServer;
 import com.alyokaz.aktorrent.server.NodeServer;
 import org.apache.logging.log4j.LogManager;
@@ -137,12 +140,23 @@ public class AKTorrent {
 
 
     public static void main(String[] args) throws IOException {
-        InetSocketAddress beaconAddress = null;
-        if(args.length == 2)
-                beaconAddress = new InetSocketAddress(args[0], Integer.parseInt(args[1]));
-        AKTorrent node = AKTorrent.createAndInitialize(beaconAddress);
-        CLI cli = new CLI(System.in, System.out, node);
-        cli.start();
+        try {
+            if (args.length == 1 && args[0].equals("beacon")) {
+                Beacon beacon = Beacon.createAndInitialise();
+                BeaconCLI cli = new BeaconCLI(beacon, System.in, System.out);
+                cli.start();
+            } else {
+                InetSocketAddress beaconAddress = null;
+                if (args.length == 2)
+                    beaconAddress = new InetSocketAddress(args[0], Integer.parseInt(args[1]));
+                AKTorrent node = AKTorrent.createAndInitialize(beaconAddress);
+                CLI cli = new CLI(System.in, System.out, node);
+                cli.start();
+            }
+        } catch(ContactBeaconException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        }
         System.exit(0);
     }
 

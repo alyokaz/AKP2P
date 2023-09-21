@@ -4,6 +4,7 @@ import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.cli.CLI;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.exceptions.SeedFileException;
+import com.alyokaz.aktorrent.peerservice.exceptions.ContactBeaconException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -168,6 +169,19 @@ public class CLITests {
             assertEquals(CLI.SEED_FILE_EXCEPTION, scanner.nextLine());
         }, scanner);
 
+    }
+
+    @Test
+    public void canHandleBeaconExceptionAtInit() throws IOException {
+        String command = "2\n";
+        InputStream in = buildInputStream(command);
+        doThrow(ContactBeaconException.class).when(node).getAvailableFiles();
+        buildAndStartCLI(in, out, node);
+        Scanner scanner = new Scanner(bytes.toString());
+
+        assertDisplayOutput(() -> {
+            assertEquals(CLI.BEACON_EXCEPTION, scanner.nextLine());
+        }, scanner);
     }
 
     @Test

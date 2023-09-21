@@ -3,6 +3,7 @@ package com.alyokaz.aktorrent.cli;
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.exceptions.SeedFileException;
+import com.alyokaz.aktorrent.peerservice.exceptions.ContactBeaconException;
 import com.alyokaz.aktorrent.peerservice.exceptions.PingPeerException;
 
 import java.io.*;
@@ -29,6 +30,7 @@ public class CLI {
     public static final String DOWNLOAD_PROGRESS = "Downloading %5.2f%%\r";
     public static final String DOWNLOAD_COMPLETE = "Downloading of %s complete%n";
     public static final String SERVER_STARTUP_MESSAGE = "Server started on port: %s%n";
+    public static final String BEACON_EXCEPTION = "Could not contact Beacon";
 
     private final InputStream inputStream;
     private final PrintStream outputStream;
@@ -65,6 +67,8 @@ public class CLI {
                 outputStream.println(SEED_FILE_EXCEPTION);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            } catch (ContactBeaconException e) {
+                outputStream.println(BEACON_EXCEPTION);
             }
             outputStream.println(MAIN_MENU);
         }

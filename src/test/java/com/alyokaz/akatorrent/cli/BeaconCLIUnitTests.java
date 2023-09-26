@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 public class BeaconCLIUnitTests {
 
+    public static final String DELIMITER = ">";
     private Beacon beacon;
     private InputStream in;
     private PrintStream out;
@@ -38,21 +39,19 @@ public class BeaconCLIUnitTests {
     }
 
     @Test
-    public void displaysBeaconAddress() {
+    public void displaysBeaconAddressAndShutDownPromptAndExitMessage() {
         BeaconCLI cli = setUpCLI("exit\n");
         cli.start();
         Scanner scanner = new Scanner(bytes.toString());
         assertEquals(String.format(BeaconCLI.SERVER_ADDRESS_MESSAGE.replace("%n", ""), PORT),
                 scanner.nextLine());
+        assertEquals(BeaconCLI.EXIT_PROMPT, extractPrompt(scanner));
+        assertEquals(BeaconCLI.SERVER_SHUTDOWN_MESSAGE, scanner.nextLine());
     }
 
-    @Test
-    public void displaysShutDownMessage() {
-        BeaconCLI cli = setUpCLI("exit\n");
-        cli.start();
-        Scanner scanner = new Scanner(bytes.toString());
-        scanner.nextLine();
-        assertEquals(BeaconCLI.SERVER_SHUTDOWN_MESSAGE, scanner.nextLine());
+    private String extractPrompt(Scanner scanner) {
+        scanner.useDelimiter(DELIMITER);
+        return scanner.next() + scanner.findInLine(DELIMITER);
     }
 
     private BeaconCLI setUpCLI(String command) {

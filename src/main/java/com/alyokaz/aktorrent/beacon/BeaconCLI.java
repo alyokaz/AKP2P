@@ -5,6 +5,7 @@ import java.io.*;
 public class BeaconCLI {
 
     public static final String SERVER_SHUTDOWN_MESSAGE = "Beacon shutting down";
+    public static final String EXIT_PROMPT = "Type 'exit' to shutdown beacon>";
     private final Beacon beacon;
     private final InputStream in;
     private final PrintStream out;
@@ -22,9 +23,11 @@ public class BeaconCLI {
     public void start() {
         out.printf(SERVER_ADDRESS_MESSAGE, beacon.getAddress().getPort());
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        out.printf(EXIT_PROMPT);
         while (true) {
             try {
                 if (reader.readLine().equals(EXIT_TOKEN)) break;
+                out.printf(EXIT_PROMPT);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

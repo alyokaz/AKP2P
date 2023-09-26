@@ -46,6 +46,7 @@ public class CLI {
     public static final String OPTION_PROMPT = "Select Option>";
     public static final String AVAILABLE_FILES_BANNER = YELLOW + "*** AVAILABLE FILES ***" + RESET;
     public static final String SUCCESSFUL_SEED_MESSAGE = GREEN + "File " + YELLOW + "%s " + GREEN + " seeded successfully" + RESET + "%n";
+    public static final String DISPLAY_FILE_INFO = "%d : %s - %,d bytes%n";
 
 
     private final InputStream inputStream;
@@ -143,7 +144,10 @@ public class CLI {
         List<FileInfo> files = new ArrayList<>(node.getAvailableFiles());
         if(files.size() > 0) {
             outputStream.println(AVAILABLE_FILES_BANNER);
-            IntStream.range(0, files.size()).forEach(i -> outputStream.println((i + 1) + ": " + files.get(i).getFilename()));
+            IntStream.range(0, files.size()).forEach(i -> {
+                FileInfo fileInfo = files.get(i);
+                outputStream.printf(DISPLAY_FILE_INFO, (i + 1), fileInfo.getFilename(), fileInfo.getSize());
+            } );
             String line;
             int fileNumber;
             outputStream.print(DOWNLOAD_INPUT_PROMPT);

@@ -92,8 +92,8 @@ public class CLITests {
         assertDisplayOutput(() -> {
             assertEquals(CLI.OPTION_PROMPT, extractCommandPrompt(scanner));
             assertEquals(CLI.AVAILABLE_FILES_BANNER, scanner.nextLine());
-            assertEquals( "1: " + FILENAME, scanner.nextLine());
-            assertEquals("2: " + FILENAME_2, scanner.nextLine());
+            assertEquals(String.format(stripEOL(CLI.DISPLAY_FILE_INFO), 1, FILENAME, fileInfo_A.getSize()), scanner.nextLine());
+            assertEquals(String.format(stripEOL(CLI.DISPLAY_FILE_INFO), 2, FILENAME_2, fileInfo_B.getSize()), scanner.nextLine());
             assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, extractCommandPrompt(scanner));
         }, scanner);
     }
@@ -113,7 +113,8 @@ public class CLITests {
         assertDisplayOutput(() -> {
             assertEquals(CLI.OPTION_PROMPT, extractCommandPrompt(scanner));
             assertEquals(CLI.AVAILABLE_FILES_BANNER, scanner.nextLine());
-            assertEquals("1: " + FILENAME, scanner.nextLine());
+            assertEquals(String.format(stripEOL(CLI.DISPLAY_FILE_INFO), 1, fileInfo.getFilename(), fileInfo.getSize()),
+                    scanner.nextLine());
             assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, extractCommandPrompt(scanner));
             assertEquals(String.format(stripCr(CLI.DOWNLOAD_PROGRESS), 100.00), scanner.nextLine());
             assertEquals(String.format(stripEOL(CLI.DOWNLOAD_COMPLETE), fileInfo.getFilename()), scanner.nextLine());
@@ -140,7 +141,8 @@ public class CLITests {
         assertDisplayOutput(() -> {
             assertEquals(CLI.OPTION_PROMPT, extractCommandPrompt(scanner));
             assertEquals(CLI.AVAILABLE_FILES_BANNER, scanner.nextLine());
-            assertEquals("1: " + fileInfo.getFilename(), scanner.nextLine());
+            assertEquals(String.format(stripEOL(CLI.DISPLAY_FILE_INFO), 1, fileInfo.getFilename(), fileInfo.getSize()),
+                    scanner.nextLine());
             assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, extractCommandPrompt(scanner));
             assertEquals(String.format(stripCr(CLI.DOWNLOAD_PROGRESS), first_value * 100), scanner.nextLine());
             assertEquals(String.format(stripCr(CLI.DOWNLOAD_PROGRESS), second_value * 100), scanner.nextLine());
@@ -276,14 +278,16 @@ public class CLITests {
     public void noFileForNumber() throws IOException {
         String command = "2\n2\n\n";
         InputStream in = buildInputStream(command);
-        when(node.getAvailableFiles()).thenReturn(Set.of(new FileInfo(FILENAME, 100, 100)));
+        FileInfo fileInfo = new FileInfo(FILENAME, 100, 100);
+        when(node.getAvailableFiles()).thenReturn(Set.of(fileInfo));
         buildAndStartCLI(in, out, node);
         Scanner scanner = buildScanner(bytes);
 
         assertDisplayOutput(() -> {
             assertEquals(CLI.OPTION_PROMPT, extractCommandPrompt(scanner));
             assertEquals(CLI.AVAILABLE_FILES_BANNER, scanner.nextLine());
-            assertEquals("1: " + FILENAME, scanner.nextLine());
+            assertEquals(String.format(stripEOL(CLI.DISPLAY_FILE_INFO), 1, fileInfo.getFilename(), fileInfo.getSize()),
+                    scanner.nextLine());
             assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, extractCommandPrompt(scanner));
             assertEquals(String.format(stripEOL(CLI.NON_EXISTENT_MENU_OPTION), 1), scanner.nextLine());
             assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, extractCommandPrompt(scanner));

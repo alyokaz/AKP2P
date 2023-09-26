@@ -123,6 +123,34 @@ public class CLITests {
     }
 
     @Test
+    public void willDisplayDownloadProgress() throws IOException {
+        String command = "2\n1\n";
+        InputStream in = buildInputStream(command);
+        FileInfo fileInfo = new FileInfo(FILENAME, 100, 100);
+
+        when(node.getAvailableFiles()).thenReturn(Set.of(fileInfo));
+        double first_value = 0.50;
+        double second_value = 0.75;
+        double third_value = 1.00;
+        when(node.getProgressOfDownload(any())).thenReturn(first_value, second_value, third_value);
+
+        buildAndStartCLI(in, out, node);
+        Scanner scanner = buildScanner(bytes);
+
+        assertDisplayOutput(() -> {
+            assertEquals(CLI.OPTION_PROMPT, extractCommandPrompt(scanner));
+            assertEquals(CLI.AVAILABLE_FILES_BANNER, scanner.nextLine());
+            assertEquals("1: " + fileInfo.getFilename(), scanner.nextLine());
+            assertEquals(CLI.DOWNLOAD_INPUT_PROMPT, extractCommandPrompt(scanner));
+            assertEquals(String.format(stripCr(CLI.DOWNLOAD_PROGRESS), first_value * 100), scanner.nextLine());
+            assertEquals(String.format(stripCr(CLI.DOWNLOAD_PROGRESS), second_value * 100), scanner.nextLine());
+            assertEquals(String.format(stripCr(CLI.DOWNLOAD_PROGRESS), third_value * 100), scanner.nextLine());
+            assertEquals(String.format(CLI.DOWNLOAD_COMPLETE.replace("%n", ""),
+                    fileInfo.getFilename()), scanner.nextLine());
+        }, scanner);
+    }
+
+    @Test
     public void recoverFromWrongMenuInput() throws IOException {
         String command = "X";
         InputStream in = buildInputStream(command);

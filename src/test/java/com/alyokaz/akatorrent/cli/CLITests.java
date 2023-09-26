@@ -2,6 +2,7 @@ package com.alyokaz.akatorrent.cli;
 
 import com.alyokaz.aktorrent.AKTorrent;
 import com.alyokaz.aktorrent.cli.CLI;
+import com.alyokaz.aktorrent.cli.SpinnerFactory;
 import com.alyokaz.aktorrent.fileservice.FileInfo;
 import com.alyokaz.aktorrent.fileservice.exceptions.SeedFileException;
 import com.alyokaz.aktorrent.peerservice.exceptions.ContactBeaconException;
@@ -163,19 +164,23 @@ public class CLITests {
         }, scanner);
     }
 
-    @Disabled // Progress display is inconsistent, sometimes displays, sometimes doesn't.
     @Test
     public void canAddPeer() throws IOException {
         String command = "3\n" + "localhost " + "4441\n";
         InputStream in = buildInputStream(command);
         when(node.addPeer(any())).thenReturn(true);
-        buildAndStartCLI(in, out, node);
+
+        Thread spinnerThread = mock(Thread.class);
+        SpinnerFactory spinnerFactory = mock(SpinnerFactory.class);
+        when(spinnerFactory.buildSpinnerThread()).thenReturn(spinnerThread);
+        
+        CLI cli = new CLI(in, out, node, spinnerFactory);
+        cli.start();
         Scanner scanner = buildScanner(bytes);
 
         assertDisplayOutput(() -> {
             assertEquals(CLI.OPTION_PROMPT, extractCommandPrompt(scanner));
             assertEquals(stripEOL(CLI.INPUT_PEER_ADDRESS_PROMPT), scanner.nextLine());
-            assertEquals(CLI.GREEN + "Connecting /" + CLI.RESET, scanner.nextLine()); // Inconsistent
             assertEquals(String.format(stripEOL(CLI.PEER_CONNECTED_MESSAGE), "localhost", "4441"), scanner.nextLine());
         }, scanner);
     }

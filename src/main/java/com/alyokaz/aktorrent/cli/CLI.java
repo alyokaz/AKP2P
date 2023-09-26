@@ -7,10 +7,8 @@ import com.alyokaz.aktorrent.peerservice.exceptions.ContactBeaconException;
 import com.alyokaz.aktorrent.peerservice.exceptions.PingPeerException;
 
 import java.io.*;
-import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -53,12 +51,20 @@ public class CLI {
     private final InputStream inputStream;
     private final PrintStream outputStream;
     private final AKTorrent node;
+    private final SpinnerFactory spinnerFactory;
 
 
     public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
         this.node = node;
+        this.spinnerFactory = new SpinnerFactory(outputStream);
+    }
+    public CLI(InputStream inputStream, PrintStream outputStream, AKTorrent node, SpinnerFactory spinnerFactory) {
+        this.inputStream = inputStream;
+        this.outputStream = outputStream;
+        this.node = node;
+        this.spinnerFactory = spinnerFactory;
     }
 
     public void start() throws IOException {
@@ -106,7 +112,7 @@ public class CLI {
         String[] address;
         while(!(address = reader.readLine().split(" "))[0].equals("")) {
             if (address.length == 2) {
-                Thread spinnerThread = new Thread(new Spinner(outputStream));
+                Thread spinnerThread = spinnerFactory.buildSpinnerThread();
                 try {
                     spinnerThread.start();
                     if (node.addPeer(new InetSocketAddress(address[0], Integer.parseInt(address[1])))) {
@@ -128,33 +134,6 @@ public class CLI {
         }
     }
 
-
-    public static class Spinner implements Runnable {
-
-        private final PrintStream outputStream;
-        private final int SPEED = 100;
-        private final List<Character> blades = List.of('/', '-', '\\', '-');
-
-        public Spinner(PrintStream outputStream) {this.outputStream = outputStream;}
-
-        @Override
-        public void run() {
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    for(char blade: blades) {
-                        spin(blade);
-                    }
-                }
-            } catch(InterruptedException e) {
-                //no action needed
-            }
-        }
-
-        private void spin(char blade) throws InterruptedException {
-            outputStream.printf("\r" + GREEN + "Connecting " + blade + RESET);
-            Thread.sleep(SPEED);
-        }
-    }
 
     private void processDefault(PrintStream outputStream, Integer selection) {
         outputStream.println(selection + NON_EXISTENT_MENU_OPTION);

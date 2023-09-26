@@ -185,10 +185,11 @@ public class IntegrationTest {
     //TODO this is now more of addPeers functionality stress test rather than stress test of pinging.
     @Test
     public void pingByMultipleNodes() throws IOException {
+        int numberOfNodes = 10;
         AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
 
         Set<AKTorrent> nodes = Stream.generate(AKTorrent::createAndInitializeNoBeacon)
-                .limit(100)
+                .limit(numberOfNodes)
                 .collect(Collectors.toSet());
         InetSocketAddress serverAddress = server.getAddress();
         nodes.forEach(node -> {

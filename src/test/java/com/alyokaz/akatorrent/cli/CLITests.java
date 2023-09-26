@@ -12,10 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,6 +26,7 @@ public class CLITests {
     private static final int PORT = 4444;
 
     public static final String DELIMITER = ">";
+    public static final int NUMBER_OF_LIVE_PEERS = 10;
     private ByteArrayOutputStream bytes;
     private PrintStream out;
     private AKTorrent node;
@@ -39,6 +37,9 @@ public class CLITests {
         out = new PrintStream(bytes);
         node = mock(AKTorrent.class);
         when(node.getAddress()).thenReturn(new InetSocketAddress(PORT));
+        Set<InetSocketAddress> livePeers = mock(HashSet.class);
+        when(livePeers.size()).thenReturn(NUMBER_OF_LIVE_PEERS);
+        when(node.getLivePeers()).thenReturn(livePeers);
     }
 
     @Test
@@ -303,7 +304,7 @@ public class CLITests {
         verify(node).shutDown();
     }
 
-    private String stripEOL(String string) {
+    private static String stripEOL(String string) {
         return string.replace("%n", "");
     }
 
@@ -335,9 +336,12 @@ public class CLITests {
     public static void assertDisplayWelcomeMessage(Scanner scanner) {
         assertEquals(CLI.WELCOME_MESSAGE, scanner.nextLine());
         assertEquals(String.format(CLI.SERVER_STARTUP_MESSAGE.replace("%n", ""), PORT), scanner.nextLine());
+
     }
 
     public static void assertDisplayMenu(Scanner scanner) {
+        assertEquals(String.format(stripEOL(CLI.CONNECTED_PEERS_MESSAGE), NUMBER_OF_LIVE_PEERS), scanner.nextLine());
+        assertEquals("", scanner.nextLine());
         Scanner menuScanner = new Scanner(CLI.MAIN_MENU);
         while(menuScanner.hasNext()) {
             assertEquals(menuScanner.nextLine(), scanner.nextLine());

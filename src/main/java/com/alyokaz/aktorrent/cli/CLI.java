@@ -47,6 +47,7 @@ public class CLI {
     public static final String AVAILABLE_FILES_BANNER = YELLOW + "*** AVAILABLE FILES ***" + RESET;
     public static final String SUCCESSFUL_SEED_MESSAGE = GREEN + "File " + YELLOW + "%s " + GREEN + " seeded successfully" + RESET + "%n";
     public static final String DISPLAY_FILE_INFO = "%d : %s - %,d bytes%n";
+    public static final String CONNECTED_PEERS_MESSAGE = "Connected peers - %d%n";
 
 
     private final InputStream inputStream;
@@ -71,6 +72,8 @@ public class CLI {
     public void start() throws IOException {
         outputStream.println(WELCOME_MESSAGE);
         outputStream.printf(SERVER_STARTUP_MESSAGE, node.getAddress().getPort());
+        outputStream.println("");
+        outputStream.printf(CONNECTED_PEERS_MESSAGE, node.getLivePeers().size());
         outputStream.println("");
         outputStream.println(MAIN_MENU);
         outputStream.print(OPTION_PROMPT);
@@ -99,7 +102,10 @@ public class CLI {
             }
             if(running) {
                 outputStream.println("");
+                outputStream.printf(CONNECTED_PEERS_MESSAGE, node.getLivePeers().size());
+                outputStream.println("");
                 outputStream.println(MAIN_MENU);
+                outputStream.println("");
                 outputStream.print(OPTION_PROMPT);
             } else {
                 outputStream.println("Bye.");

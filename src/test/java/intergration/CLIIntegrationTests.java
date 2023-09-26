@@ -90,7 +90,7 @@ public class CLIIntegrationTests {
         serverAddress.add(server.getAddress());
 
         InputStream in = new InputStream() {
-            private final byte[] command = ("2\n1\n").getBytes();
+            private final byte[] command = ("2\n1\n\n").getBytes();
             int index = 0;
             @Override
             public int read() {
@@ -192,7 +192,7 @@ public class CLIIntegrationTests {
                 final InetSocketAddress socketAddress = serverAddress.take();
                 AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
 
-                CLI cli = new CLI(new ByteArrayInputStream(("3\n" + "bad peer address").getBytes()),
+                CLI cli = new CLI(new ByteArrayInputStream(("3\n" + "bad peer address\n\n").getBytes()),
                         new PrintStream(new ByteArrayOutputStream()), client);
                 cli.start();
 
@@ -222,7 +222,7 @@ public class CLIIntegrationTests {
                 AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
 
                 CLI cli = new CLI(new ByteArrayInputStream(("3\n" + socketAddress.getHostName() + " "
-                        + socketAddress.getPort()).getBytes()),
+                        + socketAddress.getPort() + "\n\n").getBytes()),
                         new PrintStream(new ByteArrayOutputStream()), client);
                 cli.start();
 

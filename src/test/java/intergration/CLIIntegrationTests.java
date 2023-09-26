@@ -1,10 +1,10 @@
 package intergration;
 
-import com.alyokaz.aktorrent.AKTorrent;
-import com.alyokaz.aktorrent.fileservice.FileService;
-import com.alyokaz.aktorrent.cli.CLI;
-import com.alyokaz.aktorrent.fileservice.exceptions.SeedFileException;
-import com.alyokaz.aktorrent.peerservice.exceptions.PingPeerException;
+import com.alyokaz.akp2p.AKP2P;
+import com.alyokaz.akp2p.fileservice.FileService;
+import com.alyokaz.akp2p.cli.CLI;
+import com.alyokaz.akp2p.fileservice.exceptions.SeedFileException;
+import com.alyokaz.akp2p.peerservice.exceptions.PingPeerException;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -51,7 +51,7 @@ public class CLIIntegrationTests {
             };
 
             PrintStream out = new PrintStream(new ByteArrayOutputStream(1024));
-            AKTorrent node = AKTorrent.createAndInitializeNoBeacon();
+            AKP2P node = AKP2P.createAndInitializeNoBeacon();
             serverAddress.add(node.getAddress());
             CLI cli = new CLI(in, out, node);
             try {
@@ -63,7 +63,7 @@ public class CLIIntegrationTests {
 
         countDownLatch_B.await();
 
-        AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
+        AKP2P client = AKP2P.createAndInitializeNoBeacon();
         client.addPeer(serverAddress.take());
         File file = getFile(FILENAME);
         client.downloadFile(FileService.getFileInfo(file));
@@ -83,7 +83,7 @@ public class CLIIntegrationTests {
         CountDownLatch countDownLatch_A = new CountDownLatch(1);
         CountDownLatch exit = new CountDownLatch(1);
 
-        AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
+        AKP2P server = AKP2P.createAndInitializeNoBeacon();
         File file = getFile(FILENAME);
         BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
         server.seedFile(file);
@@ -110,7 +110,7 @@ public class CLIIntegrationTests {
         };
 
         Thread clientThread = new Thread(() -> {
-            AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
+            AKP2P client = AKP2P.createAndInitializeNoBeacon();
             try {
                 client.addPeer(serverAddress.take());
             } catch (InterruptedException e) {
@@ -155,13 +155,13 @@ public class CLIIntegrationTests {
         CountDownLatch exitLatch = new CountDownLatch(1);
         BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
 
-        AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
+        AKP2P server = AKP2P.createAndInitializeNoBeacon();
         serverAddress.add(server.getAddress());
 
         new Thread(() -> {
             try {
                 final InetSocketAddress socketAddress = serverAddress.take();
-                AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
+                AKP2P client = AKP2P.createAndInitializeNoBeacon();
 
                 CLI cli = new CLI(new ByteArrayInputStream(("3\n" + socketAddress.getHostName() + " "
                         + socketAddress.getPort()).getBytes()),
@@ -184,13 +184,13 @@ public class CLIIntegrationTests {
         CountDownLatch exitLatch = new CountDownLatch(1);
         BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
 
-        AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
+        AKP2P server = AKP2P.createAndInitializeNoBeacon();
         serverAddress.add(server.getAddress());
 
         new Thread(() -> {
             try {
                 final InetSocketAddress socketAddress = serverAddress.take();
-                AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
+                AKP2P client = AKP2P.createAndInitializeNoBeacon();
 
                 CLI cli = new CLI(new ByteArrayInputStream(("3\n" + "bad peer address\n\n").getBytes()),
                         new PrintStream(new ByteArrayOutputStream()), client);
@@ -212,14 +212,14 @@ public class CLIIntegrationTests {
         CountDownLatch exitLatch = new CountDownLatch(1);
         BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
 
-        AKTorrent server = AKTorrent.createAndInitializeNoBeacon();
+        AKP2P server = AKP2P.createAndInitializeNoBeacon();
         serverAddress.add(server.getAddress());
         server.shutDown();
 
         new Thread(() -> {
             try {
                 final InetSocketAddress socketAddress = serverAddress.take();
-                AKTorrent client = AKTorrent.createAndInitializeNoBeacon();
+                AKP2P client = AKP2P.createAndInitializeNoBeacon();
 
                 CLI cli = new CLI(new ByteArrayInputStream(("3\n" + socketAddress.getHostName() + " "
                         + socketAddress.getPort() + "\n\n").getBytes()),

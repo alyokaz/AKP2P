@@ -1,0 +1,8 @@
+package com.alyokaz.akp2p.peerservice.exceptions;
+
+public class DiscoverPeersException extends RuntimeException {
+
+    public DiscoverPeersException(String message, Throwable t) {
+        super(message, t);
+    }
+}

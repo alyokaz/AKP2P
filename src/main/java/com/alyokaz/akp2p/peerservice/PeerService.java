@@ -53,7 +53,7 @@ public class PeerService {
 
     /**
      * Adds peer to list of live peers if it responds to ping
-     * @param address
+     * @param address address of peer to add
      * @return true if peer is added to live peers
      */
     public synchronized boolean addPeer(InetSocketAddress address) {
@@ -140,9 +140,9 @@ public class PeerService {
 
     /**
      * Adds peers at the given address to a {@code Set} of address that
-     * will not be attempted to be contacted by this instance
-     * @param address
-     * @return
+     * will not be attempted to be contacted by this instance.
+     * @param address address of peer to ping.
+     * @return {@code true} if peer is not already excluded.
      */
     public boolean addExcluded(InetSocketAddress address) {
         return excluded.add(address);
@@ -151,8 +151,8 @@ public class PeerService {
     /**
      * Removes the peer at the given address from a {@code Set} of address
      * that will not be attempted to be contacted by this instance.
-     * @param address
-     * @return
+     * @param address - address for peers to be removed
+     * @return {@code true} if peer was removed
      */
     public boolean removeExcluded(InetSocketAddress address) {
         return excluded.remove(address);

@@ -5,11 +5,11 @@ import java.net.Socket;
 
 public interface Server {
 
-    public void start();
+    void start();
 
-    public void shutdown();
+    void shutdown();
 
-    public InetSocketAddress getServerAddress();
+    InetSocketAddress getServerAddress();
 
-    public Runnable process(Socket socket);
+    Runnable process(Socket socket);
 }

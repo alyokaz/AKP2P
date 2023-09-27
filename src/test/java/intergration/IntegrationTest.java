@@ -25,8 +25,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class IntegrationTest {
-
-    private static final String LOCAL_HOST = "127.0.0.1";
+    
     private static final String FILENAME = "test_file.mp4";
     private static final String FILENAME_2 = "test_file_2.mp4";
     private final static ExecutorService executor = Executors.newCachedThreadPool();
@@ -138,12 +137,6 @@ public class IntegrationTest {
         node_B.shutDown();
     }
 
-    // Why is this passing if with beacon it fails?
-    // The test only works because the client node runs updatePeers transitively
-    // through getAvailableFiles. It gathers all peers and then tries to download
-    // the file from all of them. It should only download from nodes that have
-    // the file. The address of the node(s) should be stored with the file for
-    // this.
     @Test
     public void testDiscoverTransientPeers() throws IOException, ExecutionException, InterruptedException, TimeoutException, PingPeerException, SeedFileException {
         AKP2P nodeA = AKP2P.createAndInitializeNoBeacon();
@@ -439,6 +432,7 @@ public class IntegrationTest {
         nodeB.shutDown();
     }
 
+    //TODO ability to see if a file has been scheduled for download or is in progress would make this redundant
     @Test
     public void willContactOnlyPeersWithFile() throws SeedFileException, PingPeerException, IOException, ExecutionException, InterruptedException, TimeoutException {
         AKP2P nodeA = AKP2P.createAndInitializeNoBeacon();

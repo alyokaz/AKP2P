@@ -69,11 +69,6 @@ public class AKP2P {
         return fileService.getCompletedFile(filename);
     }
 
-    public void shutDown() {
-        if (server != null) server.shutdown();
-        if (udpServer != null) udpServer.shutdown();
-    }
-
     public Set<InetSocketAddress> getLivePeers() {
         return this.peerService.getLivePeers();
     }
@@ -90,8 +85,21 @@ public class AKP2P {
         return this.server.getServerAddress();
     }
 
+    public Set<InetSocketAddress> getPeers() {
+        return peerService.getPeers();
+    }
+
+    public double getProgressOfDownload(String name) {
+        return fileService.getProgress(name);
+    }
+
     public Map<FileInfo, Set<InetSocketAddress>> getFileRegistry() {
         return Map.copyOf(fileService.getFileAddressRegistry());
+    }
+
+    public void shutDown() {
+        if (server != null) server.shutdown();
+        if (udpServer != null) udpServer.shutdown();
     }
 
 
@@ -160,11 +168,5 @@ public class AKP2P {
         System.exit(0);
     }
 
-    public Set<InetSocketAddress> getPeers() {
-        return peerService.getPeers();
-    }
 
-    public double getProgressOfDownload(String name) {
-        return fileService.getProgress(name);
-    }
 }

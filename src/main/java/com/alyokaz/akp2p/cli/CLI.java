@@ -10,11 +10,11 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 public class CLI {
 
-    public static final String INDENT = "    ";
     public static final String GREEN = "\u001B[32m";
     public static final String RED = "\u001B[31m";
     public static final String YELLOW = "\u001B[33m";
@@ -49,12 +49,10 @@ public class CLI {
     public static final String DISPLAY_FILE_INFO = "%d : %s - %,d bytes%n";
     public static final String CONNECTED_PEERS_MESSAGE = "Connected peers - %d%n";
 
-
     private final InputStream inputStream;
     private final PrintStream outputStream;
     private final AKP2P node;
     private final SpinnerFactory spinnerFactory;
-
 
     public CLI(InputStream inputStream, PrintStream outputStream, AKP2P node) {
         this.inputStream = inputStream;
@@ -72,9 +70,9 @@ public class CLI {
     public void start() throws IOException {
         outputStream.println(WELCOME_MESSAGE);
         outputStream.printf(SERVER_STARTUP_MESSAGE, node.getAddress().getPort());
-        outputStream.println("");
+        outputStream.println();
         outputStream.printf(CONNECTED_PEERS_MESSAGE, node.getLivePeers().size());
-        outputStream.println("");
+        outputStream.println();
         outputStream.println(MAIN_MENU);
         outputStream.print(OPTION_PROMPT);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -101,11 +99,11 @@ public class CLI {
                 outputStream.println(BEACON_EXCEPTION);
             }
             if(running) {
-                outputStream.println("");
+                outputStream.println();
                 outputStream.printf(CONNECTED_PEERS_MESSAGE, node.getLivePeers().size());
-                outputStream.println("");
+                outputStream.println();
                 outputStream.println(MAIN_MENU);
-                outputStream.println("");
+                outputStream.println();
                 outputStream.print(OPTION_PROMPT);
             } else {
                 outputStream.println("Bye.");

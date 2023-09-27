@@ -115,14 +115,14 @@ public class PeerService {
     }
 
     /**
-     * @return a {@code Set} of addresses of peers currently know to be live
+     * {@return a {@code Set} of addresses of peers currently know to be live}
      */
     public Set<InetSocketAddress> getLivePeers() {
         return Collections.unmodifiableSet(this.livePeers);
     }
 
     /**
-     * @return a {@code Set} of peer addresses not currently know to be live
+     * {@return a {@code Set} of peer addresses not currently know to be live}
      */
     public Set<InetSocketAddress> getPeers() {
         return Collections.unmodifiableSet(this.peers);
@@ -167,7 +167,7 @@ public class PeerService {
     }
 
     /**
-     * @return the address for the servers of this instance.
+     * {@return the address for the servers of this instance.}
      */
     public InetSocketAddress getServerAddress() {
         return serverAddress;

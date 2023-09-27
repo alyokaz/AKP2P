@@ -122,14 +122,14 @@ public class AKP2P {
     }
 
     /**
-     * @return the address the system servers are listening on.
+     * {@return the address the system servers are listening on}.
      */
     public InetSocketAddress getAddress() {
         return this.server.getServerAddress();
     }
 
     /**
-     * @return set of all peers known to be currently live
+     * {@return set of all peers known to be currently live}
      */
     public Set<InetSocketAddress> getPeers() {
         return peerService.getPeers();
@@ -145,7 +145,7 @@ public class AKP2P {
     }
 
     /**
-     * @return a {@code Map} of files to peers that host them.
+     * {@return a {@code Map} of files to peers that host them.}
      */
     public Map<FileInfo, Set<InetSocketAddress>> getFileRegistry() {
         return Map.copyOf(fileService.getFileAddressRegistry());

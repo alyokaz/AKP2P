@@ -17,6 +17,9 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+/**
+ * This class handles the downloading of {@code Pieces} for a single file from a single peer.
+ */
 public class DownloadFileTargetTask implements Runnable {
 
     protected final InetSocketAddress address;
@@ -33,6 +36,10 @@ public class DownloadFileTargetTask implements Runnable {
         this.fileInfo = fileInfo;
     }
 
+    /**
+     * This method establishes a connection to the peer at the given address and then hands off the {@code InputStream}
+     * and {@code OutputStream} to the {@link #downloadPieces} method.
+     */
     @Override
     public void run() {
         try (Socket socket = new Socket(address.getAddress(), address.getPort());
@@ -46,6 +53,14 @@ public class DownloadFileTargetTask implements Runnable {
         }
     }
 
+    /**
+     * This method handles the downloading of {@code Piece}s from the peer connection.
+     *
+     *
+     * @param filename the filename the {@code PieceContainer} for the related file is stored under
+     * @param out the {@code OutputStream} for the peer connection
+     * @param in the {@code InputStream} for the peer connection
+     */
     protected void downloadPieces(String filename, ObjectOutputStream out, ObjectInputStream in) {
         // the container is potentially shared between multiple connections and is responsible for managing the
         // allocation of which pieces should be downloaded

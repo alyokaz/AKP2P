@@ -15,6 +15,9 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Set;
 
+/**
+ * This class handles the requesting of seeded files available for download from a single peer.
+ */
 public class GetConnectedPeersFilesTask implements Runnable {
 
     private final FileService fileService;
@@ -28,7 +31,10 @@ public class GetConnectedPeersFilesTask implements Runnable {
         this.peerService = peerService;
     }
 
-
+    /**
+     * This method requests a {@code Set} of {@code FileInfo}, representing the files available for download
+     * at this peer.
+     */
     @Override
     public void run() {
         try (Socket socket = new Socket(address.getHostName(), address.getPort());

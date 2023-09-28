@@ -4,6 +4,10 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * This class a single <i>chunk</i> or <i>piece</i> of a file that can be downloaded interdependently of any other
+ * {@code Piece}, allowing a file to be downloaded from multiple peers at once.
+ */
 public class Piece implements Serializable, Comparable<Piece> {
     private final int id;
     private final byte[] data;
@@ -13,10 +17,20 @@ public class Piece implements Serializable, Comparable<Piece> {
         this.data = data;
     }
 
+    /**
+     * Returns the {@code ID} of this piece.
+     *
+     * @return the {@code ID} of this piece.
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Returns the data in {@code Bytes} that this {@code Piece} contains.
+     *
+     * @return the data in {@code Bytes} that this {@code Piece} contains.
+     */
     public byte[] getData() {
         return data;
     }

@@ -158,6 +158,7 @@ public class PeerService {
         return excluded.remove(address);
     }
 
+    //TODO should this be private?
     /**
      * Sets the address of the servers for this instance.
      * @param serverAddress - the address of the servers.

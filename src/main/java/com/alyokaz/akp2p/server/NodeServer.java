@@ -6,6 +6,9 @@ import com.alyokaz.akp2p.peerservice.PeerService;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * A {@code Server} implementation to be used in non-{@code Beacon} nodes.
+ */
 public class NodeServer extends AbstractServer {
 
     private final PeerService peerService;

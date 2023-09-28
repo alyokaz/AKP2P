@@ -7,6 +7,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
+/**
+ * An implementation of {@code Server} to be used in {@code Beacon} nodes.
+ */
 public class BeaconServer extends AbstractServer {
 
     private final List<InetSocketAddress> peers;

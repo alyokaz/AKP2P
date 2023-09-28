@@ -19,11 +19,6 @@ import java.io.IOException;
 import java.net.*;
 import java.util.*;
 
-
-//TODO This class should be refactored to get rid of the null argument for
-// beacon address. It seems a lot of the logic that requires communication between
-// the services could be simplified by pulling it up into this class.
-
 /**
  * Entry point for the system and all functionality.
  *
@@ -68,7 +63,7 @@ public class AKP2P {
     }
 
     /**
-     * Attempts to download the file from current know peers.
+     * Attempts to download the file from current known peers.
      *
      * @param fileInfo  the {@code FileInfo} for the file to download.
      */
@@ -77,7 +72,7 @@ public class AKP2P {
     }
 
     /**
-     * Attempts to contact the peer at the given address and if successful adds it to a list of know live peers.
+     * Attempts to contact the peer at the given address and if successful adds it to a list of known live peers.
      *
      * @param address  the address of the peer
      * @return {@code true} if peer could be contacted

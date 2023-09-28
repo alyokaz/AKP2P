@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
+/**
+ * A CLI for an AKP2P non-beacon node.
+ */
 public class CLI {
 
     public static final String GREEN = "\u001B[32m";
@@ -67,6 +70,11 @@ public class CLI {
         this.spinnerFactory = spinnerFactory;
     }
 
+    /**
+     * Starts the CLI.
+     *
+     * @throws IOException if reading in input from command line fails
+     */
     public void start() throws IOException {
         outputStream.println(WELCOME_MESSAGE);
         outputStream.printf(SERVER_STARTUP_MESSAGE, node.getAddress().getPort());
@@ -112,6 +120,14 @@ public class CLI {
         node.shutDown();
     }
 
+    /**
+     * Adds the peer at the given address to this nodes collection of live peers.
+     *
+     * @param reader for input from the command line
+     * @param outputStream for output to the command line
+     * @throws IOException if a failure occurs reading the command line input
+     * @throws PingPeerException if peer is unable to be pinged
+     */
     private void processAddPeer(BufferedReader reader, PrintStream outputStream) throws IOException, PingPeerException {
         outputStream.print(CLI.INPUT_PEER_ADDRESS_PROMPT);
         String[] address;
@@ -139,11 +155,24 @@ public class CLI {
         }
     }
 
-
+    /**
+     * Handles menu input that doesn't correspond to an available option.
+     *
+     * @param outputStream for output to the command line
+     * @param selection the value entered
+     */
     private void processDefault(PrintStream outputStream, Integer selection) {
         outputStream.println(selection + NON_EXISTENT_MENU_OPTION);
     }
 
+    /**
+     * Displays the available files and downloads the file selected.
+     *
+     * @param reader for input from the command line
+     * @param outputStream for output to the command line
+     * @throws IOException if a failure occurs reading in the input
+     * @throws InterruptedException if the thread is interrupted whilst in the display progress loop
+     */
     private void processDisplayFiles(BufferedReader reader, PrintStream outputStream) throws IOException, InterruptedException {
         List<FileInfo> files = new ArrayList<>(node.getAvailableFiles());
         if(files.size() > 0) {
@@ -178,6 +207,13 @@ public class CLI {
         }
     }
 
+    /**
+     * Makes the file at the given path available for download from other peers in the network.
+     * @param reader for input from the command line
+     * @param out for output to the command line
+     * @throws IOException if reading in input fails
+     * @throws SeedFileException if file is unable to be seeded
+     */
     private void processSeedFile(BufferedReader reader, PrintStream out) throws IOException, SeedFileException {
         out.print(INPUT_PROMPT);
         String filename;

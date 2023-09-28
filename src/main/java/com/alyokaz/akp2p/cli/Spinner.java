@@ -3,6 +3,9 @@ package com.alyokaz.akp2p.cli;
 import java.io.PrintStream;
 import java.util.List;
 
+/**
+ * Creates an animation of a spinning blade on the command line.
+ */
 public class Spinner implements Runnable {
 
     private final PrintStream outputStream;

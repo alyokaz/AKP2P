@@ -2,6 +2,9 @@ package com.alyokaz.akp2p.server.message;
 
 import java.net.InetSocketAddress;
 
+/**
+ * A subclass of {@code Message} used to request an individual {@code Piece} from a peer
+ */
 public class RequestPieceMessage extends Message {
 
     private final String filename;
@@ -16,10 +19,19 @@ public class RequestPieceMessage extends Message {
         this.serverAddress = serverAddress;
     }
 
+    /**
+     * Returns the filename the requested {@code Piece} belongs to.
+     *
+     * @return the filename the requested {@code Piece} belongs to
+     */
     public String getFilename() {
         return filename;
     }
 
+    /**
+     * Returns the {@code ID} of the requested {@code Piece}.
+     * @return the {@code ID} of the requested {@code Piece}
+     */
     public int getPieceId() {
         return pieceId;
     }

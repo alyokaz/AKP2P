@@ -59,7 +59,8 @@ public class AKP2P {
 
     /**
      * Makes the file available for download by other peers.
-     * @param file the {@code File} to seed
+     *
+     * @param file  the {@code File} to seed
      * @throws SeedFileException
      */
     public void seedFile(File file) throws SeedFileException {
@@ -68,16 +69,17 @@ public class AKP2P {
 
     /**
      * Attempts to download the file from current know peers.
-     * @param fileInfo the {@code FileInfo} for the file to download.
+     *
+     * @param fileInfo  the {@code FileInfo} for the file to download.
      */
     public void downloadFile(FileInfo fileInfo) {
         fileService.downloadFileTarget(fileInfo);
     }
 
     /**
-     * Attempts to contact the peer at the given address and
-     * if successful adds it to a list of know live peers.
-     * @param address the address of the peer
+     * Attempts to contact the peer at the given address and if successful adds it to a list of know live peers.
+     *
+     * @param address  the address of the peer
      * @return {@code true} if peer could be contacted
      */
     public boolean addPeer(InetSocketAddress address) {
@@ -92,26 +94,27 @@ public class AKP2P {
 
     /**
      * Attempts to retrieve a fully downloaded file from the given filename.
-     * @param filename the name of the file
-     * @return An {@code Optional} with the requested file.
+     *
+     * @param  filename the name of the file
+     * @return  {@code Optional} with the requested file
      */
     public Optional<File> getFile(String filename) {
         return fileService.getCompletedFile(filename);
     }
 
     /**
-     * Returns a {@code Set} of addresses for peers that are currently
-     * known to be live.
-     * @return a {@code Set} of live peers addresses
+     * Returns a {@code Set} of addresses for peers that are currently known to be live.
+     *
+     * @return  a {@code Set} of live peers addresses
      */
     public Set<InetSocketAddress> getLivePeers() {
         return this.peerService.getLivePeers();
     }
 
     /**
-     * Returns a {@code Set} of files available to download from the current
-     * network of live peers.
-     * @return a {@code Set<FileInfo>} of files available for download.
+     * Returns a {@code Set} of files available to download from the current network of live peers.
+     *
+     * @return  a {@code Set<FileInfo>} of files available for download
      */
     public Set<FileInfo> getAvailableFiles() {
         if(beaconAddress != null)
@@ -122,14 +125,18 @@ public class AKP2P {
     }
 
     /**
-     * {@return the address the system servers are listening on}.
+     * Returns the address the system servers are listening on.
+     *
+     * @return  the address the system servers are listening on.
      */
     public InetSocketAddress getAddress() {
         return this.server.getServerAddress();
     }
 
     /**
-     * {@return set of all peers known to be currently live}
+     * Returns a {@code Set} of all peers known to be currently live.
+     *
+     * @return a {@code Set} of all peers known to be currently live
      */
     public Set<InetSocketAddress> getPeers() {
         return peerService.getPeers();
@@ -137,15 +144,19 @@ public class AKP2P {
 
     //TODO what if file isn't being downloaded?
     /**
-     * @param name the name of the file to get progress for
-     * @return the download progress of the file represented as a {@code double}
+     * Returns the download progress of the file with the given name.
+     *
+     * @param  name the name of the file to get progress for
+     * @return  the download progress of the file represented as a {@code double}
      */
     public double getProgressOfDownload(String name) {
         return fileService.getProgress(name);
     }
 
     /**
-     * {@return a {@code Map} of files to peers that host them.}
+     * Returns a {@code Map} of files to peers that host them.
+     *
+     * @return  a {@code Map} of files to peers that host them
      */
     public Map<FileInfo, Set<InetSocketAddress>> getFileRegistry() {
         return Map.copyOf(fileService.getFileAddressRegistry());
@@ -163,6 +174,7 @@ public class AKP2P {
     /**
      * Constructs an instance of {@code AKP2P} that attempts to contact a {@code Beacon}
      * node, at the given address, to download peer addresses that have registered with that {@code Beacon}.
+     *
      * @param beaconAddress the address of the {@code beacon} node.
      * @return An instance of {@code AKP2P} registered and in contact with a {@code Beacon} node
      */
@@ -172,9 +184,10 @@ public class AKP2P {
     }
 
     /**
-     * Constructs and initialises an instance of AKP2P that does not attempt to contact
-     * a {@code Beacon} node. Note this instance will be orphaned from the network
-     * until a peer address is supplied to the system,
+     * Constructs and initialises an instance of AKP2P that does not attempt to contact a {@code Beacon} node.
+     * <p>
+     * Note this instance will be orphaned from the network until a peer address is supplied to the system.
+     *
      * @return An instance of {@code AKP2P} not in contact with a {@code Beacon} node
      */
     public static AKP2P createAndInitializeNoBeacon() {
@@ -220,7 +233,8 @@ public class AKP2P {
      * Main entry point for system.
      * <p>
      * Constructs an {@code AKP2P} node or a {@code Beacon} node depending on supplied arguments.
-     * {@code AK2P2} nodes can be started with a {@code Beacon} address or in <i>orphaned</i> mode
+     * {@code AK2P2} nodes can be started with a {@code Beacon} address or in <i>orphaned</i> mode.
+     *
      * @param args startup arguments
      * @throws IOException
      */

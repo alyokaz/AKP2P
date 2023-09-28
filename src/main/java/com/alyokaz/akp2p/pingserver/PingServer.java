@@ -11,6 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * This class is for responding to pings for other peers in the network.
+ */
 public class PingServer {
 
     public static final int BUFFER_SIZE = 1400;
@@ -24,6 +27,9 @@ public class PingServer {
         this.socket = socket;
     }
 
+    /**
+     * Starts this server.
+     */
     public void start() {
         executor.execute(() -> {
             try (DatagramSocket inSocket = socket) {
@@ -43,6 +49,9 @@ public class PingServer {
         });
     }
 
+    /**
+     * Stops this server.
+     */
     public void shutdown() {
         logger.info("Ping server at {} shutting down...", socket.getLocalSocketAddress());
         this.socket.close();

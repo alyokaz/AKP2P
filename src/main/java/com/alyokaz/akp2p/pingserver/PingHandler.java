@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
+/**
+ * This class is for handling ping requests sent to a nodes {@code PingServer}.
+ */
 public class PingHandler implements Runnable {
 
     final DatagramPacket packet;

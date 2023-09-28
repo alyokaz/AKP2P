@@ -11,6 +11,9 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 
+/**
+ * This class handles a request for a peer to register with a {@code Beacon} node.
+ */
 public class BeaconTask implements Runnable {
 
     private final Socket socket;
@@ -23,6 +26,9 @@ public class BeaconTask implements Runnable {
         this.peers = peers;
     }
 
+    /**
+     * Registers the peer from the connection with this {@code Beacon}.
+     */
     @Override
     public void run() {
         try(Socket socket = this.socket;

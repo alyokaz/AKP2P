@@ -2,6 +2,9 @@ package com.alyokaz.akp2p.beacon;
 
 import java.io.*;
 
+/**
+ * This class a CLI for a {@code Beacon} node.
+ */
 public class BeaconCLI {
 
     public static final String SERVER_SHUTDOWN_MESSAGE = "Beacon shutting down";

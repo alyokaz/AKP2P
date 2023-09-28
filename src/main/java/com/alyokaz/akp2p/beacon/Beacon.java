@@ -11,6 +11,10 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents a {@code Beacon} node that other nodes in the network can register and receive the
+ * addresses of other nodes who have also registered.
+ */
 public class Beacon {
 
     final private Server beaconServer;
@@ -21,6 +25,9 @@ public class Beacon {
         this.pingServer = pingServer;
     }
 
+    /**
+     * Shuts down this {@code Beacon}
+     */
     public void shutDown() {
         if(this.beaconServer != null)
             this.beaconServer.shutdown();
@@ -28,10 +35,20 @@ public class Beacon {
             this.pingServer.shutdown();
     }
 
+    /**
+     * Returns the address this {@code Beacon} is listening on.
+     *
+     * @return the address this {@code Beacon} is listening on
+     */
     public InetSocketAddress getAddress() {
         return beaconServer.getServerAddress();
     }
 
+    /**
+     * Static factory method for creation and initialisation of a {@code Beacon} node.
+     *
+     * @return a fully initialised {@code Beacon} node
+     */
     public static Beacon createAndInitialise() {
         ServerSocket serverSocket = null;
         DatagramSocket datagramSocket = null;

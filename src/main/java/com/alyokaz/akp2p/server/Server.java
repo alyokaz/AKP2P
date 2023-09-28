@@ -11,5 +11,4 @@ public interface Server {
 
     InetSocketAddress getServerAddress();
 
-    Runnable process(Socket socket);
 }

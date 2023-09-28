@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -48,6 +49,9 @@ public abstract class AbstractServer implements Server {
         return new InetSocketAddress(serverSocket.getInetAddress(),
                 serverSocket.getLocalPort());
     }
+
+    protected abstract Runnable process(Socket socket);
+
 
 
 }

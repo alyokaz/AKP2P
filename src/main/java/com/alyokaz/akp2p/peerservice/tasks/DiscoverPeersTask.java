@@ -13,6 +13,10 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Set;
 
+/**
+ * This class is for send request for and handling the results of a request for a {@code Set} of know live peers from
+ * known live peers.
+ */
 public class DiscoverPeersTask implements Runnable {
 
     private final InetSocketAddress address;
@@ -27,6 +31,10 @@ public class DiscoverPeersTask implements Runnable {
         this.serverAddress = serverAddress;
     }
 
+    /**
+     * Contacts the peer at the given address, requests a {@code Set} of known live peers and then attempts to add
+     * each received peer to this nodes {@code Set} of known live peers.
+     */
     @Override
     public void run() {
         try (Socket socket = new Socket(address.getHostName(), address.getPort());

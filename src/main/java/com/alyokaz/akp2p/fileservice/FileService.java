@@ -35,11 +35,6 @@ public class FileService {
 
     public void addFile(File file) throws SeedFileException {
         this.files.put(file.getName(), buildPieceContainer(file));
-        this.availableFiles.add(getFileInfo(file));
-    }
-
-    public void addFile(FileInfo fileInfo) {
-        files.put(fileInfo.getFilename(), new PieceContainer(fileInfo));
     }
 
     public Optional<File> getCompletedFile(String filename) {
@@ -139,7 +134,7 @@ public class FileService {
 
     public void downloadFileTarget(FileInfo fileInfo) {
         if(fileAddressRegistry.containsKey(fileInfo)) {
-            addFile(fileInfo);
+            files.put(fileInfo.getFilename(), new PieceContainer(fileInfo));
             fileAddressRegistry.get(fileInfo).forEach(address ->
                     executor.execute(new DownloadFileTargetTask(address, this, peerService, fileInfo)));
         }

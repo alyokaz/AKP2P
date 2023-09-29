@@ -35,12 +35,14 @@ The project was built with a purposeful <i>naive</i> design. This was done first
 exploratory and, secondly, to try to avoid a "Solutions looking for problems" mindset when building the code.
 <p>
 That being said, in a post-hoc analysis, it appears the architecture that emerged was something similar to that of the 
-Kazaa network.
+Kazaa network. 
 <p>
 <img src="kazaa.png">
 
-Essentially the <i>standard</i> nodes in the AKP2P network are the equivalent of <a href="https://cse.engineering.nyu.edu/~ross/papers/UnderstandingKaZaA.pdf">Kazaa</a> <i>Supernodes</i> sharing
-a central directory of files and peers available on the network.
+Essentially the <i>standard</i> nodes in the AKP2P network are the equivalent of 
+<a href="https://cse.engineering.nyu.edu/~ross/papers/UnderstandingKaZaA.pdf">Kazaa</a> <i>Supernodes</i> 
+sharing a central directory of files and peers available on the network. That is we have a network of 
+supernodes without any ordinary nodes existing.
 <p>
 It could be interesting to lean into this architecture in a future iteration, creating something analogous 
 to Bitcoins <a href="https://en.bitcoin.it/wiki/Full_node">full</a> and 

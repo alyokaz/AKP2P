@@ -13,7 +13,7 @@ FROM eclipse-temurin:17-jdk-jammy
 
 COPY --from=build /app/build/libs/*.jar /app/app.jar
 
-CMD ["java", "-jar", "app.jar", "4441"]
+CMD ["java", "-jar", "/app/app.jar"]
 
 EXPOSE 8080
 

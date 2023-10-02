@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
@@ -490,6 +491,34 @@ public class IntegrationTest {
             Thread.sleep(1);
         }
     }
+
+    @Test
+    public void canBuildWithCustomPort() throws IOException {
+        int customPort = getFreePort();
+
+        AKP2P nodeA = AKP2P.createAndInitializeNoBeacon(customPort);
+        AKP2P nodeB = AKP2P.createAndInitializeNoBeacon();
+
+        nodeB.addPeer(nodeA.getAddress());
+        assertTrue(nodeB.getLivePeers().contains(nodeA.getAddress()));
+    }
+
+    @Test
+    public void canBuildWithCustomPortAndBeacon() throws IOException {
+        Beacon beacon = Beacon.createAndInitialise();
+        int customPort = getFreePort();
+        AKP2P nodeA = AKP2P.createAndInitialize(customPort, beacon.getAddress());
+        AKP2P nodeB = AKP2P.createAndInitialize(beacon.getAddress());
+
+        assertTrue(nodeB.getLivePeers().contains(nodeA.getAddress()));
+    }
+
+    private int getFreePort() throws IOException {
+        ServerSocket socket = new ServerSocket(0);
+        socket.close();
+        return socket.getLocalPort();
+    }
+
 
     //TODO move timeout to this method
     private static Future<File> getDownloadedFile(AKP2P node, String filename) {

@@ -175,7 +175,22 @@ public class AKP2P {
      */
     public static AKP2P createAndInitialize(InetSocketAddress beaconAddress) {
         logger.atInfo().log("Initialising with Beacon at : " + beaconAddress);
-        return init(beaconAddress);
+        return init(beaconAddress, 0);
+    }
+
+    /**
+     * Constructs an instance of {@code AKP2P} with its servers listening on the given {@code Port} and that attempts
+     * to contact a {@code Beacon} node, at the given address, to download peer addresses that have registered with
+     * that {@code Beacon}.
+     *
+     * @param port the port number the instances servers will listen on
+     * @param beaconAddress the address of a beacon node
+     * @return An instance of {@code AKP2P} with its servers listening on the given port and registered and in contact
+     * with a {@code Beacon} node
+     */
+    public static AKP2P createAndInitialize(int port, InetSocketAddress beaconAddress) {
+        logger.atInfo().log("Initialising with use defined port at {} and Beacon at {}", port, beaconAddress);
+        return init(beaconAddress, port);
     }
 
     /**
@@ -187,17 +202,31 @@ public class AKP2P {
      */
     public static AKP2P createAndInitializeNoBeacon() {
         logger.atInfo().log("Initialising without Beacon");
-        return init(null);
+        return init(null, 0);
     }
 
-    private static AKP2P init(InetSocketAddress beaconAddress)  {
+    /**
+     * Constructs and initialises an instance of AKP2P with its servers listen on the given port and that does not
+     * attempt to contact a {@code Beacon} node.
+     * <p>
+     * Note this instance will be orphaned from the network until a peer address is supplied to the system.
+     *
+     * @param port the port number this instances servers will listen on
+     * @return An instance of {@code AKP2P} listening on the given port and not in contact with a {@code Beacon} node
+     */
+    public static AKP2P createAndInitializeNoBeacon(int port) {
+        logger.atInfo().log("Initialising with user defined port {}", port);
+        return init(null, port);
+    }
+
+    private static AKP2P init(InetSocketAddress beaconAddress, int port)  {
         PeerService peerService = new PeerService();
         FileService fileService = new FileService(peerService);
 
         ServerSocket serverSocket = null;
         DatagramSocket datagramSocket = null;
         try {
-            serverSocket = new ServerSocket(0);
+            serverSocket = new ServerSocket(port);
             datagramSocket = new DatagramSocket(serverSocket.getLocalPort());
         } catch (IOException e) {
             throw new RuntimeException(e);

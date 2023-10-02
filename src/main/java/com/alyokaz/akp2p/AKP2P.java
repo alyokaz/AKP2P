@@ -263,24 +263,7 @@ public class AKP2P {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        try {
-            if (args.length == 1 && args[0].equals("beacon")) {
-                Beacon beacon = Beacon.createAndInitialise();
-                BeaconCLI cli = new BeaconCLI(beacon, System.in, System.out);
-                cli.start();
-            } else {
-                InetSocketAddress beaconAddress = null;
-                if (args.length == 2)
-                    beaconAddress = new InetSocketAddress(args[0], Integer.parseInt(args[1]));
-                AKP2P node = AKP2P.createAndInitialize(beaconAddress);
-                CLI cli = new CLI(System.in, System.out, node);
-                cli.start();
-            }
-        } catch(ContactBeaconException e) {
-            System.out.println(e.getMessage());
-            System.exit(1);
-        }
-        System.exit(0);
+        ArgumentParser.parseArguments(args);
     }
 
 

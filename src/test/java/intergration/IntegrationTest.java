@@ -513,6 +513,19 @@ public class IntegrationTest {
         assertTrue(nodeB.getLivePeers().contains(nodeA.getAddress()));
     }
 
+    @Test
+    public void canBuildBeaconWithCustomPort() throws IOException {
+        int customPort = getFreePort();
+        Beacon beacon = Beacon.createAndInitialise(customPort);
+        assertEquals(customPort, beacon.getAddress().getPort());
+
+        AKP2P nodeA = AKP2P.createAndInitialize(beacon.getAddress());
+        AKP2P nodeB = AKP2P.createAndInitialize(beacon.getAddress());
+
+        assertTrue(nodeA.getLivePeers().contains(nodeB.getAddress()));
+        assertTrue(nodeB.getLivePeers().contains(nodeA.getAddress()));
+    }
+
     private int getFreePort() throws IOException {
         ServerSocket socket = new ServerSocket(0);
         socket.close();

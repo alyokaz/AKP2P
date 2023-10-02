@@ -50,10 +50,19 @@ public class Beacon {
      * @return a fully initialised {@code Beacon} node
      */
     public static Beacon createAndInitialise() {
+        return createAndInitialise(0);
+    }
+
+    /**
+     * Static factory method for creation and initialisation of a {@code Beacon} node listening on the given port.
+     *
+     * @return a fully initialised {@code Beacon} node listening of the given port.
+     */
+    public static Beacon createAndInitialise(int port) {
         ServerSocket serverSocket = null;
         DatagramSocket datagramSocket = null;
         try {
-            serverSocket = new ServerSocket(0);
+            serverSocket = new ServerSocket(port);
             datagramSocket = new DatagramSocket(serverSocket.getLocalPort());
         } catch (IOException e) {
             throw new RuntimeException(e);

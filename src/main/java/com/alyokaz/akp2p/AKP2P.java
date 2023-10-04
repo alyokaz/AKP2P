@@ -1,13 +1,12 @@
 package com.alyokaz.akp2p;
 
-import com.alyokaz.akp2p.beacon.Beacon;
-import com.alyokaz.akp2p.beacon.BeaconCLI;
-import com.alyokaz.akp2p.cli.CLI;
+import com.alyokaz.akp2p.argumentparser.ArgumentParser;
+import com.alyokaz.akp2p.argumentparser.CLIFactory;
+import com.alyokaz.akp2p.argumentparser.NodeFactory;
 import com.alyokaz.akp2p.fileservice.exceptions.SeedFileException;
 import com.alyokaz.akp2p.fileservice.FileInfo;
 import com.alyokaz.akp2p.fileservice.FileService;
 import com.alyokaz.akp2p.peerservice.PeerService;
-import com.alyokaz.akp2p.peerservice.exceptions.ContactBeaconException;
 import com.alyokaz.akp2p.pingserver.PingServer;
 import com.alyokaz.akp2p.server.NodeServer;
 import org.apache.logging.log4j.LogManager;
@@ -263,7 +262,8 @@ public class AKP2P {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        ArgumentParser.parseArguments(args);
+        ArgumentParser argumentParser = new ArgumentParser(new NodeFactory(new CLIFactory()));
+        argumentParser.parseArguments(args);
     }
 
 

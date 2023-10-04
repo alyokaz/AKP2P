@@ -1,12 +1,8 @@
-package com.alyokaz.akp2p;
+package com.alyokaz.akp2p.argumentparser;
 
-import com.alyokaz.akp2p.beacon.Beacon;
-import com.alyokaz.akp2p.beacon.BeaconCLI;
-import com.alyokaz.akp2p.cli.CLI;
 import com.alyokaz.akp2p.peerservice.exceptions.ContactBeaconException;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.*;
 
 public class ArgumentParser {
@@ -15,8 +11,12 @@ public class ArgumentParser {
     public final static String PORT_OPTION = "-port";
     public final static String BEACON_ADDRESS_OPTION = "-beacon-address";
 
+    private final NodeFactory nodeFactory;
 
-    public static void parseArguments(String[] args) {
+    public ArgumentParser(NodeFactory nodeFactory) {this.nodeFactory = nodeFactory;}
+
+
+    public void parseArguments(String[] args) {
         Map<String, String> argumentMap = new HashMap<>();
         try {
             if (args.length > 0) {
@@ -38,29 +38,27 @@ public class ArgumentParser {
                 if(argumentMap.containsKey(BEACON_OPTION)) {
 
                     if (argumentMap.containsKey(PORT_OPTION)) {
-                        buildBeacon(Integer.parseInt(argumentMap.get(PORT_OPTION)));
+                        nodeFactory.buildBeacon(Integer.parseInt(argumentMap.get(PORT_OPTION)));
                     } else {
-                        buildBeacon();
+                        nodeFactory.buildBeacon();
                     }
 
                 } else if(argumentMap.containsKey(PORT_OPTION)) {
 
                     if (argumentMap.containsKey(BEACON_ADDRESS_OPTION)) {
-                        build(argumentMap.get(BEACON_ADDRESS_OPTION), Integer.parseInt(argumentMap.get((PORT_OPTION))));
+                        nodeFactory.build(argumentMap.get(BEACON_ADDRESS_OPTION), Integer.parseInt(argumentMap.get((PORT_OPTION))));
                     } else {
-                        build(Integer.parseInt(argumentMap.get(PORT_OPTION)));
+                        nodeFactory.build(Integer.parseInt(argumentMap.get(PORT_OPTION)));
                     }
 
                 } else if(argumentMap.containsKey(BEACON_ADDRESS_OPTION)){
-                    build(argumentMap.get(BEACON_ADDRESS_OPTION));
+                    nodeFactory.build(argumentMap.get(BEACON_ADDRESS_OPTION));
                 } else {
-                    build();
+                    nodeFactory.build();
                 }
 
             } else {
-                AKP2P node = AKP2P.createAndInitializeNoBeacon();
-                CLI cli = new CLI(System.in, System.out, node);
-                cli.start();
+                nodeFactory.build();
             }
         } catch(ContactBeaconException | IOException e) {
             System.out.println(e.getMessage());
@@ -69,38 +67,7 @@ public class ArgumentParser {
         System.exit(0);
     }
 
-    private static void buildBeacon() {
-        buildBeacon(0);
-    }
 
-    private static void buildBeacon(int port) {
-        Beacon beacon = Beacon.createAndInitialise(port);
-        BeaconCLI cli = new BeaconCLI(beacon, System.in, System.out);
-        cli.start();
-    }
-
-    private static void build() throws IOException {
-        build(0);
-    }
-    private static void build(int port) throws IOException {
-        buildAndStartCli(AKP2P.createAndInitializeNoBeacon(port));
-    }
-
-    public static void build(String beaconAddress, int port) throws IOException {
-        StringTokenizer tokenizer = new StringTokenizer(beaconAddress);
-        InetSocketAddress beaconSocketAddress =
-                new InetSocketAddress(tokenizer.nextToken(), Integer.parseInt(tokenizer.nextToken()));
-        buildAndStartCli(AKP2P.createAndInitialize(port, beaconSocketAddress));
-    }
-
-    public static void build(String beaconAddress) throws IOException {
-        build(beaconAddress, 0);
-    }
-
-    private static void buildAndStartCli(AKP2P node) throws IOException {
-        CLI cli = new CLI(System.in, System.out, node);
-        cli.start();
-    }
 
 
 

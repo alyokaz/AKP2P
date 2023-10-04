@@ -264,6 +264,7 @@ public class AKP2P {
     public static void main(String[] args) throws IOException {
         ArgumentParser argumentParser = new ArgumentParser(new NodeFactory(new CLIFactory()));
         argumentParser.parseArguments(args);
+        System.exit(0);
     }
 
 

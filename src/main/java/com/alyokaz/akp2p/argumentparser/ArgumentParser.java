@@ -64,7 +64,6 @@ public class ArgumentParser {
             System.out.println(e.getMessage());
             System.exit(1);
         }
-        System.exit(0);
     }
 
 

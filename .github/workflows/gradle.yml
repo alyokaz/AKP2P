@@ -47,7 +47,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/aktorrent:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/akp2p:latest
     - name: Archive code coverage results
       if: always()
       uses: actions/upload-artifact@v3

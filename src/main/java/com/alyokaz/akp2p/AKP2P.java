@@ -7,6 +7,7 @@ import com.alyokaz.akp2p.fileservice.exceptions.SeedFileException;
 import com.alyokaz.akp2p.fileservice.FileInfo;
 import com.alyokaz.akp2p.fileservice.FileService;
 import com.alyokaz.akp2p.peerservice.PeerService;
+import com.alyokaz.akp2p.peerservice.exceptions.ContactBeaconException;
 import com.alyokaz.akp2p.pingserver.PingServer;
 import com.alyokaz.akp2p.server.NodeServer;
 import org.apache.logging.log4j.LogManager;
@@ -261,9 +262,14 @@ public class AKP2P {
      * @param args startup arguments
      * @throws IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args)  {
         ArgumentParser argumentParser = new ArgumentParser(new NodeFactory(new CLIFactory()));
-        argumentParser.parseArguments(args);
+        try {
+            argumentParser.parseArguments(args);
+        } catch(ContactBeaconException | IOException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        }
         System.exit(0);
     }
 

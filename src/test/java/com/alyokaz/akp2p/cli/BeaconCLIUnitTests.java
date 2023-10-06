@@ -5,12 +5,14 @@ import com.alyokaz.akp2p.beacon.BeaconCLI;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +57,7 @@ public class BeaconCLIUnitTests {
     }
 
     private BeaconCLI setUpCLI(String command) {
-        in = new ByteArrayInputStream(command .getBytes());
+        in = new ByteArrayInputStream(command.getBytes());
         bytes = new ByteArrayOutputStream();
         out = new PrintStream(bytes);
         return new BeaconCLI(beacon, in, out);

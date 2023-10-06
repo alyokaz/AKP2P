@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class CLITests {
@@ -170,9 +169,9 @@ public class CLITests {
         buildAndStartCLI(in, out, node);
         Scanner scanner = buildScanner(bytes);
 
-        assertDisplayOutput(() ->{
+        assertDisplayOutput(() -> {
             assertEquals(CLI.OPTION_PROMPT, extractCommandPrompt(scanner));
-                assertEquals(command + CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine());
+            assertEquals(command + CLI.NON_EXISTENT_MENU_OPTION, scanner.nextLine());
         }, scanner);
     }
 
@@ -201,7 +200,7 @@ public class CLITests {
         Thread spinnerThread = mock(Thread.class);
         SpinnerFactory spinnerFactory = mock(SpinnerFactory.class);
         when(spinnerFactory.buildSpinnerThread()).thenReturn(spinnerThread);
-        
+
         CLI cli = new CLI(in, out, node, spinnerFactory);
         cli.start();
         Scanner scanner = buildScanner(bytes);
@@ -340,7 +339,7 @@ public class CLITests {
         assertEquals(String.format(stripEOL(CLI.CONNECTED_PEERS_MESSAGE), NUMBER_OF_LIVE_PEERS), scanner.nextLine());
         assertEquals("", scanner.nextLine());
         Scanner menuScanner = new Scanner(CLI.MAIN_MENU);
-        while(menuScanner.hasNext()) {
+        while (menuScanner.hasNext()) {
             assertEquals(menuScanner.nextLine(), scanner.nextLine());
         }
     }
@@ -353,9 +352,6 @@ public class CLITests {
         assertEquals("", scanner.nextLine());
         assertDisplayMenu(scanner);
     }
-
-
-
 
 
 }

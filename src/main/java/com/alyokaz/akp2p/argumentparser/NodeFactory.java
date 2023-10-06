@@ -9,7 +9,7 @@ import java.util.StringTokenizer;
 
 public class NodeFactory {
 
-    private CLIFactory cliFactory;
+    private final CLIFactory cliFactory;
 
     public NodeFactory(CLIFactory cliFactory) {this.cliFactory = cliFactory;}
 
@@ -26,6 +26,7 @@ public class NodeFactory {
     public AKP2P build() throws IOException {
         return build(0);
     }
+
     public AKP2P build(int port) throws IOException {
         AKP2P akp2P = AKP2P.createAndInitializeNoBeacon(port);
         cliFactory.buildCLI(akp2P).start();

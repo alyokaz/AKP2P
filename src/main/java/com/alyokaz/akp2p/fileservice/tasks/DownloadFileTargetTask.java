@@ -22,11 +22,11 @@ import java.net.Socket;
  */
 public class DownloadFileTargetTask implements Runnable {
 
+    protected static final Logger logger = LogManager.getLogger();
     protected final InetSocketAddress address;
     protected final FileService fileService;
     protected final PeerService peerService;
     private final FileInfo fileInfo;
-    protected static final Logger logger = LogManager.getLogger();
 
     public DownloadFileTargetTask(InetSocketAddress address,
                                   FileService fileService, PeerService peerService, FileInfo fileInfo) {
@@ -56,10 +56,9 @@ public class DownloadFileTargetTask implements Runnable {
     /**
      * This method handles the downloading of {@code Piece}s from the peer connection.
      *
-     *
      * @param filename the filename the {@code PieceContainer} for the related file is stored under
-     * @param out the {@code OutputStream} for the peer connection
-     * @param in the {@code InputStream} for the peer connection
+     * @param out      the {@code OutputStream} for the peer connection
+     * @param in       the {@code InputStream} for the peer connection
      */
     protected void downloadPieces(String filename, ObjectOutputStream out, ObjectInputStream in) {
         // the container is potentially shared between multiple connections and is responsible for managing the

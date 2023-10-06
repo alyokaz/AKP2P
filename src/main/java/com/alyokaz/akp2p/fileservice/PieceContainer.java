@@ -82,7 +82,7 @@ public class PieceContainer {
      * been downloaded.
      */
     public synchronized int requestPiece() {
-        if(pieces.size() == this.fileInfo.getTotalPieces())
+        if (pieces.size() == this.fileInfo.getTotalPieces())
             return -1;
 
         List<Integer> ids = this.pieces.stream().map(Piece::getId).collect(Collectors.toList());

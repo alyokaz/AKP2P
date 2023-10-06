@@ -30,6 +30,7 @@ public class RequestPieceMessage extends Message {
 
     /**
      * Returns the {@code ID} of the requested {@code Piece}.
+     *
      * @return the {@code ID} of the requested {@code Piece}
      */
     public int getPieceId() {

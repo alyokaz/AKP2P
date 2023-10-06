@@ -9,12 +9,11 @@ public class BeaconCLI {
 
     public static final String SERVER_SHUTDOWN_MESSAGE = "Beacon shutting down";
     public static final String EXIT_PROMPT = "Type 'exit' to shutdown beacon>";
+    public static final String SERVER_ADDRESS_MESSAGE = "Beacon started on %s%n";
+    public static final String EXIT_TOKEN = "exit";
     private final Beacon beacon;
     private final InputStream in;
     private final PrintStream out;
-
-    public static final String SERVER_ADDRESS_MESSAGE = "Beacon started on %s%n";
-    public static final String EXIT_TOKEN = "exit";
 
 
     public BeaconCLI(Beacon beacon, InputStream in, PrintStream out) {

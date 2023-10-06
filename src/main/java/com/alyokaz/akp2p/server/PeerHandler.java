@@ -23,10 +23,10 @@ import java.util.stream.Collectors;
 
 public class PeerHandler implements Runnable {
 
+    private static final Logger logger = LogManager.getLogger();
     private final Socket peerSocket;
     private final PeerService peerService;
     private final FileService fileService;
-    private static final Logger logger = LogManager.getLogger();
 
     public PeerHandler(Socket peerSocket, PeerService peerService, FileService fileService) {
         this.peerSocket = peerSocket;
@@ -36,14 +36,14 @@ public class PeerHandler implements Runnable {
 
     @Override
     public void run() {
-        try(Socket peerSocket = this.peerSocket;
-            ObjectOutputStream out = new ObjectOutputStream(peerSocket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(peerSocket.getInputStream())
-        ){
+        try (Socket peerSocket = this.peerSocket;
+             ObjectOutputStream out = new ObjectOutputStream(peerSocket.getOutputStream());
+             ObjectInputStream in = new ObjectInputStream(peerSocket.getInputStream())
+        ) {
             logger.info("Client connected to server at {}", peerService.getServerAddress());
 
             boolean end = false;
-            while(!Thread.currentThread().isInterrupted() && !end) {
+            while (!Thread.currentThread().isInterrupted() && !end) {
                 Message message = (Message) in.readObject();
                 peerService.addPeer(message.getServerAddress());
                 switch (message.getType()) {
@@ -55,7 +55,7 @@ public class PeerHandler implements Runnable {
                     case END -> end = true;
                 }
             }
-        } catch (EOFException e){
+        } catch (EOFException e) {
             //TODO confusing error message
             logger.error("Client connected at {} closed with {}", peerService.getServerAddress(), e);
         } catch (IOException e) {
@@ -90,7 +90,7 @@ public class PeerHandler implements Runnable {
         Optional<Piece> piece = container.getPieces().stream().filter(p -> p.getId() == request.getPieceId()).findFirst();
 
         try {
-            if(piece.isEmpty())
+            if (piece.isEmpty())
                 out.writeObject(new Message(MessageType.END, null));
             else
                 out.writeObject(piece.get());

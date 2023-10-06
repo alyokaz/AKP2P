@@ -16,12 +16,13 @@ import java.util.concurrent.Executors;
  */
 public abstract class AbstractServer implements Server {
 
+    private static final Logger logger = LogManager.getLogger();
     final ServerSocket serverSocket;
     final ExecutorService executor = Executors.newCachedThreadPool();
-    private static final Logger logger = LogManager.getLogger();
 
     /**
      * Constructs a new instance of this class with the given {@code ServerSocket}
+     *
      * @param serverSocket the {@code ServerSocket} for the server to listen for connections on
      */
     public AbstractServer(ServerSocket serverSocket) {
@@ -66,7 +67,6 @@ public abstract class AbstractServer implements Server {
      * @return a {@code Runnable} to handle to connection to the peer
      */
     protected abstract Runnable process(Socket socket);
-
 
 
 }

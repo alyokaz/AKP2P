@@ -1,8 +1,8 @@
 package intergration;
 
 import com.alyokaz.akp2p.AKP2P;
-import com.alyokaz.akp2p.fileservice.FileService;
 import com.alyokaz.akp2p.cli.CLI;
+import com.alyokaz.akp2p.fileservice.FileService;
 import com.alyokaz.akp2p.fileservice.exceptions.SeedFileException;
 import com.alyokaz.akp2p.peerservice.exceptions.PingPeerException;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CLIIntegrationTests {
 
-    private static final String LOCAL_HOST = "127.0.0.1";
     private static final String FILENAME = "test_file.mp4";
 
     @Test
@@ -28,10 +27,11 @@ public class CLIIntegrationTests {
         CountDownLatch countDownLatch_B = new CountDownLatch(1);
         BlockingQueue<InetSocketAddress> serverAddress = new LinkedBlockingQueue<>();
 
-        new Thread(()-> {
+        new Thread(() -> {
             InputStream in = new InputStream() {
                 private final byte[] command = ("1\n " + FILENAME + "\n").getBytes();
                 int index = 0;
+
                 @Override
                 public int read() {
                     if (index == command.length) {
@@ -69,10 +69,10 @@ public class CLIIntegrationTests {
         client.downloadFile(FileService.getFileInfo(file));
 
         Optional<File> downloadedFile;
-        do{
+        do {
             downloadedFile = client.getFile(file.getName());
         } while (downloadedFile.isEmpty());
-        
+
         assertEquals(-1, Files.mismatch(file.toPath(), downloadedFile.get().toPath()));
         countDownLatch_A.countDown();
         client.shutDown();
@@ -92,6 +92,7 @@ public class CLIIntegrationTests {
         InputStream in = new InputStream() {
             private final byte[] command = ("2\n1\n\n").getBytes();
             int index = 0;
+
             @Override
             public int read() {
                 if (index == command.length) {
@@ -132,7 +133,7 @@ public class CLIIntegrationTests {
             }).start();
             Optional<File> downloadedFile;
             //TODO refactor out and make timeout
-            do{
+            do {
                 downloadedFile = client.getFile(FILENAME);
             } while (downloadedFile.isEmpty());
             try {
@@ -165,7 +166,7 @@ public class CLIIntegrationTests {
 
                 CLI cli = new CLI(new ByteArrayInputStream(("3\n" + socketAddress.getHostName() + " "
                         + socketAddress.getPort()).getBytes()),
-                    new PrintStream(new ByteArrayOutputStream()), client);
+                        new PrintStream(new ByteArrayOutputStream()), client);
                 cli.start();
 
                 assertTrue(client.getLivePeers().contains(socketAddress));

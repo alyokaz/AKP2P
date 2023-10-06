@@ -7,7 +7,7 @@ import java.net.InetSocketAddress;
  */
 public class BeaconMessage extends Message {
 
-    private InetSocketAddress serverAddress;
+    private final InetSocketAddress serverAddress;
 
     public BeaconMessage(MessageType type, InetSocketAddress serverAddress) {
         super(type, serverAddress);
@@ -16,6 +16,7 @@ public class BeaconMessage extends Message {
 
     /**
      * Returns the address of the peer that sent this message.
+     *
      * @return the address of the peer that sent this message
      */
     public InetSocketAddress getServerAddress() {

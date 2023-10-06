@@ -10,7 +10,6 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 /**
@@ -25,24 +24,24 @@ public class CLI {
 
     public static final String WELCOME_MESSAGE = GREEN + "Welcome to AKTorrent" + RESET;
     public static final String MAIN_MENU = """
-                        Options:\040\040
-                                    1 - Seed File\040\040\040
-                                    2 - Display Available Files\040\040\040
-                                    3 - Connect to Peer\040\040\040
-                                    4 - Exit""";
+            Options:\040\040
+                        1 - Seed File\040\040\040
+                        2 - Display Available Files\040\040\040
+                        3 - Connect to Peer\040\040\040
+                        4 - Exit""";
     public static final String INPUT_PROMPT = "Enter path of file to seed>";
-    public static final String DOWNLOAD_INPUT_PROMPT = "Select number to download>" ;
+    public static final String DOWNLOAD_INPUT_PROMPT = "Select number to download>";
     public static final String NOT_A_NUMBER_ERROR = "Please select a menu number";
-    public static final String NON_EXISTENT_MENU_OPTION = RED + "%s is not an available option" + RESET + "%n" ;
+    public static final String NON_EXISTENT_MENU_OPTION = RED + "%s is not an available option" + RESET + "%n";
     public static final String FILE_NOT_FOUND = RED + "Could not locate file: " + RESET;
     public static final String INPUT_PEER_ADDRESS_PROMPT = "Enter hostname and port of peer>";
-    public static final String PEER_CONNECTED_MESSAGE = GREEN + "Peer Connection Successful at " + YELLOW + "%s:%s" + RESET + "%n" ;
+    public static final String PEER_CONNECTED_MESSAGE = GREEN + "Peer Connection Successful at " + YELLOW + "%s:%s" + RESET + "%n";
     public static final String PEER_CONNECTION_FAILED = RED + "Failed to connect to peer" + RESET;
     public static final String SEED_FILE_EXCEPTION = RED + "Failed to seed file" + RESET;
     public static final String BAD_ADDRESS_FORMAT_ERROR = RED + "Bad address format. Please enter <hostname> <port number>" + RESET;
     public static final String NO_FILES_AVAILABLE = RED + "No files are available for download" + RESET;
-    public static final String DOWNLOAD_PROGRESS = YELLOW + "Downloading %5.2f%%" + RESET + "\r" ;
-    public static final String DOWNLOAD_COMPLETE = GREEN + "Downloading of " + YELLOW + "%s " + YELLOW + GREEN + "complete"  + RESET + "%n";
+    public static final String DOWNLOAD_PROGRESS = YELLOW + "Downloading %5.2f%%" + RESET + "\r";
+    public static final String DOWNLOAD_COMPLETE = GREEN + "Downloading of " + YELLOW + "%s " + YELLOW + GREEN + "complete" + RESET + "%n";
     public static final String SERVER_STARTUP_MESSAGE = "Server started on port: " + YELLOW + "%s" + RESET + "%n";
     public static final String BEACON_EXCEPTION = RED + "Could not contact Beacon" + RESET;
     public static final String COMMAND_PROMPT = YELLOW + "AKTorrent:>" + RESET;
@@ -63,6 +62,7 @@ public class CLI {
         this.node = node;
         this.spinnerFactory = new SpinnerFactory(outputStream);
     }
+
     public CLI(InputStream inputStream, PrintStream outputStream, AKP2P node, SpinnerFactory spinnerFactory) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
@@ -106,7 +106,7 @@ public class CLI {
             } catch (ContactBeaconException e) {
                 outputStream.println(BEACON_EXCEPTION);
             }
-            if(running) {
+            if (running) {
                 outputStream.println();
                 outputStream.printf(CONNECTED_PEERS_MESSAGE, node.getLivePeers().size());
                 outputStream.println();
@@ -123,7 +123,7 @@ public class CLI {
     /**
      * Adds the peer at the given address to this nodes collection of live peers.
      *
-     * @param reader for input from the command line
+     * @param reader       for input from the command line
      * @param outputStream for output to the command line
      * @throws IOException
      * @throws PingPeerException
@@ -131,7 +131,7 @@ public class CLI {
     private void processAddPeer(BufferedReader reader, PrintStream outputStream) throws IOException, PingPeerException {
         outputStream.print(CLI.INPUT_PEER_ADDRESS_PROMPT);
         String[] address;
-        while(!(address = reader.readLine().split(" "))[0].equals("")) {
+        while (!(address = reader.readLine().split(" "))[0].equals("")) {
             if (address.length == 2) {
                 Thread spinnerThread = spinnerFactory.buildSpinnerThread();
                 try {
@@ -159,7 +159,7 @@ public class CLI {
      * Handles menu input that doesn't correspond to an available option.
      *
      * @param outputStream for output to the command line
-     * @param selection the value entered
+     * @param selection    the value entered
      */
     private void processDefault(PrintStream outputStream, Integer selection) {
         outputStream.println(selection + NON_EXISTENT_MENU_OPTION);
@@ -168,23 +168,23 @@ public class CLI {
     /**
      * Displays the available files and downloads the file selected.
      *
-     * @param reader for input from the command line
+     * @param reader       for input from the command line
      * @param outputStream for output to the command line
      * @throws IOException
      * @throws InterruptedException
      */
     private void processDisplayFiles(BufferedReader reader, PrintStream outputStream) throws IOException, InterruptedException {
         List<FileInfo> files = new ArrayList<>(node.getAvailableFiles());
-        if(files.size() > 0) {
+        if (files.size() > 0) {
             outputStream.println(AVAILABLE_FILES_BANNER);
             IntStream.range(0, files.size()).forEach(i -> {
                 FileInfo fileInfo = files.get(i);
                 outputStream.printf(DISPLAY_FILE_INFO, (i + 1), fileInfo.getFilename(), fileInfo.getSize());
-            } );
+            });
             String line;
             int fileNumber;
             outputStream.print(DOWNLOAD_INPUT_PROMPT);
-            while(!(line = reader.readLine()).equals("")) {
+            while (!(line = reader.readLine()).equals("")) {
                 fileNumber = Integer.parseInt(line) - 1;
                 if (fileNumber + 1 > files.size()) {
                     outputStream.printf(CLI.NON_EXISTENT_MENU_OPTION, fileNumber);
@@ -209,15 +209,16 @@ public class CLI {
 
     /**
      * Makes the file at the given path available for download from other peers in the network.
+     *
      * @param reader for input from the command line
-     * @param out for output to the command line
+     * @param out    for output to the command line
      * @throws IOException
      * @throws SeedFileException
      */
     private void processSeedFile(BufferedReader reader, PrintStream out) throws IOException, SeedFileException {
         out.print(INPUT_PROMPT);
         String filename;
-        while(!(filename = reader.readLine().trim()).equals("")) {
+        while (!(filename = reader.readLine().trim()).equals("")) {
             File file = new File(filename);
             if (file.exists()) {
                 node.seedFile(file);

@@ -16,9 +16,9 @@ import java.util.List;
  */
 public class BeaconTask implements Runnable {
 
+    private static final Logger logger = LogManager.getLogger();
     private final Socket socket;
     private final List<InetSocketAddress> peers;
-    private static final Logger logger = LogManager.getLogger();
 
 
     public BeaconTask(Socket socket, List<InetSocketAddress> peers) {
@@ -31,11 +31,11 @@ public class BeaconTask implements Runnable {
      */
     @Override
     public void run() {
-        try(Socket socket = this.socket;
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
+        try (Socket socket = this.socket;
+             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+             ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
             Object obj = in.readObject();
-            if(obj instanceof BeaconMessage) {
+            if (obj instanceof BeaconMessage) {
                 BeaconMessage message = (BeaconMessage) obj;
                 out.writeObject(peers);
                 peers.add(message.getServerAddress());
@@ -43,7 +43,7 @@ public class BeaconTask implements Runnable {
             }
         } catch (IOException | ClassNotFoundException ex) {
             logger.error("Handling beacon connection from {} failed with {}",
-                    socket.getInetAddress().getHostAddress() +  socket.getLocalPort(),
+                    socket.getInetAddress().getHostAddress() + socket.getLocalPort(),
                     ex.getMessage());
         }
     }

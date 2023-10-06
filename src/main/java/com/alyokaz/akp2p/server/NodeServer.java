@@ -23,6 +23,6 @@ public class NodeServer extends AbstractServer {
 
     @Override
     public Runnable process(Socket socket) {
-        return  new PeerHandler(socket, peerService, fileService);
+        return new PeerHandler(socket, peerService, fileService);
     }
 }

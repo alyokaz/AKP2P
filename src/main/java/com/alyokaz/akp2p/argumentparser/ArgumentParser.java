@@ -1,7 +1,10 @@
 package com.alyokaz.akp2p.argumentparser;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class ArgumentParser {
 
@@ -18,7 +21,7 @@ public class ArgumentParser {
         if (args.length > 0) {
             Iterator<String> it = Arrays.stream(args).iterator();
 
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 String command = it.next();
                 switch (command.trim()) {
                     case BEACON_OPTION -> argumentMap.put(BEACON_OPTION, "");
@@ -28,10 +31,10 @@ public class ArgumentParser {
                 }
             }
 
-            if(argumentMap.containsKey(BEACON_OPTION) && argumentMap.containsKey(BEACON_ADDRESS_OPTION))
+            if (argumentMap.containsKey(BEACON_OPTION) && argumentMap.containsKey(BEACON_ADDRESS_OPTION))
                 throw new IllegalArgumentException(BEACON_ADDRESS_OPTION + " is not applicable to a Beacon instance");
 
-            if(argumentMap.containsKey(BEACON_OPTION)) {
+            if (argumentMap.containsKey(BEACON_OPTION)) {
 
                 if (argumentMap.containsKey(PORT_OPTION)) {
                     nodeFactory.buildBeacon(Integer.parseInt(argumentMap.get(PORT_OPTION)));
@@ -39,7 +42,7 @@ public class ArgumentParser {
                     nodeFactory.buildBeacon();
                 }
 
-            } else if(argumentMap.containsKey(PORT_OPTION)) {
+            } else if (argumentMap.containsKey(PORT_OPTION)) {
 
                 if (argumentMap.containsKey(BEACON_ADDRESS_OPTION)) {
                     nodeFactory.build(argumentMap.get(BEACON_ADDRESS_OPTION), Integer.parseInt(argumentMap.get((PORT_OPTION))));
@@ -47,7 +50,7 @@ public class ArgumentParser {
                     nodeFactory.build(Integer.parseInt(argumentMap.get(PORT_OPTION)));
                 }
 
-            } else if(argumentMap.containsKey(BEACON_ADDRESS_OPTION))
+            } else if (argumentMap.containsKey(BEACON_ADDRESS_OPTION))
                 nodeFactory.build(argumentMap.get(BEACON_ADDRESS_OPTION));
         } else {
             nodeFactory.build();

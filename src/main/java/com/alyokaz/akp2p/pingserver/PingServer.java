@@ -19,9 +19,9 @@ public class PingServer {
     public static final int BUFFER_SIZE = 1400;
     public static final String PING_PAYLOAD = "ping";
     public static final String PONG_PAYLOAD = "pong";
+    private static final Logger logger = LogManager.getLogger();
     private final DatagramSocket socket;
     private final ExecutorService executor = Executors.newCachedThreadPool();
-    private static final Logger logger = LogManager.getLogger();
 
     public PingServer(DatagramSocket socket) {
         this.socket = socket;

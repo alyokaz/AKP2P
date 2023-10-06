@@ -20,10 +20,10 @@ import java.util.Set;
  */
 public class GetConnectedPeersFilesTask implements Runnable {
 
+    private final static Logger logger = LogManager.getLogger();
     private final FileService fileService;
     private final InetSocketAddress address;
     private final PeerService peerService;
-    private final static Logger logger = LogManager.getLogger();
 
     public GetConnectedPeersFilesTask(FileService fileService, InetSocketAddress address, PeerService peerService) {
         this.fileService = fileService;
@@ -42,7 +42,7 @@ public class GetConnectedPeersFilesTask implements Runnable {
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
             out.writeObject(new Message(MessageType.REQUSET_FILE_INFOS, peerService.getServerAddress()));
             Object obj = in.readObject();
-            if(obj instanceof Set<?>) {
+            if (obj instanceof Set<?>) {
                 Set<FileInfo> remoteFileInfos = (Set<FileInfo>) obj;
                 remoteFileInfos.forEach(fileInfo -> fileService.registerFile(fileInfo, address));
             }

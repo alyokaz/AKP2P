@@ -30,7 +30,7 @@ public class IntegrationTest {
     private static final String FILENAME = "test_file.mp4";
     private static final String FILENAME_2 = "test_file_2.mp4";
     private final static ExecutorService executor = Executors.newCachedThreadPool();
-    private Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
 
     @Test
     public void canSeedAndReceiveFile() throws IOException, ExecutionException, InterruptedException, TimeoutException, PingPeerException, SeedFileException {
@@ -294,7 +294,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void deadNodeWillNotBeAddedToLivePeers()  {
+    public void deadNodeWillNotBeAddedToLivePeers() {
         AKP2P deadNode = AKP2P.createAndInitializeNoBeacon();
         InetSocketAddress deadNodeAddress = deadNode.getAddress();
         deadNode.shutDown();
@@ -373,7 +373,7 @@ public class IntegrationTest {
         nodeA.addPeer(nodeB.getAddress());
         nodeA.addPeer(nodeC.getAddress());
 
-        assertTrue(nodeA.getLivePeers().size() == 2);
+        assertEquals(2, nodeA.getLivePeers().size());
         assertTrue(nodeA.getLivePeers().containsAll(List.of(nodeB.getAddress(), nodeC.getAddress())));
 
         nodeA.shutDown();
@@ -484,10 +484,10 @@ public class IntegrationTest {
         Set<FileInfo> availableFiles = nodeB.getAvailableFiles();
         nodeB.downloadFile(availableFiles.stream().findFirst().get());
 
-        while(nodeB.getProgressOfDownload(file.getName()) < 1) {
+        while (nodeB.getProgressOfDownload(file.getName()) < 1) {
             double progress = nodeB.getProgressOfDownload(file.getName());
             logger.debug("Download progress = {}", progress * 100);
-            assertTrue(progress <= 1) ;
+            assertTrue(progress <= 1);
             Thread.sleep(1);
         }
     }
@@ -547,5 +547,5 @@ public class IntegrationTest {
     private File getFile(String filename) {
         return new File(getClass().getResource("/" + filename).getFile());
     }
-    
+
 }

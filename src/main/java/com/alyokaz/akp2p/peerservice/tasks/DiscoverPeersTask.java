@@ -23,7 +23,7 @@ public class DiscoverPeersTask implements Runnable {
     private final PeerService peerService;
     private final InetSocketAddress serverAddress;
 
-    private Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
 
     public DiscoverPeersTask(InetSocketAddress address, PeerService peerService, InetSocketAddress serverAddress) {
         this.address = address;

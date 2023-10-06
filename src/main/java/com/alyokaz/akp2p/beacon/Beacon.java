@@ -26,25 +26,6 @@ public class Beacon {
     }
 
     /**
-     * Shuts down this {@code Beacon}
-     */
-    public void shutDown() {
-        if(this.beaconServer != null)
-            this.beaconServer.shutdown();
-        if(this.pingServer != null)
-            this.pingServer.shutdown();
-    }
-
-    /**
-     * Returns the address this {@code Beacon} is listening on.
-     *
-     * @return the address this {@code Beacon} is listening on
-     */
-    public InetSocketAddress getAddress() {
-        return beaconServer.getServerAddress();
-    }
-
-    /**
      * Static factory method for creation and initialisation of a {@code Beacon} node.
      *
      * @return a fully initialised {@code Beacon} node
@@ -76,6 +57,25 @@ public class Beacon {
         PingServer pingServer = new PingServer(datagramSocket);
         pingServer.start();
         return new Beacon(beaconServer, pingServer);
+    }
+
+    /**
+     * Shuts down this {@code Beacon}
+     */
+    public void shutDown() {
+        if (this.beaconServer != null)
+            this.beaconServer.shutdown();
+        if (this.pingServer != null)
+            this.pingServer.shutdown();
+    }
+
+    /**
+     * Returns the address this {@code Beacon} is listening on.
+     *
+     * @return the address this {@code Beacon} is listening on
+     */
+    public InetSocketAddress getAddress() {
+        return beaconServer.getServerAddress();
     }
 
 }

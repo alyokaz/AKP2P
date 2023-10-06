@@ -20,14 +20,14 @@ java -jar /build/libs/AKP2P.jar [-beacon | -beacon-address <hostname> <port>]
 ```
 
 ### Run in a Docker Container
-The port for AKP2P must be published when run in a container. <port> defaults to 4444 inside the container, 
+The port for AKP2P must be published when run in a container. `<port>` defaults to 4444 inside the container, 
 but can be overridden.
 ```
 docker pull alyoshakaz/akp2p
 docker run -it -p <hostport>:<port> -p <hostport>:<port>/udp akp2p [-port <port>] [-beacon | -beacon-address <hostname> <port>]
 ```
 
-An AKP2P node can be started in two modes <b>Beacon</b> and <b>Standard.</b> A Beacon node exits purely
+An AKP2P node can be started in two modes <b>Beacon</b> and <b>Standard.</b> A Beacon node exists purely
 for other nodes to register with and download the addresses of other nodes who have also registered.
 
 ## Notes on Design

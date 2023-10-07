@@ -22,7 +22,16 @@ public class CLI {
     public static final String YELLOW = "\u001B[33m";
     public static final String RESET = "\u001B[0m";
 
-    public static final String WELCOME_MESSAGE = GREEN + "Welcome to AKTorrent" + RESET;
+    public static final String WELCOME_MESSAGE = GREEN + """
+                        
+               _____   ____  __.____________________________\s
+              /  _  \\ |    |/ _|\\______   \\_____  \\______   \\
+             /  /_\\  \\|      <   |     ___//  ____/|     ___/
+            /    |    \\    |  \\  |    |   /       \\|    |   \s
+            \\____|__  /____|__ \\ |____|   \\_______ \\____|   \s
+                    \\/        \\/                  \\/        \s
+                        
+            """ + RESET;
     public static final String MAIN_MENU = """
             Options:\040\040
                         1 - Seed File\040\040\040
@@ -82,6 +91,7 @@ public class CLI {
         outputStream.printf(CONNECTED_PEERS_MESSAGE, node.getLivePeers().size());
         outputStream.println();
         outputStream.println(MAIN_MENU);
+        outputStream.println();
         outputStream.print(OPTION_PROMPT);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;

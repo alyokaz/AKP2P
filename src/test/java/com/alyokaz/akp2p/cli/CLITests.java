@@ -330,10 +330,21 @@ public class CLITests {
     }
 
     public static void assertDisplayWelcomeMessage(Scanner scanner) {
-        assertEquals(CLI.WELCOME_MESSAGE, scanner.nextLine());
-        assertEquals(String.format(CLI.SERVER_STARTUP_MESSAGE.replace("%n", ""), PORT), scanner.nextLine());
+        assertDisplayLogo(scanner);
+        assertEquals(String.format(stripEOL(CLI.SERVER_STARTUP_MESSAGE), PORT), scanner.nextLine());
 
     }
+
+    private static void assertDisplayLogo(Scanner scanner) {
+        Scanner logoScanner = new Scanner(CLI.WELCOME_MESSAGE);
+        while (logoScanner.hasNext()) {
+            String logoString = logoScanner.nextLine();
+            String outString = scanner.nextLine();
+            assertEquals(logoString, outString);
+        }
+
+    }
+
 
     public static void assertDisplayMenu(Scanner scanner) {
         assertEquals(String.format(stripEOL(CLI.CONNECTED_PEERS_MESSAGE), NUMBER_OF_LIVE_PEERS), scanner.nextLine());
@@ -342,6 +353,7 @@ public class CLITests {
         while (menuScanner.hasNext()) {
             assertEquals(menuScanner.nextLine(), scanner.nextLine());
         }
+        assertEquals("", scanner.nextLine());
     }
 
     public static void assertDisplayOutput(Runnable assertions, Scanner scanner) {
